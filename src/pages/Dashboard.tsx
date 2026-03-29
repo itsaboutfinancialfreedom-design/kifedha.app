@@ -30,7 +30,7 @@ export default function Dashboard() {
         <div className="max-w-lg mx-auto">
           <p className="text-warning-foreground/70 text-sm font-medium">Welcome back 👋</p>
           <h1 className="font-display text-2xl font-bold text-warning-foreground mt-1">
-            Your Financial Blueprint
+            Your Wealth Builder
           </h1>
           <div className="mt-6 flex items-center gap-6">
             <div className="relative">

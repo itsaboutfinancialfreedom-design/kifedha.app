@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
-import { Sparkles, ArrowRight, Shield, Target, Wallet } from "lucide-react";
+import { Sparkles, ArrowRight, Shield, Target, Wallet, TrendingDown, TrendingUp, Briefcase } from "lucide-react";
 import { useEffect } from "react";
 
 export default function Landing() {
@@ -17,13 +17,13 @@ export default function Landing() {
       <div className="gradient-gold px-6 pt-16 pb-12 rounded-b-[2rem] flex-shrink-0">
         <div className="max-w-lg mx-auto">
           <h1 className="font-display text-4xl font-bold text-warning-foreground leading-tight">
-            Akilifi
+            Your Wealth Builder
           </h1>
           <p className="text-warning-foreground/80 text-lg mt-2 font-display font-medium">
-            Your AI Financial Advisor
+            Smart Financial Planning
           </p>
           <p className="text-warning-foreground/60 text-sm mt-3 leading-relaxed max-w-xs">
-            Turn your income into structured, protected, and growing wealth. Built for Kenya.
+            Track income, manage expenses, allocate to goals, and build wealth — all in one place. Built for Kenya.
           </p>
         </div>
       </div>
@@ -35,22 +35,32 @@ export default function Landing() {
             {
               icon: Sparkles,
               title: "Financial Blueprint",
-              desc: "AI tells you exactly what to do with your money — allocation, savings, investments.",
-            },
-            {
-              icon: Target,
-              title: "Goal Planning",
-              desc: "School fees, emergency fund, retirement — track it all with clear timelines.",
-            },
-            {
-              icon: Shield,
-              title: "Risk & Protection",
-              desc: "Know your financial risks and get insurance recommendations.",
+              desc: "Get a personalized income allocation plan — needs, savings, investments, and protection.",
             },
             {
               icon: Wallet,
-              title: "Smart Budgeting",
-              desc: "Auto-split income, goal-based wallets, and expense tracking.",
+              title: "Track Income & Expenses",
+              desc: "See where your money goes and auto-split income using smart budgeting rules.",
+            },
+            {
+              icon: Target,
+              title: "Goal-Based Allocation",
+              desc: "School fees, emergency fund, retirement — allocate and track with clear timelines.",
+            },
+            {
+              icon: TrendingUp,
+              title: "Investment Allocation",
+              desc: "Know exactly how much to invest and where, based on your income and goals.",
+            },
+            {
+              icon: TrendingDown,
+              title: "Debt Payoff Strategy",
+              desc: "See your debt levels, interest costs, and get a clear payoff plan.",
+            },
+            {
+              icon: Briefcase,
+              title: "Income Protection & Replacement",
+              desc: "Life cover, health insurance, and income protection recommendations.",
             },
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="flex gap-4 items-start">
