@@ -76,7 +76,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const handleSetOnboarded = (v: boolean) => {
     setHasCompletedOnboarding(v);
-    localStorage.setItem("akilifi_onboarded", v.toString());
+    localStorage.setItem("ywb_onboarded", v.toString());
   };
 
   return (
