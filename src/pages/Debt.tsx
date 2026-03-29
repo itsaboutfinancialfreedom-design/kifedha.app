@@ -1,0 +1,156 @@
+import { useApp } from "@/context/AppContext";
+import { BottomNav } from "@/components/BottomNav";
+import { PremiumGate } from "@/components/PremiumGate";
+import { TrendingDown, AlertTriangle, CheckCircle2, Zap } from "lucide-react";
+
+function DebtContent() {
+  const { financials, blueprint } = useApp();
+  if (!financials || !blueprint) return null;
+
+  const income = financials.monthlyIncome;
+  const sortedDebts = [...financials.debts].sort((a, b) => b.interestRate - a.interestRate);
+  const totalMonthly = financials.debts.reduce((s, d) => s + d.monthlyPayment, 0);
+  const debtToIncomeRatio = totalMonthly / income;
+
+  const getDebtLevel = (ratio: number) => {
+    if (ratio > 0.4) return { label: "Dangerous", color: "text-danger", bg: "bg-danger/10" };
+    if (ratio > 0.2) return { label: "Moderate", color: "text-warning", bg: "bg-warning/10" };
+    return { label: "Manageable", color: "text-success", bg: "bg-success/10" };
+  };
+
+  const level = getDebtLevel(debtToIncomeRatio);
+
+  return (
+    <div className="space-y-4">
+      {/* Summary */}
+      <div className="bg-card rounded-2xl p-5 shadow-card">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-display text-base font-semibold">Debt Overview</h2>
+          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${level.bg} ${level.color}`}>
+            {level.label}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-xs text-muted-foreground">Total Debt</p>
+            <p className="font-display text-lg font-bold">
+              KES {financials.totalDebt.toLocaleString()}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Monthly Payments</p>
+            <p className="font-display text-lg font-bold">
+              KES {totalMonthly.toLocaleString()}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Debt-to-Income</p>
+            <p className={`font-display text-lg font-bold ${level.color}`}>
+              {Math.round(debtToIncomeRatio * 100)}%
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Budget for Debt</p>
+            <p className="font-display text-lg font-bold text-primary">
+              KES {blueprint.allocation.debtRepayment.amount.toLocaleString()}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Individual debts */}
+      <div className="space-y-3">
+        {sortedDebts.map((debt, i) => {
+          const isHighRate = debt.interestRate > 15;
+          // Auto-calculate months to payoff
+          const monthlyRate = debt.interestRate / 100 / 12;
+          const monthsToPayoff = monthlyRate > 0 && debt.monthlyPayment > debt.amount * monthlyRate
+            ? Math.ceil(Math.log(debt.monthlyPayment / (debt.monthlyPayment - debt.amount * monthlyRate)) / Math.log(1 + monthlyRate))
+            : Math.ceil(debt.amount / (debt.monthlyPayment || 1));
+          const totalInterest = Math.round(debt.monthlyPayment * monthsToPayoff - debt.amount);
+
+          return (
+            <div key={i} className={`bg-card rounded-2xl p-5 shadow-card ${isHighRate ? "border-l-4 border-danger" : ""}`}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex-1">
+                  <h3 className="font-display font-semibold text-sm">{debt.name}</h3>
+                  <p className="text-xs text-muted-foreground">
+                    KES {debt.amount.toLocaleString()} balance
+                  </p>
+                </div>
+                {isHighRate && (
+                  <span className="flex items-center gap-1 text-xs font-medium text-danger bg-danger/10 px-2 py-1 rounded-full">
+                    <AlertTriangle className="w-3 h-3" /> High Rate
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="bg-muted/50 rounded-lg p-2">
+                  <p className={`text-sm font-bold ${isHighRate ? "text-danger" : "text-foreground"}`}>
+                    {debt.interestRate}%
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">Interest Rate</p>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-2">
+                  <p className="text-sm font-bold">{monthsToPayoff} mo</p>
+                  <p className="text-[10px] text-muted-foreground">To Payoff</p>
+                </div>
+                <div className="bg-muted/50 rounded-lg p-2">
+                  <p className="text-sm font-bold text-warning">
+                    KES {totalInterest.toLocaleString()}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">Total Interest</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Payoff Strategy */}
+      <div className="bg-card rounded-2xl p-5 shadow-card">
+        <div className="flex items-center gap-3 mb-3">
+          <Zap className="w-5 h-5 text-primary" />
+          <h2 className="font-display text-base font-semibold">Payoff Strategy</h2>
+        </div>
+        <div className="space-y-3">
+          {sortedDebts.length > 0 && (
+            <div className="p-3 bg-primary/5 rounded-xl">
+              <div className="flex items-center gap-2 mb-1">
+                <CheckCircle2 className="w-4 h-4 text-primary" />
+                <p className="text-sm font-medium">Avalanche Method (Recommended)</p>
+              </div>
+              <p className="text-xs text-muted-foreground ml-6">
+                Pay off <strong>{sortedDebts[0].name}</strong> first ({sortedDebts[0].interestRate}% rate).
+                This saves you the most money in interest.
+              </p>
+            </div>
+          )}
+          <div className="p-3 bg-muted/50 rounded-xl">
+            <p className="text-xs text-muted-foreground">
+              💡 If you have extra cash, put it towards your highest-interest debt.
+              Even KES 1,000 extra/month makes a big difference.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Debt() {
+  return (
+    <div className="min-h-screen bg-background pb-24">
+      <div className="max-w-lg mx-auto px-4 pt-8">
+        <h1 className="font-display text-2xl font-bold mb-1">Debt Tracker</h1>
+        <p className="text-sm text-muted-foreground mb-6">
+          Understand your debt and get a clear payoff plan.
+        </p>
+        <PremiumGate featureName="Debt Tracker & Payoff Strategy">
+          <DebtContent />
+        </PremiumGate>
+      </div>
+      <BottomNav />
+    </div>
+  );
+}
