@@ -45,18 +45,18 @@ const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [financials, setFinancials] = useState<UserFinancials | null>(() => {
-    const saved = localStorage.getItem("akilifi_financials");
+    const saved = localStorage.getItem("ywb_financials");
     return saved ? JSON.parse(saved) : null;
   });
   const [blueprint, setBlueprint] = useState<FinancialBlueprint | null>(() => {
-    const saved = localStorage.getItem("akilifi_blueprint");
+    const saved = localStorage.getItem("ywb_blueprint");
     return saved ? JSON.parse(saved) : null;
   });
   const [isPremium, setIsPremium] = useState(() => {
-    return localStorage.getItem("akilifi_premium") === "true";
+    return localStorage.getItem("ywb_premium") === "true";
   });
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(() => {
-    return localStorage.getItem("akilifi_onboarded") === "true";
+    return localStorage.getItem("ywb_onboarded") === "true";
   });
 
   const handleSetFinancials = (f: UserFinancials) => {
