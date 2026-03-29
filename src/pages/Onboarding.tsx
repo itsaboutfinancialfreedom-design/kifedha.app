@@ -31,7 +31,7 @@ export default function Onboarding() {
 
   const handleSubmit = () => {
     const financials: UserFinancials = {
-      monthlyIncome: Number(income) || 0,
+      monthlyIncome: incomeSources.reduce((s, src) => s + (Number(src.amount) || 0), 0),
       expenses: expenses.map(e => ({ name: e.name, amount: Number(e.amount) || 0 })),
       totalExpenses: expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0),
       debts: debts.filter(d => d.name).map(d => ({
