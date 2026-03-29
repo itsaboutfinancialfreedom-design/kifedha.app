@@ -71,7 +71,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const handleSetPremium = (v: boolean) => {
     setIsPremium(v);
-    localStorage.setItem("akilifi_premium", v.toString());
+    localStorage.setItem("ywb_premium", v.toString());
   };
 
   const handleSetOnboarded = (v: boolean) => {
