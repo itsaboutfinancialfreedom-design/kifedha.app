@@ -66,7 +66,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const handleSetBlueprint = (b: FinancialBlueprint) => {
     setBlueprint(b);
-    localStorage.setItem("akilifi_blueprint", JSON.stringify(b));
+    localStorage.setItem("ywb_blueprint", JSON.stringify(b));
   };
 
   const handleSetPremium = (v: boolean) => {
