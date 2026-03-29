@@ -11,7 +11,10 @@ export default function Onboarding() {
   const { setFinancials, setBlueprint, setHasCompletedOnboarding } = useApp();
   const [step, setStep] = useState(0);
 
-  const [income, setIncome] = useState("");
+  const [incomeSources, setIncomeSources] = useState([
+    { name: "Salary", amount: "" },
+    { name: "Side hustle", amount: "" },
+  ]);
   const [expenses, setExpenses] = useState([
     { name: "Rent", amount: "" },
     { name: "Food", amount: "" },
@@ -28,7 +31,7 @@ export default function Onboarding() {
 
   const handleSubmit = () => {
     const financials: UserFinancials = {
-      monthlyIncome: Number(income) || 0,
+      monthlyIncome: incomeSources.reduce((s, src) => s + (Number(src.amount) || 0), 0),
       expenses: expenses.map(e => ({ name: e.name, amount: Number(e.amount) || 0 })),
       totalExpenses: expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0),
       debts: debts.filter(d => d.name).map(d => ({
@@ -87,14 +90,43 @@ export default function Onboarding() {
       {step === 0 && (
         <div className="space-y-4">
           <div>
-            <label className={labelClass}>Monthly Income (KES)</label>
-            <input
-              type="number"
-              value={income}
-              onChange={e => setIncome(e.target.value)}
-              placeholder="e.g. 80,000"
-              className={inputClass}
-            />
+            <label className={labelClass}>Income Sources</label>
+            <div className="space-y-3">
+              {incomeSources.map((src, i) => (
+                <div key={i} className="flex gap-3">
+                  <input
+                    value={src.name}
+                    onChange={e => {
+                      const next = [...incomeSources];
+                      next[i].name = e.target.value;
+                      setIncomeSources(next);
+                    }}
+                    placeholder="Source name"
+                    className={`${inputClass} flex-1`}
+                  />
+                  <input
+                    type="number"
+                    value={src.amount}
+                    onChange={e => {
+                      const next = [...incomeSources];
+                      next[i].amount = e.target.value;
+                      setIncomeSources(next);
+                    }}
+                    placeholder="KES"
+                    className={`${inputClass} w-28`}
+                  />
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => setIncomeSources([...incomeSources, { name: "", amount: "" }])}
+              className="text-sm text-primary font-medium mt-2"
+            >
+              + Add income source
+            </button>
+            <p className="text-xs text-muted-foreground mt-2">
+              Total: KES {incomeSources.reduce((s, src) => s + (Number(src.amount) || 0), 0).toLocaleString()}/month
+            </p>
           </div>
           <div>
             <label className={labelClass}>Number of Dependents</label>
