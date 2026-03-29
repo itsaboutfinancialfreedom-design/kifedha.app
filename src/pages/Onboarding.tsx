@@ -11,7 +11,10 @@ export default function Onboarding() {
   const { setFinancials, setBlueprint, setHasCompletedOnboarding } = useApp();
   const [step, setStep] = useState(0);
 
-  const [income, setIncome] = useState("");
+  const [incomeSources, setIncomeSources] = useState([
+    { name: "Salary", amount: "" },
+    { name: "Side hustle", amount: "" },
+  ]);
   const [expenses, setExpenses] = useState([
     { name: "Rent", amount: "" },
     { name: "Food", amount: "" },
