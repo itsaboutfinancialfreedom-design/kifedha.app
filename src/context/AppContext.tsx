@@ -45,38 +45,38 @@ const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [financials, setFinancials] = useState<UserFinancials | null>(() => {
-    const saved = localStorage.getItem("akilifi_financials");
+    const saved = localStorage.getItem("ywb_financials");
     return saved ? JSON.parse(saved) : null;
   });
   const [blueprint, setBlueprint] = useState<FinancialBlueprint | null>(() => {
-    const saved = localStorage.getItem("akilifi_blueprint");
+    const saved = localStorage.getItem("ywb_blueprint");
     return saved ? JSON.parse(saved) : null;
   });
   const [isPremium, setIsPremium] = useState(() => {
-    return localStorage.getItem("akilifi_premium") === "true";
+    return localStorage.getItem("ywb_premium") === "true";
   });
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(() => {
-    return localStorage.getItem("akilifi_onboarded") === "true";
+    return localStorage.getItem("ywb_onboarded") === "true";
   });
 
   const handleSetFinancials = (f: UserFinancials) => {
     setFinancials(f);
-    localStorage.setItem("akilifi_financials", JSON.stringify(f));
+    localStorage.setItem("ywb_financials", JSON.stringify(f));
   };
 
   const handleSetBlueprint = (b: FinancialBlueprint) => {
     setBlueprint(b);
-    localStorage.setItem("akilifi_blueprint", JSON.stringify(b));
+    localStorage.setItem("ywb_blueprint", JSON.stringify(b));
   };
 
   const handleSetPremium = (v: boolean) => {
     setIsPremium(v);
-    localStorage.setItem("akilifi_premium", v.toString());
+    localStorage.setItem("ywb_premium", v.toString());
   };
 
   const handleSetOnboarded = (v: boolean) => {
     setHasCompletedOnboarding(v);
-    localStorage.setItem("akilifi_onboarded", v.toString());
+    localStorage.setItem("ywb_onboarded", v.toString());
   };
 
   return (
