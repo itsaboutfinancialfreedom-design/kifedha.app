@@ -153,7 +153,7 @@ export default function Onboarding() {
       {step === 1 && (
         <div className="space-y-3">
           {expenses.map((exp, i) => (
-            <div key={i} className="flex gap-3">
+            <div key={i} className="bg-card rounded-xl p-4 shadow-card space-y-2">
               <input
                 value={exp.name}
                 onChange={e => {
@@ -161,8 +161,8 @@ export default function Onboarding() {
                   next[i].name = e.target.value;
                   setExpenses(next);
                 }}
-                placeholder="Expense name"
-                className={`${inputClass} flex-1`}
+                placeholder="e.g. Rent, Food, Transport, Utilities"
+                className={inputClass}
               />
               <input
                 type="number"
@@ -172,9 +172,17 @@ export default function Onboarding() {
                   next[i].amount = e.target.value;
                   setExpenses(next);
                 }}
-                placeholder="KES"
-                className={`${inputClass} w-28`}
+                placeholder="Amount in KES"
+                className={inputClass}
               />
+              {expenses.length > 1 && (
+                <button
+                  onClick={() => setExpenses(expenses.filter((_, idx) => idx !== i))}
+                  className="text-xs text-destructive font-medium"
+                >
+                  Remove
+                </button>
+              )}
             </div>
           ))}
           <button
