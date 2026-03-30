@@ -6,7 +6,7 @@ import { ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
 
 const steps = ["Income", "Expenses", "Debts", "Protection", "Goals"];
 
-export default function Onboarding() {
+export default function Onboarding() { 
   const navigate = useNavigate();
   const { setFinancials, setBlueprint, setHasCompletedOnboarding } = useApp();
   const [step, setStep] = useState(0);
