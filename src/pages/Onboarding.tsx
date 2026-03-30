@@ -93,7 +93,7 @@ export default function Onboarding() {
             <label className={labelClass}>Income Sources</label>
             <div className="space-y-3">
               {incomeSources.map((src, i) => (
-                <div key={i} className="flex gap-3">
+                <div key={i} className="bg-card rounded-xl p-4 shadow-card space-y-2">
                   <input
                     value={src.name}
                     onChange={e => {
@@ -101,8 +101,8 @@ export default function Onboarding() {
                       next[i].name = e.target.value;
                       setIncomeSources(next);
                     }}
-                    placeholder="Source name"
-                    className={`${inputClass} flex-1`}
+                    placeholder="e.g. Salary, Freelance, Rental income"
+                    className={inputClass}
                   />
                   <input
                     type="number"
@@ -112,9 +112,17 @@ export default function Onboarding() {
                       next[i].amount = e.target.value;
                       setIncomeSources(next);
                     }}
-                    placeholder="KES"
-                    className={`${inputClass} w-28`}
+                    placeholder="Amount in KES"
+                    className={inputClass}
                   />
+                  {incomeSources.length > 1 && (
+                    <button
+                      onClick={() => setIncomeSources(incomeSources.filter((_, idx) => idx !== i))}
+                      className="text-xs text-destructive font-medium"
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
