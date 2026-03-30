@@ -260,26 +260,35 @@ export default function Onboarding() {
       {step === 3 && (
         <div className="space-y-4">
           {[
-            { label: "I have life insurance", value: hasLifeInsurance, set: setHasLifeInsurance },
-            { label: "I have health insurance / NHIF", value: hasHealthInsurance, set: setHasHealthInsurance },
-            { label: "I have an emergency fund", value: hasEmergencyFund, set: setHasEmergencyFund },
+            { label: "Do you have life insurance?", value: hasLifeInsurance, set: setHasLifeInsurance },
+            { label: "Do you have health insurance / SHA?", value: hasHealthInsurance, set: setHasHealthInsurance },
+            { label: "Do you have an emergency fund?", value: hasEmergencyFund, set: setHasEmergencyFund },
           ].map(({ label, value, set }) => (
-            <button
-              key={label}
-              onClick={() => set(!value)}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl border transition-all ${
-                value
-                  ? "border-primary bg-primary/5"
-                  : "border-border bg-card"
-              }`}
-            >
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                value ? "border-primary bg-primary" : "border-muted-foreground"
-              }`}>
-                {value && <div className="w-2 h-2 rounded-full bg-primary-foreground" />}
+            <div key={label} className="bg-card rounded-xl p-4 shadow-card">
+              <p className="text-sm font-medium mb-3">{label}</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => set(true)}
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-semibold border transition-all ${
+                    value
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-muted/50 text-muted-foreground"
+                  }`}
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={() => set(false)}
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-semibold border transition-all ${
+                    !value
+                      ? "border-destructive bg-destructive/10 text-destructive"
+                      : "border-border bg-muted/50 text-muted-foreground"
+                  }`}
+                >
+                  No
+                </button>
               </div>
-              <span className="text-sm font-medium">{label}</span>
-            </button>
+            </div>
           ))}
           {hasEmergencyFund && (
             <div>
