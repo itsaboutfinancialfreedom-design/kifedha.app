@@ -36,7 +36,7 @@ export default function Advisor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [financials]);
 
-  const userTurnCount = messages.filter(m => m.role === "user" && m.content !== "__START__").length;
+  const userTurnCount = messages.filter(m => m.role === "user" && m.content !== "__START__" && m.content !== "Hi, I'm ready to start.").length;
   const limitReached = !isPremium && userTurnCount >= FREE_TURN_LIMIT;
 
   async function send(text: string, isOpener = false) {
