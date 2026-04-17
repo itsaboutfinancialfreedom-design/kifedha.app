@@ -7,15 +7,16 @@ function BudgetContent() {
   const { financials, blueprint } = useApp();
   if (!financials || !blueprint) return null;
 
-  const income = financials.monthlyIncome;
+  const income = financials.monthlyIncome ?? 0;
   const { allocation } = blueprint;
+  const safe = (n: number | null | undefined) => (n ?? 0).toLocaleString();
 
   const wallets = [
-    { icon: GraduationCap, label: "School Fees", suggested: Math.round(allocation.savings.amount * 0.3) },
-    { icon: Landmark, label: "Land / Property", suggested: Math.round(allocation.investments.amount * 0.4) },
-    { icon: Sunset, label: "Retirement", suggested: Math.round(allocation.investments.amount * 0.3) },
-    { icon: PiggyBank, label: "Emergency Fund", suggested: Math.round(allocation.savings.amount * 0.5) },
-    { icon: Shield, label: "Insurance", suggested: allocation.protection.amount },
+    { icon: GraduationCap, label: "School Fees", suggested: Math.round((allocation.savings.amount ?? 0) * 0.3) },
+    { icon: Landmark, label: "Land / Property", suggested: Math.round((allocation.investments.amount ?? 0) * 0.4) },
+    { icon: Sunset, label: "Retirement", suggested: Math.round((allocation.investments.amount ?? 0) * 0.3) },
+    { icon: PiggyBank, label: "Emergency Fund", suggested: Math.round((allocation.savings.amount ?? 0) * 0.5) },
+    { icon: Shield, label: "Insurance", suggested: allocation.protection.amount ?? 0 },
   ];
 
   const splitItems = [
@@ -34,14 +35,14 @@ function BudgetContent() {
           <h2 className="font-display text-base font-semibold">Auto-Split Income</h2>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
-          KES {income.toLocaleString()}/month automatically allocated:
+          KES {safe(income)}/month automatically allocated:
         </p>
         <div className="space-y-3">
           {splitItems.map(item => (
             <div key={item.label} className="flex items-center gap-3">
               <div className={`w-3 h-3 rounded-full ${item.color}`} />
               <span className="text-sm flex-1">{item.label}</span>
-              <span className="text-sm font-semibold">KES {item.amount.toLocaleString()}</span>
+              <span className="text-sm font-semibold">KES {safe(item.amount)}</span>
               <span className="text-xs text-muted-foreground w-10 text-right">{item.pct}%</span>
             </div>
           ))}
@@ -62,7 +63,7 @@ function BudgetContent() {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">{label}</p>
-                <p className="text-xs text-muted-foreground">Suggested: KES {suggested.toLocaleString()}/mo</p>
+                <p className="text-xs text-muted-foreground">Suggested: KES {safe(suggested)}/mo</p>
               </div>
             </div>
           ))}
@@ -76,14 +77,14 @@ function BudgetContent() {
           {financials.expenses.map((exp, i) => (
             <div key={i} className="flex justify-between py-2 border-b border-border last:border-0">
               <span className="text-sm">{exp.name}</span>
-              <span className="text-sm font-semibold">KES {exp.amount.toLocaleString()}</span>
+              <span className="text-sm font-semibold">KES {safe(exp.amount)}</span>
             </div>
           ))}
         </div>
         <div className="flex justify-between mt-3 pt-2 border-t border-border">
           <span className="text-sm font-semibold">Total</span>
           <span className="text-sm font-bold text-primary">
-            KES {financials.totalExpenses.toLocaleString()}
+            KES {safe(financials.totalExpenses)}
           </span>
         </div>
       </div>
