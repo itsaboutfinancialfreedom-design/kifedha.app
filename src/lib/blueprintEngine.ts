@@ -56,7 +56,7 @@ export function generateBlueprint(f: UserFinancials): FinancialBlueprint {
   }
   if (!f.hasHealthInsurance) {
     risks.push("No health cover — one hospital visit could wipe your savings");
-    insuranceRecommendations.push("Start with NHIF or affordable private health cover");
+    insuranceRecommendations.push("Start with SHA or affordable private health cover");
   }
   if (!f.hasEmergencyFund || f.emergencyFundAmount < income * 3) {
     risks.push("Emergency fund below 3 months of income");

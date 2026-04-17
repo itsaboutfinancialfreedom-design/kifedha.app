@@ -24,7 +24,7 @@ export default function Protection() {
       has: financials.hasHealthInsurance,
       description: financials.hasHealthInsurance
         ? "Great! Make sure your cover includes inpatient and outpatient."
-        : "Start with NHIF (KES 500/mo) or explore affordable private health plans.",
+        : "Start with SHA (KES 500/mo) or explore affordable private health plans.",
     },
     {
       icon: Briefcase,
