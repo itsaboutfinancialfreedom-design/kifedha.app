@@ -2,18 +2,31 @@ import { useApp } from "@/context/AppContext";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
 import { ScoreRing } from "@/components/ScoreRing";
-import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles } from "lucide-react";
-import { useEffect } from "react";
+import { InsightCard } from "@/components/InsightCard";
+import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { generateInsights } from "@/lib/insightsEngine";
 
 export default function Dashboard() {
-  const { financials, blueprint, hasCompletedOnboarding } = useApp();
+  const { financials, blueprint, hasCompletedOnboarding, automation, setAutomation } = useApp();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!hasCompletedOnboarding) navigate("/");
   }, [hasCompletedOnboarding, navigate]);
 
+  const insights = useMemo(
+    () => (financials && blueprint ? generateInsights(financials, blueprint) : []),
+    [financials, blueprint]
+  );
+
   if (!financials || !blueprint) return null;
+
+  const visibleInsights = insights.filter(i => {
+    if (i.category === "balance" && !automation.lowBalanceAlerts) return false;
+    if (i.category === "subscription" && !automation.subscriptionScan) return false;
+    return true;
+  });
 
   const allocationItems = [
     { label: "Needs", ...blueprint.allocation.needs, color: "bg-primary" },
@@ -23,15 +36,38 @@ export default function Dashboard() {
     { label: "Debt", ...blueprint.allocation.debtRepayment, color: "bg-danger" },
   ];
 
+  function handleInsightAction(id: string) {
+    if (id === "round-ups") {
+      setAutomation({ ...automation, roundUps: true });
+      navigate("/settings");
+    } else if (id === "idle-cash") {
+      setAutomation({ ...automation, autoSweepSurplus: true });
+      navigate("/settings");
+    } else if (id.startsWith("subs") || id.startsWith("low-balance") || id === "top-category") {
+      navigate("/budget");
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <div className="gradient-gold px-4 pt-8 pb-10 rounded-b-3xl">
         <div className="max-w-lg mx-auto">
-          <p className="text-warning-foreground/70 text-sm font-medium">Welcome back 👋</p>
-          <h1 className="font-display text-2xl font-bold text-warning-foreground mt-1">
-            Your Wealth Builder
-          </h1>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-warning-foreground/70 text-sm font-medium">Welcome back 👋</p>
+              <h1 className="font-display text-2xl font-bold text-warning-foreground mt-1">
+                Kifedha
+              </h1>
+            </div>
+            <button
+              onClick={() => navigate("/settings")}
+              aria-label="Trust & automation settings"
+              className="p-2 rounded-xl bg-warning-foreground/10 hover:bg-warning-foreground/20 transition-colors"
+            >
+              <SettingsIcon className="w-5 h-5 text-warning-foreground" />
+            </button>
+          </div>
           <div className="mt-6 flex items-center gap-6">
             <div className="relative">
               <ScoreRing score={blueprint.healthScore} size={100} />
