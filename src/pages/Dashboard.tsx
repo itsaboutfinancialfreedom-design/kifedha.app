@@ -99,6 +99,23 @@ export default function Dashboard() {
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </button>
 
+        {/* Proactive Insights (Pillar 2) */}
+        {visibleInsights.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <h2 className="font-display text-base font-semibold">Proactive Insights</h2>
+              <span className="text-[11px] text-muted-foreground">{visibleInsights.length} new</span>
+            </div>
+            {visibleInsights.map(ins => (
+              <InsightCard
+                key={ins.id}
+                insight={ins}
+                onAction={() => handleInsightAction(ins.id)}
+              />
+            ))}
+          </div>
+        )}
+
         {/* Allocation Breakdown */}
         <div className="bg-card rounded-2xl p-5 shadow-card">
           <h2 className="font-display text-base font-semibold mb-4">Income Allocation</h2>

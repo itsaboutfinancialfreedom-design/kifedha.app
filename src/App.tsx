@@ -12,6 +12,7 @@ import Budget from "./pages/Budget";
 import Protection from "./pages/Protection";
 import Debt from "./pages/Debt";
 import Advisor from "./pages/Advisor";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/protection" element={<Protection />} />
             <Route path="/debt" element={<Debt />} />
             <Route path="/advisor" element={<Advisor />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
