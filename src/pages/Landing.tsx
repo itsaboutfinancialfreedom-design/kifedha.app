@@ -23,7 +23,7 @@ export default function Landing() {
             Smart Financial Planning
           </p>
           <p className="text-warning-foreground/60 text-sm mt-3 leading-relaxed max-w-xs">
-            Track income, manage expenses, allocate to goals, and build wealth — all in one place. Built for Kenya.
+            Track income, manage expenses, allocate to goals, and build wealth — all in one place.
           </p>
         </div>
       </div>
