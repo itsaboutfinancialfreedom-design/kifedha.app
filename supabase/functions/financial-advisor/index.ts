@@ -24,9 +24,14 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { messages, financials, blueprint, isPremium } = await req.json();
+    const { messages, financials, blueprint, isPremium, insights } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+
+    const sevRank: Record<string, number> = { danger: 3, warning: 2, info: 1, success: 0 };
+    const rankedInsights = Array.isArray(insights)
+      ? [...insights].sort((a: any, b: any) => (sevRank[b.severity] ?? 0) - (sevRank[a.severity] ?? 0))
+      : [];
 
     const profileContext = `
 CLIENT FINANCIAL PROFILE (from onboarding):
@@ -49,6 +54,13 @@ GENERATED BLUEPRINT SUMMARY:
 - Risk Score: ${blueprint.riskScore}
 - Top Risks: ${blueprint.risks?.slice(0, 3).join("; ")}
 - Opportunities: ${blueprint.opportunities?.slice(0, 3).join("; ")}
+` : ""}
+
+${rankedInsights.length > 0 ? `
+PROACTIVE INSIGHTS (already detected by the system — reference these by name in your diagnosis):
+${rankedInsights.slice(0, 5).map((i: any, idx: number) =>
+  `${idx + 1}. [${i.severity?.toUpperCase()}] ${i.title} — ${i.body} (Why: ${i.reason})`
+).join("\n")}
 ` : ""}
 
 CLIENT TIER: ${isPremium ? "PREMIUM (give full diagnosis with numbers + action plan)" : "FREE (tease the diagnosis — show 1 gap, then position the premium blueprint)"}
