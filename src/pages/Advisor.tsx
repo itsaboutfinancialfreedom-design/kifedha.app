@@ -66,6 +66,7 @@ export default function Advisor() {
           financials,
           blueprint,
           isPremium,
+          insights: financials && blueprint ? generateInsights(financials, blueprint) : [],
         }),
       });
 
