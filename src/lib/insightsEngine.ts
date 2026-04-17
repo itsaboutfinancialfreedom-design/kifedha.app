@@ -101,6 +101,23 @@ export function generateInsights(
         category: "spending",
       });
     }
+
+    // ---- 3b. Spending anomaly: actual "Needs" outflow vs blueprint plan ----
+    const plannedNeeds = b.allocation.needs.amount;
+    const actualNeeds = f.totalExpenses;
+    if (plannedNeeds > 0 && actualNeeds > plannedNeeds * 1.2) {
+      const overPct = Math.round(((actualNeeds - plannedNeeds) / plannedNeeds) * 100);
+      const overKES = actualNeeds - plannedNeeds;
+      insights.push({
+        id: "spending-anomaly",
+        severity: overPct > 40 ? "danger" : "warning",
+        title: `You're spending ${overPct}% above plan`,
+        body: `Your expenses (KES ${actualNeeds.toLocaleString()}) are KES ${overKES.toLocaleString()} over the recommended Needs budget. This is squeezing savings & investments.`,
+        reason: `Blueprint allocates KES ${plannedNeeds.toLocaleString()} to Needs (50% rule). Actual spending exceeds it by more than 20%, which signals lifestyle creep.`,
+        category: "spending",
+        actionLabel: "See what to cut",
+      });
+    }
   }
 
   // ---- 4. Idle cash opportunity (self-driving prompt) ----
