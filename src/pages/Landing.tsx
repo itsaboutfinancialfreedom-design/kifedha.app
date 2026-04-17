@@ -17,7 +17,7 @@ export default function Landing() {
       <div className="gradient-gold px-6 pt-16 pb-12 rounded-b-[2rem] flex-shrink-0">
         <div className="max-w-lg mx-auto">
           <h1 className="font-display text-4xl font-bold text-warning-foreground leading-tight">
-            Your Wealth Builder
+            Kifedha
           </h1>
           <p className="text-warning-foreground/80 text-lg mt-2 font-display font-medium">
             Smart Financial Planning
