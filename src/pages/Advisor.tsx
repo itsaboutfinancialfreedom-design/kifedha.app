@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { ArrowLeft, Send, Sparkles, Lock, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
+import { generateInsights } from "@/lib/insightsEngine";
 
 interface Msg { role: "user" | "assistant"; content: string }
 
