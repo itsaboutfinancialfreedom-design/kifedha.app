@@ -48,6 +48,21 @@ export default function Dashboard() {
       </div>
 
       <div className="max-w-lg mx-auto px-4 -mt-4 space-y-4">
+        {/* AI Advisor CTA */}
+        <button
+          onClick={() => navigate("/advisor")}
+          className="w-full bg-card rounded-2xl p-4 shadow-elevated flex items-center gap-3 text-left active:scale-[0.99] transition-transform border border-border"
+        >
+          <div className="w-11 h-11 rounded-xl gradient-premium flex items-center justify-center shrink-0">
+            <Sparkles className="w-5 h-5 text-premium-foreground" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-display font-bold text-sm">Talk to your AI Advisor</p>
+            <p className="text-xs text-muted-foreground">Get a personalized 4-pillar diagnosis in minutes</p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </button>
+
         {/* Allocation Breakdown */}
         <div className="bg-card rounded-2xl p-5 shadow-card">
           <h2 className="font-display text-base font-semibold mb-4">Income Allocation</h2>
