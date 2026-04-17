@@ -11,6 +11,7 @@ import Goals from "./pages/Goals";
 import Budget from "./pages/Budget";
 import Protection from "./pages/Protection";
 import Debt from "./pages/Debt";
+import Advisor from "./pages/Advisor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/budget" element={<Budget />} />
             <Route path="/protection" element={<Protection />} />
             <Route path="/debt" element={<Debt />} />
+            <Route path="/advisor" element={<Advisor />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
