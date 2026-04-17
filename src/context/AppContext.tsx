@@ -1,4 +1,4 @@
-import { useState, createContext, useContext, ReactNode } from "react";
+import { useState, createContext, useContext, ReactNode, useEffect } from "react";
 
 export interface UserFinancials {
   monthlyIncome: number;
@@ -12,6 +12,22 @@ export interface UserFinancials {
   hasHealthInsurance: boolean;
   hasEmergencyFund: boolean;
   emergencyFundAmount: number;
+}
+
+export interface AutomationSettings {
+  autopilotGoals: boolean;       // self-driving money allocation
+  roundUps: boolean;              // simulated round-up savings
+  lowBalanceAlerts: boolean;      // proactive warnings
+  subscriptionScan: boolean;      // detect duplicate / unused subs
+  autoSweepSurplus: boolean;      // move idle cash to high-yield
+}
+
+export interface GoalAutopilot {
+  goalName: string;
+  enabled: boolean;
+  monthlyContribution: number;
+  simulatedBalance: number;
+  lastRunISO: string;
 }
 
 export interface FinancialBlueprint {
@@ -30,6 +46,14 @@ export interface FinancialBlueprint {
   insuranceRecommendations: string[];
 }
 
+const DEFAULT_AUTOMATION: AutomationSettings = {
+  autopilotGoals: false,
+  roundUps: false,
+  lowBalanceAlerts: true,
+  subscriptionScan: true,
+  autoSweepSurplus: false,
+};
+
 interface AppContextType {
   financials: UserFinancials | null;
   setFinancials: (f: UserFinancials) => void;
@@ -39,6 +63,10 @@ interface AppContextType {
   setIsPremium: (v: boolean) => void;
   hasCompletedOnboarding: boolean;
   setHasCompletedOnboarding: (v: boolean) => void;
+  automation: AutomationSettings;
+  setAutomation: (a: AutomationSettings) => void;
+  autopilots: GoalAutopilot[];
+  setAutopilots: (a: GoalAutopilot[]) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -58,6 +86,46 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(() => {
     return localStorage.getItem("ywb_onboarded") === "true";
   });
+  const [automation, setAutomationState] = useState<AutomationSettings>(() => {
+    const saved = localStorage.getItem("ywb_automation");
+    return saved ? { ...DEFAULT_AUTOMATION, ...JSON.parse(saved) } : DEFAULT_AUTOMATION;
+  });
+  const [autopilots, setAutopilotsState] = useState<GoalAutopilot[]>(() => {
+    const saved = localStorage.getItem("ywb_autopilots");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const setAutomation = (a: AutomationSettings) => {
+    setAutomationState(a);
+    localStorage.setItem("ywb_automation", JSON.stringify(a));
+  };
+  const setAutopilots = (a: GoalAutopilot[]) => {
+    setAutopilotsState(a);
+    localStorage.setItem("ywb_autopilots", JSON.stringify(a));
+  };
+
+  // Self-driving money: simulate autopilot accruals on each session if enabled
+  useEffect(() => {
+    if (!automation.autopilotGoals || autopilots.length === 0) return;
+    const now = new Date();
+    const updated = autopilots.map(ap => {
+      if (!ap.enabled) return ap;
+      const last = new Date(ap.lastRunISO);
+      const daysPassed = Math.floor((now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysPassed <= 0) return ap;
+      const dailyAccrual = ap.monthlyContribution / 30;
+      return {
+        ...ap,
+        simulatedBalance: ap.simulatedBalance + dailyAccrual * daysPassed,
+        lastRunISO: now.toISOString(),
+      };
+    });
+    if (JSON.stringify(updated) !== JSON.stringify(autopilots)) {
+      setAutopilotsState(updated);
+      localStorage.setItem("ywb_autopilots", JSON.stringify(updated));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSetFinancials = (f: UserFinancials) => {
     setFinancials(f);
@@ -85,6 +153,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       blueprint, setBlueprint: handleSetBlueprint,
       isPremium, setIsPremium: handleSetPremium,
       hasCompletedOnboarding, setHasCompletedOnboarding: handleSetOnboarded,
+      automation, setAutomation,
+      autopilots, setAutopilots,
     }}>
       {children}
     </AppContext.Provider>
