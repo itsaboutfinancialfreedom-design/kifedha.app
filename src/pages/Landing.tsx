@@ -38,6 +38,11 @@ export default function Landing() {
               desc: "Get a personalized income allocation plan — needs, savings, investments, and protection.",
             },
             {
+              icon: Shield,
+              title: "Three Smart Dashboards",
+              desc: "See your financial literacy, wealth planning readiness, and insurance coverage gaps at a glance.",
+            },
+            {
               icon: Wallet,
               title: "Track Income & Expenses",
               desc: "See where your money goes and auto-split income using smart budgeting rules.",

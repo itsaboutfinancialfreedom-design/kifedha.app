@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
 import { ScoreRing } from "@/components/ScoreRing";
 import { InsightCard } from "@/components/InsightCard";
-import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon } from "lucide-react";
+import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { generateInsights } from "@/lib/insightsEngine";
 
@@ -99,6 +99,20 @@ export default function Dashboard() {
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </button>
 
+        <button
+          onClick={() => navigate("/dashboards")}
+          className="w-full bg-card rounded-2xl p-4 shadow-card flex items-center gap-3 text-left border border-border"
+        >
+          <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <BookOpenCheck className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-display font-bold text-sm">Financial Dashboards</p>
+            <p className="text-xs text-muted-foreground">Literacy, wealth planning, and insurance penetration in one view</p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </button>
+
         {/* Proactive Insights (Pillar 2) */}
         {visibleInsights.length > 0 && (
           <div className="space-y-3">
@@ -183,6 +197,7 @@ export default function Dashboard() {
         {/* Quick links */}
         {[
           { label: "Goal Planning", to: "/goals", icon: TrendingUp },
+          { label: "Financial Dashboards", to: "/dashboards", icon: BookOpenCheck },
           { label: "Protection Insights", to: "/protection", icon: Shield },
         ].map(({ label, to, icon: Icon }) => (
           <button
