@@ -12,6 +12,7 @@ import Budget from "./pages/Budget";
 import Protection from "./pages/Protection";
 import Debt from "./pages/Debt";
 import Advisor from "./pages/Advisor";
+import Dashboards from "./pages/Dashboards";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/protection" element={<Protection />} />
             <Route path="/debt" element={<Debt />} />
             <Route path="/advisor" element={<Advisor />} />
+            <Route path="/dashboards" element={<Dashboards />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
