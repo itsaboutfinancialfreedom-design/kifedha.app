@@ -138,8 +138,8 @@ export default function Dashboard() {
               <div key={item.label} className="flex items-center gap-3">
                 <div className={`w-3 h-3 rounded-full ${item.color}`} />
                 <span className="text-sm flex-1">{item.label}</span>
-                <span className="text-sm font-semibold">KES {item.amount.toLocaleString()}</span>
-                <span className="text-xs text-muted-foreground w-10 text-right">{item.percent}%</span>
+                <span className="text-sm font-semibold">KES {(item.amount ?? 0).toLocaleString()}</span>
+                <span className="text-xs text-muted-foreground w-10 text-right">{item.percent ?? 0}%</span>
               </div>
             ))}
           </div>
