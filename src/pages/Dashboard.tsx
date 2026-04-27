@@ -75,7 +75,7 @@ export default function Dashboard() {
             <div>
               <p className="text-warning-foreground/70 text-xs">Monthly Income</p>
               <p className="font-display text-xl font-bold text-warning-foreground">
-                KES {financials.monthlyIncome.toLocaleString()}
+                KES {(financials.monthlyIncome ?? 0).toLocaleString()}
               </p>
               <p className="text-warning-foreground/70 text-xs mt-2">Financial Health Score</p>
             </div>
