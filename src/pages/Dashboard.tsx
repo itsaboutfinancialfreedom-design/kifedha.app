@@ -149,7 +149,7 @@ export default function Dashboard() {
               <div
                 key={item.label}
                 className={`${item.color} transition-all`}
-                style={{ width: `${item.percent}%` }}
+                style={{ width: `${item.percent ?? 0}%` }}
               />
             ))}
           </div>
