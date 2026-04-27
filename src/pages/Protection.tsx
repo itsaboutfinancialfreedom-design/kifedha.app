@@ -1,7 +1,8 @@
 import { useApp } from "@/context/AppContext";
 import { BottomNav } from "@/components/BottomNav";
 import { ScoreRing } from "@/components/ScoreRing";
-import { Shield, Heart, Briefcase, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Shield, Heart, Briefcase, AlertTriangle, CheckCircle2, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Protection() {
   const { financials, blueprint } = useApp();
@@ -81,6 +82,31 @@ export default function Protection() {
               <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
             </div>
           ))}
+        </div>
+
+        {/* Talk to a certified financial advisor */}
+        <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-5 shadow-card mt-4">
+          <div className="flex items-start gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+              <Calendar className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-display font-semibold text-sm">Talk to a Certified Financial Advisor</h3>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                Book a free 30-minute discovery call to review your protection plan with a licensed expert.
+              </p>
+            </div>
+          </div>
+          <Button asChild className="w-full" size="sm">
+            <a
+              href="https://calendly.com/financialdiscoverycall/30min"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Calendar className="w-4 h-4" />
+              Book a Free Call
+            </a>
+          </Button>
         </div>
 
         {/* Insurance allocation */}
