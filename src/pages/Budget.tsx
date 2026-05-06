@@ -1,6 +1,6 @@
 import { useApp } from "@/context/AppContext";
 import { BottomNav } from "@/components/BottomNav";
-import { PremiumGate } from "@/components/PremiumGate";
+
 import { Wallet, PiggyBank, TrendingUp, Shield, GraduationCap, Landmark, Sunset } from "lucide-react";
 
 function BudgetContent() {
@@ -100,9 +100,7 @@ export default function Budget() {
         <p className="text-sm text-muted-foreground mb-6">
           Smart budgeting with auto-split income and goal wallets.
         </p>
-        <PremiumGate featureName="Budget & Expense Tracker">
-          <BudgetContent />
-        </PremiumGate>
+        <BudgetContent />
       </div>
       <BottomNav />
     </div>

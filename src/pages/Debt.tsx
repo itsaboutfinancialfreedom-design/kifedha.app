@@ -1,6 +1,6 @@
 import { useApp } from "@/context/AppContext";
 import { BottomNav } from "@/components/BottomNav";
-import { PremiumGate } from "@/components/PremiumGate";
+
 import { TrendingDown, AlertTriangle, CheckCircle2, Zap } from "lucide-react";
 
 function DebtContent() {
@@ -146,9 +146,7 @@ export default function Debt() {
         <p className="text-sm text-muted-foreground mb-6">
           Understand your debt and get a clear payoff plan.
         </p>
-        <PremiumGate featureName="Debt Tracker & Payoff Strategy">
-          <DebtContent />
-        </PremiumGate>
+        <DebtContent />
       </div>
       <BottomNav />
     </div>
