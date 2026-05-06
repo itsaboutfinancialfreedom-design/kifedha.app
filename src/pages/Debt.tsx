@@ -1,6 +1,6 @@
 import { useApp } from "@/context/AppContext";
 import { BottomNav } from "@/components/BottomNav";
-import { PremiumGate } from "@/components/PremiumGate";
+
 import { TrendingDown, AlertTriangle, CheckCircle2, Zap } from "lucide-react";
 
 function DebtContent() {

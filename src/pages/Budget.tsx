@@ -1,6 +1,6 @@
 import { useApp } from "@/context/AppContext";
 import { BottomNav } from "@/components/BottomNav";
-import { PremiumGate } from "@/components/PremiumGate";
+
 import { Wallet, PiggyBank, TrendingUp, Shield, GraduationCap, Landmark, Sunset } from "lucide-react";
 
 function BudgetContent() {
