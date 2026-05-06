@@ -4,7 +4,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
+import { TransactionsProvider } from "@/context/TransactionsContext";
 import Landing from "./pages/Landing";
+import Tracker from "./pages/Tracker";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import Goals from "./pages/Goals";
@@ -21,6 +23,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AppProvider>
+      <TransactionsProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -28,6 +31,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/tracker" element={<Tracker />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/goals" element={<Goals />} />
             <Route path="/budget" element={<Budget />} />
@@ -40,6 +44,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+      </TransactionsProvider>
     </AppProvider>
   </QueryClientProvider>
 );
