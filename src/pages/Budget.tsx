@@ -100,9 +100,7 @@ export default function Budget() {
         <p className="text-sm text-muted-foreground mb-6">
           Smart budgeting with auto-split income and goal wallets.
         </p>
-        <PremiumGate featureName="Budget & Expense Tracker">
-          <BudgetContent />
-        </PremiumGate>
+        <BudgetContent />
       </div>
       <BottomNav />
     </div>

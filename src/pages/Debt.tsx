@@ -146,9 +146,7 @@ export default function Debt() {
         <p className="text-sm text-muted-foreground mb-6">
           Understand your debt and get a clear payoff plan.
         </p>
-        <PremiumGate featureName="Debt Tracker & Payoff Strategy">
-          <DebtContent />
-        </PremiumGate>
+        <DebtContent />
       </div>
       <BottomNav />
     </div>
