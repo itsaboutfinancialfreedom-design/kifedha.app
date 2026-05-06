@@ -1,10 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Target, Wallet, Shield, TrendingDown } from "lucide-react";
+import { Receipt, Target, LayoutDashboard, Shield, TrendingDown } from "lucide-react";
 
 const navItems = [
-  { to: "/dashboard", icon: LayoutDashboard, label: "Home" },
+  { to: "/tracker", icon: Receipt, label: "Tracker" },
+  { to: "/dashboard", icon: LayoutDashboard, label: "Wealth" },
   { to: "/goals", icon: Target, label: "Goals" },
-  { to: "/budget", icon: Wallet, label: "Budget" },
   { to: "/protection", icon: Shield, label: "Protect" },
   { to: "/debt", icon: TrendingDown, label: "Debt" },
 ];
