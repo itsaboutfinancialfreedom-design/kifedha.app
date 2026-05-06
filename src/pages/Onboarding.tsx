@@ -57,7 +57,7 @@ export default function Onboarding() {
     const bp = generateBlueprint(financials);
     setBlueprint(bp);
     setHasCompletedOnboarding(true);
-    navigate("/dashboard");
+    navigate("/tracker");
   };
 
   const inputClass = "w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring transition-all";

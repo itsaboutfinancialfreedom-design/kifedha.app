@@ -8,7 +8,7 @@ export default function Landing() {
   const { hasCompletedOnboarding } = useApp();
 
   useEffect(() => {
-    if (hasCompletedOnboarding) navigate("/dashboard");
+    if (hasCompletedOnboarding) navigate("/tracker");
   }, [hasCompletedOnboarding, navigate]);
 
   return (
