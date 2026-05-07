@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { useTransactions } from "@/context/TransactionsContext";
@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, ArrowDownCircle, ArrowUpCircle, Trash2, Sparkles } from "lucide-react";
+import { Plus, ArrowDownCircle, ArrowUpCircle, Trash2, Sparkles, Mic, Loader2 } from "lucide-react";
 import { CATEGORIES, Category, autoCategorize } from "@/lib/categorize";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const QUICK_EXPENSE_CATS: Category[] = ["Food", "Transport", "Bills", "Airtime & Data", "Shopping", "Health"];
 
