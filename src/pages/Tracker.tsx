@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { useTransactions } from "@/context/TransactionsContext";
@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, ArrowDownCircle, ArrowUpCircle, Trash2, Sparkles } from "lucide-react";
+import { Plus, ArrowDownCircle, ArrowUpCircle, Trash2, Sparkles, Mic, Loader2 } from "lucide-react";
 import { CATEGORIES, Category, autoCategorize } from "@/lib/categorize";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const QUICK_EXPENSE_CATS: Category[] = ["Food", "Transport", "Bills", "Airtime & Data", "Shopping", "Health"];
 
@@ -23,6 +24,75 @@ export default function Tracker() {
   const [note, setNote] = useState("");
   const [category, setCategory] = useState<Category>("Other");
   const [autoCat, setAutoCat] = useState(true);
+  const [recording, setRecording] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+
+  async function startRecording() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast.error("Voice recording not supported on this device");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      chunksRef.current = [];
+      mr.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
+      mr.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const mime = mr.mimeType || "audio/webm";
+        await processAudio(new Blob(chunksRef.current, { type: mime }), mime);
+      };
+      mr.start();
+      recorderRef.current = mr;
+      setRecording(true);
+    } catch (err) {
+      console.error(err);
+      toast.error("Microphone permission denied");
+    }
+  }
+
+  function stopRecording() {
+    recorderRef.current?.stop();
+    setRecording(false);
+  }
+
+  async function processAudio(blob: Blob, mimeType: string) {
+    setProcessing(true);
+    try {
+      const buf = await blob.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      let binary = "";
+      const CHUNK = 0x8000;
+      for (let i = 0; i < bytes.length; i += CHUNK) {
+        binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + CHUNK)));
+      }
+      const b64 = btoa(binary);
+      const { data, error } = await supabase.functions.invoke("parse-transaction", {
+        body: { audio: b64, mimeType },
+      });
+      if (error) throw error;
+      if (!data || !data.amount) {
+        toast.error("Couldn't catch an amount. Try: 'Lunch at Naivas 350'");
+        return;
+      }
+      addTransaction({
+        type: data.type,
+        amount: Number(data.amount),
+        note: data.note,
+        category: data.category as Category,
+        date: new Date().toISOString(),
+        source: "voice",
+      });
+      toast.success(`Logged: ${data.note} · KES ${Number(data.amount).toLocaleString()}`);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || "Voice parsing failed");
+    } finally {
+      setProcessing(false);
+    }
+  }
 
   const monthIncome = useMemo(() => {
     const now = new Date();
@@ -108,12 +178,28 @@ export default function Tracker() {
         <div className="bg-card rounded-2xl p-4 shadow-card">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display text-sm font-semibold">Quick log</h2>
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" className="rounded-full">
-                  <Plus className="w-4 h-4 mr-1" /> Add
-                </Button>
-              </DialogTrigger>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant={recording ? "destructive" : "outline"}
+                className="rounded-full"
+                onClick={recording ? stopRecording : startRecording}
+                disabled={processing}
+                aria-label={recording ? "Stop recording" : "Voice log"}
+              >
+                {processing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Mic className={`w-4 h-4 ${recording ? "animate-pulse" : ""}`} />
+                )}
+                {recording ? "Stop" : processing ? "…" : "Voice"}
+              </Button>
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="rounded-full">
+                    <Plus className="w-4 h-4 mr-1" /> Add
+                  </Button>
+                </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Log a transaction</DialogTitle>
@@ -187,6 +273,7 @@ export default function Tracker() {
                 </div>
               </DialogContent>
             </Dialog>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             {QUICK_EXPENSE_CATS.map(c => (
