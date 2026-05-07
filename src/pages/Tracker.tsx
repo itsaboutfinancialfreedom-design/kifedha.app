@@ -24,6 +24,75 @@ export default function Tracker() {
   const [note, setNote] = useState("");
   const [category, setCategory] = useState<Category>("Other");
   const [autoCat, setAutoCat] = useState(true);
+  const [recording, setRecording] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+
+  async function startRecording() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast.error("Voice recording not supported on this device");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      chunksRef.current = [];
+      mr.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
+      mr.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const mime = mr.mimeType || "audio/webm";
+        await processAudio(new Blob(chunksRef.current, { type: mime }), mime);
+      };
+      mr.start();
+      recorderRef.current = mr;
+      setRecording(true);
+    } catch (err) {
+      console.error(err);
+      toast.error("Microphone permission denied");
+    }
+  }
+
+  function stopRecording() {
+    recorderRef.current?.stop();
+    setRecording(false);
+  }
+
+  async function processAudio(blob: Blob, mimeType: string) {
+    setProcessing(true);
+    try {
+      const buf = await blob.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      let binary = "";
+      const CHUNK = 0x8000;
+      for (let i = 0; i < bytes.length; i += CHUNK) {
+        binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + CHUNK)));
+      }
+      const b64 = btoa(binary);
+      const { data, error } = await supabase.functions.invoke("parse-transaction", {
+        body: { audio: b64, mimeType },
+      });
+      if (error) throw error;
+      if (!data || !data.amount) {
+        toast.error("Couldn't catch an amount. Try: 'Lunch at Naivas 350'");
+        return;
+      }
+      addTransaction({
+        type: data.type,
+        amount: Number(data.amount),
+        note: data.note,
+        category: data.category as Category,
+        date: new Date().toISOString(),
+        source: "voice",
+      });
+      toast.success(`Logged: ${data.note} · KES ${Number(data.amount).toLocaleString()}`);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || "Voice parsing failed");
+    } finally {
+      setProcessing(false);
+    }
+  }
 
   const monthIncome = useMemo(() => {
     const now = new Date();
