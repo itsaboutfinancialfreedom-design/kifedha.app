@@ -273,6 +273,7 @@ export default function Tracker() {
                 </div>
               </DialogContent>
             </Dialog>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             {QUICK_EXPENSE_CATS.map(c => (
