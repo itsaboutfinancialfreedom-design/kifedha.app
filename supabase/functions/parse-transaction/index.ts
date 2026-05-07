@@ -22,23 +22,31 @@ Rules:
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
-    const { text } = await req.json();
-    if (!text || typeof text !== "string") {
-      return new Response(JSON.stringify({ error: "Missing text" }), {
+    const { text, audio, mimeType } = await req.json();
+    if (!text && !audio) {
+      return new Response(JSON.stringify({ error: "Missing text or audio" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     const KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!KEY) throw new Error("LOVABLE_API_KEY not configured");
 
+    const fmt = ((mimeType || "audio/webm").split("/")[1] || "webm").split(";")[0];
+    const userContent: any = audio
+      ? [
+          { type: "text", text: "Transcribe this short voice note (English, Swahili, or Sheng) and return the parsed transaction JSON." },
+          { type: "input_audio", input_audio: { data: audio, format: fmt } },
+        ]
+      : text;
+
     const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: SYSTEM },
-          { role: "user", content: text },
+          { role: "user", content: userContent },
         ],
         response_format: { type: "json_object" },
       }),
@@ -56,13 +64,12 @@ Deno.serve(async (req) => {
     let parsed: any = {};
     try { parsed = JSON.parse(content); } catch { parsed = {}; }
 
-    // sanitize
     const type = parsed.type === "income" ? "income" : "expense";
     const amount = Number(parsed.amount) || 0;
-    const note = (parsed.note || text).toString().slice(0, 80);
+    const note = (parsed.note || text || "Voice entry").toString().slice(0, 80);
     const category = CATEGORIES.includes(parsed.category) ? parsed.category : "Other";
 
-    return new Response(JSON.stringify({ type, amount, note, category, transcript: text }), {
+    return new Response(JSON.stringify({ type, amount, note, category }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
