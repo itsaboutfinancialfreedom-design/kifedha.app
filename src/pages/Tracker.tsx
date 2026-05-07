@@ -178,12 +178,28 @@ export default function Tracker() {
         <div className="bg-card rounded-2xl p-4 shadow-card">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display text-sm font-semibold">Quick log</h2>
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" className="rounded-full">
-                  <Plus className="w-4 h-4 mr-1" /> Add
-                </Button>
-              </DialogTrigger>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant={recording ? "destructive" : "outline"}
+                className="rounded-full"
+                onClick={recording ? stopRecording : startRecording}
+                disabled={processing}
+                aria-label={recording ? "Stop recording" : "Voice log"}
+              >
+                {processing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Mic className={`w-4 h-4 ${recording ? "animate-pulse" : ""}`} />
+                )}
+                {recording ? "Stop" : processing ? "…" : "Voice"}
+              </Button>
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="rounded-full">
+                    <Plus className="w-4 h-4 mr-1" /> Add
+                  </Button>
+                </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Log a transaction</DialogTitle>
