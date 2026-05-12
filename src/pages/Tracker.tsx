@@ -3,11 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { useTransactions } from "@/context/TransactionsContext";
 import { BottomNav } from "@/components/BottomNav";
+import { OfflineBadge } from "@/components/OfflineBadge";
+import { useT } from "@/hooks/useT";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, ArrowDownCircle, ArrowUpCircle, Trash2, Sparkles, Mic, Loader2 } from "lucide-react";
+import { Plus, ArrowDownCircle, ArrowUpCircle, Trash2, Sparkles, Mic, Loader2, MessageSquareText, Languages } from "lucide-react";
 import { CATEGORIES, Category, autoCategorize } from "@/lib/categorize";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,9 +19,13 @@ const QUICK_EXPENSE_CATS: Category[] = ["Food", "Transport", "Bills", "Airtime &
 
 export default function Tracker() {
   const navigate = useNavigate();
+  const { t, lang, toggle } = useT();
   const { financials } = useApp();
   const { transactions, addTransaction, deleteTransaction } = useTransactions();
   const [open, setOpen] = useState(false);
+  const [smsOpen, setSmsOpen] = useState(false);
+  const [smsText, setSmsText] = useState("");
+  const [smsBusy, setSmsBusy] = useState(false);
   const [type, setType] = useState<"income" | "expense">("expense");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
@@ -28,6 +35,32 @@ export default function Tracker() {
   const [processing, setProcessing] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+
+  async function parseSMS() {
+    const text = smsText.trim();
+    if (!text) { toast.error("Paste an M-Pesa SMS first"); return; }
+    setSmsBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("parse-transaction", { body: { text } });
+      if (error) throw error;
+      if (!data || !data.amount) { toast.error("Couldn't extract a transaction from that SMS"); return; }
+      addTransaction({
+        type: data.type,
+        amount: Number(data.amount),
+        note: data.note,
+        category: data.category as Category,
+        date: new Date().toISOString(),
+        source: "mpesa",
+      });
+      toast.success(`Logged: ${data.note} · KES ${Number(data.amount).toLocaleString()}`);
+      setSmsText("");
+      setSmsOpen(false);
+    } catch (e: any) {
+      toast.error(e?.message || "SMS parsing failed");
+    } finally {
+      setSmsBusy(false);
+    }
+  }
 
   async function startRecording() {
     if (!navigator.mediaDevices?.getUserMedia) {
