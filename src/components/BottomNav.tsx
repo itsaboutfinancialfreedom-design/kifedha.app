@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Receipt, Target, LayoutDashboard, Shield, TrendingDown } from "lucide-react";
+import { Receipt, Target, LayoutDashboard, Shield, TrendingDown, BookOpen } from "lucide-react";
 
 const navItems = [
   { to: "/tracker", icon: Receipt, label: "Tracker" },
@@ -7,6 +7,7 @@ const navItems = [
   { to: "/goals", icon: Target, label: "Goals" },
   { to: "/protection", icon: Shield, label: "Protect" },
   { to: "/debt", icon: TrendingDown, label: "Debt" },
+  { to: "/learn", icon: BookOpen, label: "Learn" },
 ];
 
 export function BottomNav() {
@@ -14,14 +15,14 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border safe-bottom z-50">
-      <div className="flex justify-around items-center h-16 max-w-lg mx-auto">
+      <div className="flex justify-around items-center h-16 max-w-lg mx-auto px-1">
         {navItems.map(({ to, icon: Icon, label }) => {
           const active = location.pathname === to;
           return (
             <Link
               key={to}
               to={to}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors ${
+              className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors ${
                 active
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
