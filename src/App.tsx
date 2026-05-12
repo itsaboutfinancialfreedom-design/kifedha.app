@@ -17,6 +17,7 @@ import Advisor from "./pages/Advisor";
 import Dashboards from "./pages/Dashboards";
 import Settings from "./pages/Settings";
 import Reports from "./pages/Reports";
+import Learn from "./pages/Learn";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/dashboards" element={<Dashboards />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/learn" element={<Learn />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
