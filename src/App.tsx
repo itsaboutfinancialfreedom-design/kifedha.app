@@ -16,6 +16,7 @@ import Debt from "./pages/Debt";
 import Advisor from "./pages/Advisor";
 import Dashboards from "./pages/Dashboards";
 import Settings from "./pages/Settings";
+import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/advisor" element={<Advisor />} />
             <Route path="/dashboards" element={<Dashboards />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/reports" element={<Reports />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
