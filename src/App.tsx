@@ -23,8 +23,9 @@ import Reports from "./pages/Reports";
 import Learn from "./pages/Learn";
 import Upgrade from "./pages/Upgrade";
 import UpgradeSuccess from "./pages/UpgradeSuccess";
-import NotFound from "./pages/NotFound";
-
+import Upgrade from "./pages/Upgrade";
+import UpgradeSuccess from "./pages/UpgradeSuccess";
+import IncomeAllocatorPage from "./pages/IncomeAllocator";
 const queryClient = new QueryClient();
 
 const guarded = (el: JSX.Element) => <RequireAuth>{el}</RequireAuth>;
@@ -42,8 +43,9 @@ const App = () => (
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route
-                  path="/onboarding"
-                  element={
+                <Route path="/" element={<Landing />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/tools/income-allocator" element={<IncomeAllocatorPage />} />
                     <RequireAuth requireOnboarded={false}>
                       <Onboarding />
                     </RequireAuth>
