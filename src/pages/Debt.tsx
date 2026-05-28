@@ -37,7 +37,10 @@ function DebtContent() {
           <div>
             <p className="text-xs text-muted-foreground">Total Debt</p>
             <p className="font-display text-lg font-bold">
-              KES {financials.totalDebt.toLocaleString()}
+          <div>
+            <p className="text-xs text-muted-foreground">Total Debt</p>
+            <p className="font-display text-lg font-bold">
+              KES {totalDebt.toLocaleString()}
             </p>
           </div>
           <div>
@@ -55,9 +58,12 @@ function DebtContent() {
           <div>
             <p className="text-xs text-muted-foreground">Budget for Debt</p>
             <p className="font-display text-lg font-bold text-primary">
-              KES {blueprint.allocation.debtRepayment.amount.toLocaleString()}
+              KES {debtBudget.toLocaleString()}
             </p>
           </div>
+        </div>
+      </div>
+
         </div>
       </div>
 
