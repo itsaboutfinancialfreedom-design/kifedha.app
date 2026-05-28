@@ -204,6 +204,42 @@ export type Database = {
           },
         ]
       }
+      user_protection_gaps: {
+        Row: {
+          assessed_at: string
+          health_insurance_gap: number
+          id: string
+          income_protection_gap: number
+          inputs: Json
+          life_insurance_gap: number
+          protection_score: number
+          total_gap: number
+          user_id: string
+        }
+        Insert: {
+          assessed_at?: string
+          health_insurance_gap?: number
+          id?: string
+          income_protection_gap?: number
+          inputs?: Json
+          life_insurance_gap?: number
+          protection_score?: number
+          total_gap?: number
+          user_id: string
+        }
+        Update: {
+          assessed_at?: string
+          health_insurance_gap?: number
+          id?: string
+          income_protection_gap?: number
+          inputs?: Json
+          life_insurance_gap?: number
+          protection_score?: number
+          total_gap?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_risk_profiles: {
         Row: {
           answers: Json
