@@ -18,6 +18,8 @@ import Dashboards from "./pages/Dashboards";
 import Settings from "./pages/Settings";
 import Reports from "./pages/Reports";
 import Learn from "./pages/Learn";
+import Upgrade from "./pages/Upgrade";
+import UpgradeSuccess from "./pages/UpgradeSuccess";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +46,8 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/learn" element={<Learn />} />
+            <Route path="/advisor/upgrade" element={<Upgrade />} />
+            <Route path="/advisor/success" element={<UpgradeSuccess />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

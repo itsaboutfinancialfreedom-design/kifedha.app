@@ -1,4 +1,4 @@
-import { useState, createContext, useContext, ReactNode, useEffect } from "react";
+import { useState, createContext, useContext, ReactNode, useEffect, useMemo } from "react";
 
 export interface UserFinancials {
   monthlyIncome: number;
@@ -15,11 +15,11 @@ export interface UserFinancials {
 }
 
 export interface AutomationSettings {
-  autopilotGoals: boolean;       // self-driving money allocation
-  roundUps: boolean;              // simulated round-up savings
-  lowBalanceAlerts: boolean;      // proactive warnings
-  subscriptionScan: boolean;      // detect duplicate / unused subs
-  autoSweepSurplus: boolean;      // move idle cash to high-yield
+  autopilotGoals: boolean;
+  roundUps: boolean;
+  lowBalanceAlerts: boolean;
+  subscriptionScan: boolean;
+  autoSweepSurplus: boolean;
 }
 
 export interface GoalAutopilot {
@@ -46,12 +46,28 @@ export interface FinancialBlueprint {
   insuranceRecommendations: string[];
 }
 
+export type BillingCycle = "monthly" | "yearly";
+
+export interface Subscription {
+  paid: boolean;            // user has an active paid plan (mock)
+  cycle: BillingCycle | null;
+  trialEndsAt: string | null; // ISO; if in future → treated as premium
+  startedAt: string | null;
+}
+
 const DEFAULT_AUTOMATION: AutomationSettings = {
   autopilotGoals: false,
   roundUps: false,
   lowBalanceAlerts: true,
   subscriptionScan: true,
   autoSweepSurplus: false,
+};
+
+const DEFAULT_SUB: Subscription = {
+  paid: false,
+  cycle: null,
+  trialEndsAt: null,
+  startedAt: null,
 };
 
 interface AppContextType {
@@ -61,6 +77,11 @@ interface AppContextType {
   setBlueprint: (b: FinancialBlueprint) => void;
   isPremium: boolean;
   setIsPremium: (v: boolean) => void;
+  subscription: Subscription;
+  startTrial: (cycle: BillingCycle) => void;
+  cancelSubscription: () => void;
+  trialDaysLeft: number;
+  isTrialing: boolean;
   hasCompletedOnboarding: boolean;
   setHasCompletedOnboarding: (v: boolean) => void;
   automation: AutomationSettings;
@@ -80,8 +101,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem("ywb_blueprint");
     return saved ? JSON.parse(saved) : null;
   });
-  const [isPremium, setIsPremium] = useState(() => {
-    return localStorage.getItem("ywb_premium") === "true";
+  const [subscription, setSubscriptionState] = useState<Subscription>(() => {
+    const saved = localStorage.getItem("ywb_subscription");
+    if (saved) return { ...DEFAULT_SUB, ...JSON.parse(saved) };
+    // Back-compat: previous flag
+    const legacy = localStorage.getItem("ywb_premium") === "true";
+    return { ...DEFAULT_SUB, paid: legacy };
   });
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(() => {
     return localStorage.getItem("ywb_onboarded") === "true";
@@ -95,6 +120,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const persistSub = (s: Subscription) => {
+    setSubscriptionState(s);
+    localStorage.setItem("ywb_subscription", JSON.stringify(s));
+    localStorage.setItem("ywb_premium", String(s.paid));
+  };
+
   const setAutomation = (a: AutomationSettings) => {
     setAutomationState(a);
     localStorage.setItem("ywb_automation", JSON.stringify(a));
@@ -104,7 +135,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("ywb_autopilots", JSON.stringify(a));
   };
 
-  // Self-driving money: simulate autopilot accruals on each session if enabled
   useEffect(() => {
     if (!automation.autopilotGoals || autopilots.length === 0) return;
     const now = new Date();
@@ -131,27 +161,55 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setFinancials(f);
     localStorage.setItem("ywb_financials", JSON.stringify(f));
   };
-
   const handleSetBlueprint = (b: FinancialBlueprint) => {
     setBlueprint(b);
     localStorage.setItem("ywb_blueprint", JSON.stringify(b));
   };
-
-  const handleSetPremium = (v: boolean) => {
-    setIsPremium(v);
-    localStorage.setItem("ywb_premium", v.toString());
-  };
-
   const handleSetOnboarded = (v: boolean) => {
     setHasCompletedOnboarding(v);
     localStorage.setItem("ywb_onboarded", v.toString());
+  };
+
+  // Trial / premium derived state
+  const { isTrialing, trialDaysLeft, isPremium } = useMemo(() => {
+    const now = Date.now();
+    const ends = subscription.trialEndsAt ? new Date(subscription.trialEndsAt).getTime() : 0;
+    const trialing = ends > now;
+    const daysLeft = trialing ? Math.max(0, Math.ceil((ends - now) / (1000 * 60 * 60 * 24))) : 0;
+    return {
+      isTrialing: trialing,
+      trialDaysLeft: daysLeft,
+      isPremium: subscription.paid || trialing,
+    };
+  }, [subscription]);
+
+  const startTrial = (cycle: BillingCycle) => {
+    const now = new Date();
+    const trialEnds = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    persistSub({
+      paid: true, // mock: simulate successful subscription
+      cycle,
+      trialEndsAt: trialEnds.toISOString(),
+      startedAt: now.toISOString(),
+    });
+  };
+
+  const cancelSubscription = () => {
+    persistSub({ ...DEFAULT_SUB });
+  };
+
+  const setIsPremium = (v: boolean) => {
+    if (v && !subscription.paid) startTrial("monthly");
+    else if (!v) cancelSubscription();
   };
 
   return (
     <AppContext.Provider value={{
       financials, setFinancials: handleSetFinancials,
       blueprint, setBlueprint: handleSetBlueprint,
-      isPremium, setIsPremium: handleSetPremium,
+      isPremium, setIsPremium,
+      subscription, startTrial, cancelSubscription,
+      trialDaysLeft, isTrialing,
       hasCompletedOnboarding, setHasCompletedOnboarding: handleSetOnboarded,
       automation, setAutomation,
       autopilots, setAutopilots,

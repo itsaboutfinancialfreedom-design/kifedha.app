@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { BottomNav } from "@/components/BottomNav";
-import { ArrowLeft, Send, Sparkles, Lock, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Lock, Loader2, Crown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import { generateInsights } from "@/lib/insightsEngine";
@@ -13,7 +13,7 @@ const FREE_TURN_LIMIT = 6; // free users can exchange ~6 messages before paywall
 
 export default function Advisor() {
   const navigate = useNavigate();
-  const { financials, blueprint, isPremium, setIsPremium, hasCompletedOnboarding } = useApp();
+  const { financials, blueprint, isPremium, isTrialing, trialDaysLeft, hasCompletedOnboarding } = useApp();
 
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -134,13 +134,53 @@ export default function Advisor() {
             <Sparkles className="w-4 h-4 text-premium-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="font-display font-bold text-base leading-tight">AI Financial Advisor</h1>
+            <h1 className="font-display font-bold text-base leading-tight flex items-center gap-1.5">
+              AI Financial Advisor
+              {isPremium && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-warning/15 text-warning text-[10px] font-semibold">
+                  <Crown className="w-3 h-3" /> Premium{isTrialing ? ` · ${trialDaysLeft}d` : ""}
+                </span>
+              )}
+            </h1>
             <p className="text-[11px] text-muted-foreground">
-              {isPremium ? "Premium · Full diagnosis enabled" : `Free preview · ${Math.max(0, FREE_TURN_LIMIT - userTurnCount)} messages left`}
+              {isPremium ? "Full diagnosis enabled" : `Free plan · ${Math.max(0, FREE_TURN_LIMIT - userTurnCount)} messages left`}
             </p>
           </div>
+          {!isPremium && (
+            <button
+              onClick={() => navigate("/advisor/upgrade")}
+              className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg gradient-premium text-premium-foreground shadow-card"
+            >
+              Upgrade
+            </button>
+          )}
         </div>
       </div>
+
+      {!isPremium && (
+        <div className="max-w-lg mx-auto w-full px-4 pt-3">
+          <button
+            onClick={() => navigate("/advisor/upgrade")}
+            className="w-full rounded-xl border border-warning/30 bg-warning/5 px-4 py-3 text-left hover:bg-warning/10 transition"
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-semibold text-foreground">Your free plan</span>
+              <span className="text-[10px] font-semibold text-warning">See all premium benefits →</span>
+            </div>
+            <p className="text-[11px] text-muted-foreground mb-2">
+              Includes 2 goals, basic debt plan, and {Math.max(0, FREE_TURN_LIMIT - userTurnCount)} advisor messages left.
+            </p>
+            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full gradient-premium"
+                style={{ width: `${Math.min(100, (userTurnCount / FREE_TURN_LIMIT) * 100)}%` }}
+              />
+            </div>
+          </button>
+        </div>
+      )}
+
+
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
@@ -187,7 +227,7 @@ export default function Advisor() {
                 Get your personalized Financial Blueprint — exact KES allocations, gap fixes, and a 3-step action plan.
               </p>
               <button
-                onClick={() => { setIsPremium(true); toast.success("Premium unlocked"); }}
+                onClick={() => navigate("/advisor/upgrade")}
                 className="w-full py-3 rounded-xl gradient-premium text-premium-foreground font-semibold text-sm shadow-elevated"
               >
                 Upgrade — KES 499/month
