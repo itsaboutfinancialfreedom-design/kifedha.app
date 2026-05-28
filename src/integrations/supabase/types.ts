@@ -204,6 +204,33 @@ export type Database = {
           },
         ]
       }
+      user_risk_profiles: {
+        Row: {
+          answers: Json
+          assessed_at: string
+          id: string
+          risk_level: string
+          risk_score: number
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          assessed_at?: string
+          id?: string
+          risk_level: string
+          risk_score: number
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          assessed_at?: string
+          id?: string
+          risk_level?: string
+          risk_score?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
