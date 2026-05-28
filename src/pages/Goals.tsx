@@ -98,11 +98,10 @@ export default function Goals() {
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-xl gradient-green flex items-center justify-center">
                       <Target className="w-5 h-5 text-secondary-foreground" />
-                    </div>
-                        KES {targetAmount.toLocaleString()} target
+                    <div className="flex-1">
                       <h3 className="font-display font-semibold text-sm">{goal.name}</h3>
                       <p className="text-xs text-muted-foreground">
-                        KES {goal.targetAmount.toLocaleString()} target
+                        KES {targetAmount.toLocaleString()} target
                       </p>
                     </div>
                   </div>
