@@ -7,10 +7,13 @@ function DebtContent() {
   const { financials, blueprint } = useApp();
   if (!financials || !blueprint) return null;
 
-  const income = financials.monthlyIncome;
-  const sortedDebts = [...financials.debts].sort((a, b) => b.interestRate - a.interestRate);
-  const totalMonthly = financials.debts.reduce((s, d) => s + d.monthlyPayment, 0);
-  const debtToIncomeRatio = totalMonthly / income;
+  const income = financials.monthlyIncome ?? 0;
+  const debts = financials.debts ?? [];
+  const sortedDebts = [...debts].sort((a, b) => b.interestRate - a.interestRate);
+  const totalMonthly = debts.reduce((s, d) => s + (d.monthlyPayment ?? 0), 0);
+  const debtToIncomeRatio = income > 0 ? totalMonthly / income : 0;
+  const totalDebt = financials.totalDebt ?? debts.reduce((s, d) => s + (d.amount ?? 0), 0);
+  const debtBudget = blueprint.allocation?.debtRepayment?.amount ?? 0;
 
   const getDebtLevel = (ratio: number) => {
     if (ratio > 0.4) return { label: "Dangerous", color: "text-danger", bg: "bg-danger/10" };
@@ -34,7 +37,7 @@ function DebtContent() {
           <div>
             <p className="text-xs text-muted-foreground">Total Debt</p>
             <p className="font-display text-lg font-bold">
-              KES {financials.totalDebt.toLocaleString()}
+              KES {totalDebt.toLocaleString()}
             </p>
           </div>
           <div>
@@ -52,11 +55,12 @@ function DebtContent() {
           <div>
             <p className="text-xs text-muted-foreground">Budget for Debt</p>
             <p className="font-display text-lg font-bold text-primary">
-              KES {blueprint.allocation.debtRepayment.amount.toLocaleString()}
+              KES {debtBudget.toLocaleString()}
             </p>
           </div>
         </div>
       </div>
+
 
       {/* Individual debts */}
       <div className="space-y-3">
