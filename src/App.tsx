@@ -4,8 +4,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { TransactionsProvider } from "@/context/TransactionsContext";
+import { RequireAuth } from "@/components/RequireAuth";
 import Landing from "./pages/Landing";
+import Auth from "./pages/Auth";
 import Tracker from "./pages/Tracker";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
@@ -24,36 +27,48 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const guarded = (el: JSX.Element) => <RequireAuth>{el}</RequireAuth>;
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AppProvider>
-      <TransactionsProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/tracker" element={<Tracker />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/goals" element={<Goals />} />
-            <Route path="/budget" element={<Budget />} />
-            <Route path="/protection" element={<Protection />} />
-            <Route path="/debt" element={<Debt />} />
-            <Route path="/advisor" element={<Advisor />} />
-            <Route path="/dashboards" element={<Dashboards />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/learn" element={<Learn />} />
-            <Route path="/advisor/upgrade" element={<Upgrade />} />
-            <Route path="/advisor/success" element={<UpgradeSuccess />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-      </TransactionsProvider>
-    </AppProvider>
+    <AuthProvider>
+      <AppProvider>
+        <TransactionsProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route
+                  path="/onboarding"
+                  element={
+                    <RequireAuth requireOnboarded={false}>
+                      <Onboarding />
+                    </RequireAuth>
+                  }
+                />
+                <Route path="/tracker" element={guarded(<Tracker />)} />
+                <Route path="/dashboard" element={guarded(<Dashboard />)} />
+                <Route path="/goals" element={guarded(<Goals />)} />
+                <Route path="/budget" element={guarded(<Budget />)} />
+                <Route path="/protection" element={guarded(<Protection />)} />
+                <Route path="/debt" element={guarded(<Debt />)} />
+                <Route path="/advisor" element={guarded(<Advisor />)} />
+                <Route path="/dashboards" element={guarded(<Dashboards />)} />
+                <Route path="/settings" element={guarded(<Settings />)} />
+                <Route path="/reports" element={guarded(<Reports />)} />
+                <Route path="/learn" element={guarded(<Learn />)} />
+                <Route path="/advisor/upgrade" element={guarded(<Upgrade />)} />
+                <Route path="/advisor/success" element={guarded(<UpgradeSuccess />)} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </TransactionsProvider>
+      </AppProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
