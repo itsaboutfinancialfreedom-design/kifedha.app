@@ -81,14 +81,17 @@ export default function Goals() {
         ) : (
           <div className="space-y-4">
             {financials.goals.map((goal, i) => {
+              const targetAmount = Number(goal.targetAmount) || 0;
               const monthsLeft = goal.deadline
                 ? Math.max(1, differenceInMonths(parseISO(goal.deadline), new Date()))
                 : 12;
-              const monthlyNeeded = Math.ceil(goal.targetAmount / monthsLeft);
+              const monthlyNeeded = Math.ceil(targetAmount / monthsLeft) || 0;
               const ap = getAutopilot(goal.name);
               const autoBal = ap?.enabled ? ap.simulatedBalance : 0;
-              const progressPct = Math.min(100, Math.round((autoBal / goal.targetAmount) * 100)) ||
-                Math.min(100, Math.round((monthlySavings / monthlyNeeded) * 100));
+              const progressPct = targetAmount > 0
+                ? (Math.min(100, Math.round((autoBal / targetAmount) * 100)) ||
+                   Math.min(100, Math.round((monthlySavings / Math.max(1, monthlyNeeded)) * 100)))
+                : 0;
 
               return (
                 <div key={i} className="bg-card rounded-2xl p-5 shadow-card">
