@@ -42,10 +42,10 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route
-                <Route path="/" element={<Landing />} />
-                <Route path="/auth" element={<Auth />} />
                 <Route path="/tools/income-allocator" element={<IncomeAllocatorPage />} />
+                <Route
+                  path="/onboarding"
+                  element={
                     <RequireAuth requireOnboarded={false}>
                       <Onboarding />
                     </RequireAuth>

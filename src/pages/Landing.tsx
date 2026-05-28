@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Sparkles, ArrowRight, Shield, Target, Wallet, TrendingDown, TrendingUp, Briefcase } from "lucide-react";
 import { useEffect } from "react";
+import IncomeAllocator from "@/components/IncomeAllocator";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -93,6 +94,30 @@ export default function Landing() {
         <p className="text-center text-xs text-muted-foreground mt-4">
           Free to use. Sign in with email or Google.
         </p>
+
+        {/* Financial Blueprint — Income Allocation Simulator */}
+        <section className="mt-12">
+          <div className="text-center mb-6">
+            <h2 className="font-display text-2xl font-bold">Your Financial Blueprint</h2>
+            <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+              Get a personalized income allocation plan. Adjust the sliders to see how changes affect your financial future.
+            </p>
+          </div>
+          <IncomeAllocator embedded />
+          <div className="text-center mt-4">
+            <button
+              onClick={() => navigate("/tools/income-allocator")}
+              className="text-sm text-primary underline underline-offset-4"
+            >
+              Open the full simulator →
+            </button>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  );
+}
 
       </div>
     </div>
