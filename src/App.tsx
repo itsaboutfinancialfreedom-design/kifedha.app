@@ -23,9 +23,9 @@ import Reports from "./pages/Reports";
 import Learn from "./pages/Learn";
 import Upgrade from "./pages/Upgrade";
 import UpgradeSuccess from "./pages/UpgradeSuccess";
-import Upgrade from "./pages/Upgrade";
-import UpgradeSuccess from "./pages/UpgradeSuccess";
 import IncomeAllocatorPage from "./pages/IncomeAllocator";
+import NotFound from "./pages/NotFound";
+
 const queryClient = new QueryClient();
 
 const guarded = (el: JSX.Element) => <RequireAuth>{el}</RequireAuth>;
