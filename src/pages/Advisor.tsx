@@ -146,6 +146,13 @@ export default function Advisor() {
               {isPremium ? "Full diagnosis enabled" : `Free plan · ${Math.max(0, FREE_TURN_LIMIT - userTurnCount)} messages left`}
             </p>
           </div>
+          <button
+            onClick={() => navigate("/assessment/risk-profile")}
+            className="text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border border-border hover:bg-muted"
+            title="Risk assessment"
+          >
+            Risk
+          </button>
           {!isPremium && (
             <button
               onClick={() => navigate("/advisor/upgrade")}

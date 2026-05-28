@@ -24,6 +24,7 @@ import Learn from "./pages/Learn";
 import Upgrade from "./pages/Upgrade";
 import UpgradeSuccess from "./pages/UpgradeSuccess";
 import IncomeAllocatorPage from "./pages/IncomeAllocator";
+import RiskProfile from "./pages/RiskProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,6 +65,7 @@ const App = () => (
                 <Route path="/learn" element={guarded(<Learn />)} />
                 <Route path="/advisor/upgrade" element={guarded(<Upgrade />)} />
                 <Route path="/advisor/success" element={guarded(<UpgradeSuccess />)} />
+                <Route path="/assessment/risk-profile" element={guarded(<RiskProfile />)} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
