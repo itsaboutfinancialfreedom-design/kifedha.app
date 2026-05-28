@@ -213,6 +213,39 @@ export type Database = {
           },
         ]
       }
+      user_notifications: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          frequency: string | null
+          id: string
+          last_sent: string | null
+          notification_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          frequency?: string | null
+          id?: string
+          last_sent?: string | null
+          notification_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          frequency?: string | null
+          id?: string
+          last_sent?: string | null
+          notification_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_protection_gaps: {
         Row: {
           assessed_at: string
