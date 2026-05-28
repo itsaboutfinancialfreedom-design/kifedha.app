@@ -23,6 +23,7 @@ import Reports from "./pages/Reports";
 import Learn from "./pages/Learn";
 import Upgrade from "./pages/Upgrade";
 import UpgradeSuccess from "./pages/UpgradeSuccess";
+import IncomeAllocatorPage from "./pages/IncomeAllocator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/tools/income-allocator" element={<IncomeAllocatorPage />} />
                 <Route
                   path="/onboarding"
                   element={
