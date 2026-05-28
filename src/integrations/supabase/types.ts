@@ -126,28 +126,37 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          due_date: string | null
           id: string
           interest_rate: number
+          is_paid_off: boolean
           min_payment: number
           name: string
+          paid_off_date: string | null
           user_id: string
         }
         Insert: {
           amount?: number
           created_at?: string
+          due_date?: string | null
           id?: string
           interest_rate?: number
+          is_paid_off?: boolean
           min_payment?: number
           name: string
+          paid_off_date?: string | null
           user_id: string
         }
         Update: {
           amount?: number
           created_at?: string
+          due_date?: string | null
           id?: string
           interest_rate?: number
+          is_paid_off?: boolean
           min_payment?: number
           name?: string
+          paid_off_date?: string | null
           user_id?: string
         }
         Relationships: [
