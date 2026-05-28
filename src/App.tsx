@@ -27,6 +27,7 @@ import IncomeAllocatorPage from "./pages/IncomeAllocator";
 import RiskProfile from "./pages/RiskProfile";
 import ProtectionCalculator from "./pages/ProtectionCalculator";
 import DebtPlanner from "./pages/DebtPlanner";
+import NotificationSettings from "./pages/NotificationSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -70,7 +71,8 @@ const App = () => (
                 <Route path="/assessment/risk-profile" element={guarded(<RiskProfile />)} />
                 <Route path="/tools/protection-calculator" element={<ProtectionCalculator />} />
                 <Route path="/tools/debt-planner" element={guarded(<DebtPlanner />)} />
-                <Route path="*" element={<NotFound />} />
+                <Route path="/tools/debt-planner" element={guarded(<DebtPlanner />)} />
+                <Route path="/settings/notifications" element={guarded(<NotificationSettings />)} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>

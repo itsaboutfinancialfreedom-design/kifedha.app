@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
 import { ScoreRing } from "@/components/ScoreRing";
 import { InsightCard } from "@/components/InsightCard";
-import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck } from "lucide-react";
+import { Recommendations } from "@/components/Recommendations";
+import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { generateInsights } from "@/lib/insightsEngine";
 
@@ -112,6 +113,16 @@ export default function Dashboard() {
           </div>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </button>
+        {/* Personalized recommendations */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="font-display text-base font-semibold">Recommended for you</h2>
+            <button onClick={() => navigate("/settings/notifications")} className="text-xs text-primary flex items-center gap-1">
+              <Bell className="w-3 h-3" /> Notifications
+            </button>
+          </div>
+          <Recommendations compact />
+        </div>
 
         {/* Proactive Insights (Pillar 2) */}
         {visibleInsights.length > 0 && (
