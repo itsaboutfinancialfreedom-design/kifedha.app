@@ -1,15 +1,18 @@
 import { useNavigate } from "react-router-dom";
-import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { Sparkles, ArrowRight, Shield, Target, Wallet, TrendingDown, TrendingUp, Briefcase } from "lucide-react";
 import { useEffect } from "react";
 
 export default function Landing() {
   const navigate = useNavigate();
-  const { hasCompletedOnboarding } = useApp();
+  const { user, profile, loading } = useAuth();
 
   useEffect(() => {
-    if (hasCompletedOnboarding) navigate("/tracker");
-  }, [hasCompletedOnboarding, navigate]);
+    if (loading || !user) return;
+    if (profile?.onboarding_completed) navigate("/tracker");
+    else navigate("/onboarding");
+  }, [user, profile, loading, navigate]);
+
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -81,15 +84,16 @@ export default function Landing() {
         </div>
 
         <button
-          onClick={() => navigate("/onboarding")}
+          onClick={() => navigate("/auth")}
           className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl gradient-gold text-warning-foreground font-display font-bold text-base mt-8 shadow-elevated transition-transform active:scale-[0.98]"
         >
           Get Started <ArrowRight className="w-5 h-5" />
         </button>
 
         <p className="text-center text-xs text-muted-foreground mt-4">
-          Free to use. No bank connection needed.
+          Free to use. Sign in with email or Google.
         </p>
+
       </div>
     </div>
   );

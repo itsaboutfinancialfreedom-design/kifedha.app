@@ -1,386 +1,526 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useApp, UserFinancials } from "@/context/AppContext";
-import { generateBlueprint } from "@/lib/blueprintEngine";
-import { ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
+import { toast } from "sonner";
+import { ArrowLeft, ArrowRight, Loader2, Plus, Trash2, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 
-const steps = ["Income", "Expenses", "Debts", "Protection", "Goals"];
+type Frequency = "monthly" | "bi-weekly" | "weekly";
+type Stability = "stable" | "unstable" | "freelance";
+type Priority = "High" | "Medium" | "Low";
 
-export default function Onboarding() { 
+interface DebtRow {
+  name: string;
+  amount: string;
+  interest_rate: string;
+  min_payment: string;
+}
+interface GoalRow {
+  goal_type: string;
+  target_amount: string;
+  target_date: string; // yyyy-mm
+  priority: Priority;
+}
+
+const GOAL_TYPES = [
+  "Emergency fund",
+  "School fees",
+  "Retirement",
+  "House deposit",
+  "Business capital",
+  "Vacation",
+];
+
+const RISK_QUIZ = [
+  {
+    q: "If your investment dropped 20% in a month, you would:",
+    options: [
+      { label: "Sell immediately to stop losses", score: 1 },
+      { label: "Wait and watch closely", score: 2 },
+      { label: "Buy more at a discount", score: 3 },
+    ],
+  },
+  {
+    q: "Which return profile sounds most like you?",
+    options: [
+      { label: "Steady 5% with no losses", score: 1 },
+      { label: "8–12% with small swings", score: 2 },
+      { label: "15%+ with bigger swings", score: 3 },
+    ],
+  },
+  {
+    q: "Your investment time horizon is:",
+    options: [
+      { label: "Under 2 years", score: 1 },
+      { label: "2 – 7 years", score: 2 },
+      { label: "Over 7 years", score: 3 },
+    ],
+  },
+] as const;
+
+export default function Onboarding() {
   const navigate = useNavigate();
-  const { setFinancials, setBlueprint, setHasCompletedOnboarding } = useApp();
-  const [step, setStep] = useState(0);
+  const { user, profile, loading, refreshProfile } = useAuth();
+  const [step, setStep] = useState(1);
+  const [saving, setSaving] = useState(false);
 
-  const [incomeSources, setIncomeSources] = useState([
-    { name: "Salary", amount: "" },
-    { name: "Side hustle", amount: "" },
-  ]);
-  const [expenses, setExpenses] = useState([
-    { name: "Rent", amount: "" },
-    { name: "Food", amount: "" },
-    { name: "Transport", amount: "" },
-    { name: "Utilities", amount: "" },
-  ]);
-  const [debts, setDebts] = useState([{ name: "", amount: "", interestRate: "", monthlyPayment: "" }]);
+  // Step 1
+  const [income, setIncome] = useState("");
+  const [frequency, setFrequency] = useState<Frequency>("monthly");
+  const [stability, setStability] = useState<Stability>("stable");
+
+  // Step 2
   const [dependents, setDependents] = useState("0");
-  const [hasLifeInsurance, setHasLifeInsurance] = useState(false);
-  const [hasHealthInsurance, setHasHealthInsurance] = useState(false);
-  const [hasEmergencyFund, setHasEmergencyFund] = useState(false);
-  const [emergencyFundAmount, setEmergencyFundAmount] = useState("");
-  const [goals, setGoals] = useState([{ name: "", targetAmount: "", deadline: "" }]);
+  const [ages, setAges] = useState<string[]>([]);
+  const [supportsElderly, setSupportsElderly] = useState(false);
 
-  const handleSubmit = () => {
-    const financials: UserFinancials = {
-      monthlyIncome: incomeSources.reduce((s, src) => s + (Number(src.amount) || 0), 0),
-      expenses: expenses.map(e => ({ name: e.name, amount: Number(e.amount) || 0 })),
-      totalExpenses: expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0),
-      debts: debts.filter(d => d.name).map(d => ({
-        name: d.name,
-        amount: Number(d.amount) || 0,
-        interestRate: Number(d.interestRate) || 0,
-        monthlyPayment: Number(d.monthlyPayment) || 0,
-      })),
-      totalDebt: debts.reduce((s, d) => s + (Number(d.amount) || 0), 0),
-      dependents: Number(dependents) || 0,
-      goals: goals.filter(g => g.name).map(g => ({
-        name: g.name,
-        targetAmount: Number(g.targetAmount) || 0,
-        deadline: g.deadline,
-      })),
-      hasLifeInsurance,
-      hasHealthInsurance,
-      hasEmergencyFund,
-      emergencyFundAmount: Number(emergencyFundAmount) || 0,
-    };
+  // Step 3
+  const [debts, setDebts] = useState<DebtRow[]>([]);
 
-    setFinancials(financials);
-    const bp = generateBlueprint(financials);
-    setBlueprint(bp);
-    setHasCompletedOnboarding(true);
-    navigate("/tracker");
+  // Step 4
+  const [goals, setGoals] = useState<GoalRow[]>([
+    { goal_type: "Emergency fund", target_amount: "", target_date: "", priority: "High" },
+  ]);
+
+  // Step 5
+  const [answers, setAnswers] = useState<number[]>([0, 0, 0]);
+
+  useEffect(() => {
+    if (!loading && !user) navigate("/auth", { replace: true });
+    if (profile?.onboarding_completed) navigate("/tracker", { replace: true });
+  }, [user, profile, loading, navigate]);
+
+  const depCount = Math.max(0, parseInt(dependents || "0", 10));
+  useEffect(() => {
+    setAges((prev) => {
+      const next = [...prev];
+      while (next.length < depCount) next.push("");
+      next.length = depCount;
+      return next;
+    });
+  }, [depCount]);
+
+  const addDebt = () =>
+    setDebts((d) => [...d, { name: "", amount: "", interest_rate: "", min_payment: "" }]);
+  const removeDebt = (i: number) => setDebts((d) => d.filter((_, idx) => idx !== i));
+  const updateDebt = (i: number, k: keyof DebtRow, v: string) =>
+    setDebts((d) => d.map((row, idx) => (idx === i ? { ...row, [k]: v } : row)));
+
+  const addGoal = () => {
+    if (goals.length >= 2) {
+      toast.info("Free plan allows 2 goals. Unlock more with Premium.");
+      return;
+    }
+    setGoals((g) => [
+      ...g,
+      { goal_type: "School fees", target_amount: "", target_date: "", priority: "Medium" },
+    ]);
+  };
+  const removeGoal = (i: number) => setGoals((g) => g.filter((_, idx) => idx !== i));
+  const updateGoal = (i: number, k: keyof GoalRow, v: string) =>
+    setGoals((g) => g.map((row, idx) => (idx === i ? { ...row, [k]: v as never } : row)));
+
+  const riskTotal = useMemo(
+    () => answers.reduce((s, a, i) => s + (RISK_QUIZ[i].options[a]?.score ?? 0), 0),
+    [answers]
+  );
+  const riskTolerance =
+    riskTotal <= 4 ? "Conservative" : riskTotal <= 7 ? "Balanced" : "Aggressive";
+
+  const canNext = (): boolean => {
+    if (step === 1) return Number(income) > 0;
+    if (step === 2) return depCount >= 0 && ages.every((a, i) => (i < depCount ? a !== "" : true));
+    if (step === 3) return debts.every((d) => d.name && Number(d.amount) >= 0);
+    if (step === 4)
+      return goals.length > 0 && goals.every((g) => g.goal_type && Number(g.target_amount) > 0);
+    return true;
   };
 
-  const inputClass = "w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-sm font-body focus:outline-none focus:ring-2 focus:ring-ring transition-all";
-  const labelClass = "text-sm font-medium text-foreground mb-1.5 block";
+  const submit = async () => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      const { error: pErr } = await supabase
+        .from("profiles")
+        .update({
+          monthly_income: Number(income),
+          income_frequency: frequency,
+          income_stability: stability,
+          dependents_count: depCount,
+          dependents_ages: ages.map((a) => Number(a)).filter((n) => !Number.isNaN(n)),
+          supports_elderly: supportsElderly,
+          risk_tolerance: riskTolerance,
+          risk_score: riskTotal,
+          onboarding_completed: true,
+        })
+        .eq("id", user.id);
+      if (pErr) throw pErr;
+
+      if (debts.length) {
+        const { error: dErr } = await supabase.from("user_debts").insert(
+          debts.map((d) => ({
+            user_id: user.id,
+            name: d.name,
+            amount: Number(d.amount) || 0,
+            interest_rate: Number(d.interest_rate) || 0,
+            min_payment: Number(d.min_payment) || 0,
+          }))
+        );
+        if (dErr) throw dErr;
+      }
+
+      if (goals.length) {
+        const { error: gErr } = await supabase.from("user_goals").insert(
+          goals.map((g) => ({
+            user_id: user.id,
+            goal_type: g.goal_type,
+            target_amount: Number(g.target_amount) || 0,
+            target_date: g.target_date ? `${g.target_date}-01` : null,
+            priority: g.priority,
+            is_premium_feature: false,
+          }))
+        );
+        if (gErr) throw gErr;
+      }
+
+      await refreshProfile();
+      toast.success("You're all set!");
+      navigate("/tracker", { replace: true });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save your profile");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background px-4 pt-6 pb-8 max-w-lg mx-auto">
-      {/* Progress */}
-      <div className="flex gap-1.5 mb-8">
-        {steps.map((_, i) => (
-          <div
-            key={i}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              i <= step ? "gradient-gold" : "bg-muted"
-            }`}
-          />
-        ))}
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="gradient-gold px-6 pt-10 pb-6 rounded-b-[2rem]">
+        <div className="max-w-lg mx-auto">
+          <p className="text-warning-foreground/80 text-sm font-medium">Step {step} of 5</p>
+          <h1 className="font-display text-2xl font-bold text-warning-foreground mt-1">
+            {step === 1 && "Tell us about your income"}
+            {step === 2 && "Who depends on you?"}
+            {step === 3 && "Any existing debts?"}
+            {step === 4 && "Your financial goals"}
+            {step === 5 && "Your risk comfort"}
+          </h1>
+          <Progress value={(step / 5) * 100} className="mt-4 h-2 bg-warning-foreground/20" />
+        </div>
       </div>
 
-      <h1 className="font-display text-2xl font-bold mb-1">{steps[step]}</h1>
-      <p className="text-muted-foreground text-sm mb-6">
-        {step === 0 && "How much do you earn each month?"}
-        {step === 1 && "What are your main monthly expenses?"}
-        {step === 2 && "Tell us about any debts you have."}
-        {step === 3 && "Let's check your financial safety net."}
-        {step === 4 && "What are you saving towards?"}
-      </p>
+      <div className="flex-1 px-6 py-6 max-w-lg mx-auto w-full">
+        {step === 1 && (
+          <div className="space-y-5">
+            <div>
+              <Label htmlFor="income">Monthly income after tax (KES)</Label>
+              <Input
+                id="income"
+                inputMode="numeric"
+                value={income}
+                onChange={(e) => setIncome(e.target.value.replace(/[^0-9.]/g, ""))}
+                placeholder="80,000"
+                className="mt-1 text-lg"
+              />
+            </div>
+            <div>
+              <Label>Income frequency</Label>
+              <RadioGroup
+                value={frequency}
+                onValueChange={(v) => setFrequency(v as Frequency)}
+                className="mt-2 grid grid-cols-3 gap-2"
+              >
+                {(["monthly", "bi-weekly", "weekly"] as Frequency[]).map((f) => (
+                  <label
+                    key={f}
+                    className={`border rounded-xl p-3 text-center text-sm capitalize cursor-pointer ${
+                      frequency === f ? "border-primary bg-primary/5" : "border-border"
+                    }`}
+                  >
+                    <RadioGroupItem value={f} className="sr-only" />
+                    {f}
+                  </label>
+                ))}
+              </RadioGroup>
+            </div>
+            <div>
+              <Label>Income stability</Label>
+              <RadioGroup
+                value={stability}
+                onValueChange={(v) => setStability(v as Stability)}
+                className="mt-2 space-y-2"
+              >
+                {(
+                  [
+                    { v: "stable", t: "Stable salary every period" },
+                    { v: "unstable", t: "Varies month to month" },
+                    { v: "freelance", t: "Freelance / project-based" },
+                  ] as { v: Stability; t: string }[]
+                ).map(({ v, t }) => (
+                  <label
+                    key={v}
+                    className={`flex items-center gap-3 border rounded-xl p-3 cursor-pointer ${
+                      stability === v ? "border-primary bg-primary/5" : "border-border"
+                    }`}
+                  >
+                    <RadioGroupItem value={v} />
+                    <span className="text-sm">{t}</span>
+                  </label>
+                ))}
+              </RadioGroup>
+            </div>
+          </div>
+        )}
 
-      {/* Step 0: Income */}
-      {step === 0 && (
-        <div className="space-y-4">
-          <div>
-            <label className={labelClass}>Income Sources</label>
-            <div className="space-y-3">
-              {incomeSources.map((src, i) => (
-                <div key={i} className="bg-card rounded-xl p-4 shadow-card space-y-2">
-                  <input
-                    value={src.name}
-                    onChange={e => {
-                      const next = [...incomeSources];
-                      next[i].name = e.target.value;
-                      setIncomeSources(next);
+        {step === 2 && (
+          <div className="space-y-5">
+            <div>
+              <Label htmlFor="dep">Number of dependents</Label>
+              <Input
+                id="dep"
+                inputMode="numeric"
+                value={dependents}
+                onChange={(e) => setDependents(e.target.value.replace(/[^0-9]/g, ""))}
+                className="mt-1"
+              />
+            </div>
+            {depCount > 0 && (
+              <div className="space-y-2">
+                <Label>Ages (children under 18)</Label>
+                {ages.map((a, i) => (
+                  <Input
+                    key={i}
+                    inputMode="numeric"
+                    value={a}
+                    onChange={(e) => {
+                      const next = [...ages];
+                      next[i] = e.target.value.replace(/[^0-9]/g, "");
+                      setAges(next);
                     }}
-                    placeholder="e.g. Salary, Freelance, Rental income"
-                    className={inputClass}
+                    placeholder={`Dependent ${i + 1} age`}
                   />
-                  <input
-                    type="number"
-                    value={src.amount}
-                    onChange={e => {
-                      const next = [...incomeSources];
-                      next[i].amount = e.target.value;
-                      setIncomeSources(next);
-                    }}
-                    placeholder="Amount in KES"
-                    className={inputClass}
+                ))}
+              </div>
+            )}
+            <div>
+              <Label>Do you support elderly parents?</Label>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {[true, false].map((v) => (
+                  <button
+                    key={String(v)}
+                    type="button"
+                    onClick={() => setSupportsElderly(v)}
+                    className={`border rounded-xl p-3 text-sm ${
+                      supportsElderly === v ? "border-primary bg-primary/5" : "border-border"
+                    }`}
+                  >
+                    {v ? "Yes" : "No"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-4">
+            {debts.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No debts? Skip ahead. Otherwise add each one below.
+              </p>
+            )}
+            {debts.map((d, i) => (
+              <div key={i} className="border rounded-xl p-3 space-y-2 bg-card">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-medium text-muted-foreground">Debt {i + 1}</span>
+                  <button onClick={() => removeDebt(i)} className="text-destructive">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+                <Input
+                  placeholder="Debt name (e.g. KCB loan)"
+                  value={d.name}
+                  onChange={(e) => updateDebt(i, "name", e.target.value)}
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    inputMode="numeric"
+                    placeholder="Amount (KES)"
+                    value={d.amount}
+                    onChange={(e) => updateDebt(i, "amount", e.target.value.replace(/[^0-9.]/g, ""))}
                   />
-                  {incomeSources.length > 1 && (
-                    <button
-                      onClick={() => setIncomeSources(incomeSources.filter((_, idx) => idx !== i))}
-                      className="text-xs text-destructive font-medium"
-                    >
-                      Remove
+                  <Input
+                    inputMode="numeric"
+                    placeholder="Interest %"
+                    value={d.interest_rate}
+                    onChange={(e) =>
+                      updateDebt(i, "interest_rate", e.target.value.replace(/[^0-9.]/g, ""))
+                    }
+                  />
+                </div>
+                <Input
+                  inputMode="numeric"
+                  placeholder="Min payment (KES)"
+                  value={d.min_payment}
+                  onChange={(e) =>
+                    updateDebt(i, "min_payment", e.target.value.replace(/[^0-9.]/g, ""))
+                  }
+                />
+              </div>
+            ))}
+            <Button variant="outline" onClick={addDebt} className="w-full">
+              <Plus className="w-4 h-4 mr-2" />
+              Add another debt
+            </Button>
+          </div>
+        )}
+
+        {step === 4 && (
+          <div className="space-y-4">
+            {goals.map((g, i) => (
+              <div key={i} className="border rounded-xl p-3 space-y-2 bg-card">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-medium text-muted-foreground">Goal {i + 1}</span>
+                  {goals.length > 1 && (
+                    <button onClick={() => removeGoal(i)} className="text-destructive">
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   )}
                 </div>
-              ))}
-            </div>
-            <button
-              onClick={() => setIncomeSources([...incomeSources, { name: "", amount: "" }])}
-              className="text-sm text-primary font-medium mt-2"
-            >
-              + Add income source
-            </button>
-            <p className="text-xs text-muted-foreground mt-2">
-              Total: KES {incomeSources.reduce((s, src) => s + (Number(src.amount) || 0), 0).toLocaleString()}/month
-            </p>
+                <Select value={g.goal_type} onValueChange={(v) => updateGoal(i, "goal_type", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {GOAL_TYPES.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  inputMode="numeric"
+                  placeholder="Target amount (KES)"
+                  value={g.target_amount}
+                  onChange={(e) =>
+                    updateGoal(i, "target_amount", e.target.value.replace(/[^0-9.]/g, ""))
+                  }
+                />
+                <Input
+                  type="month"
+                  value={g.target_date}
+                  onChange={(e) => updateGoal(i, "target_date", e.target.value)}
+                />
+                <Select
+                  value={g.priority}
+                  onValueChange={(v) => updateGoal(i, "priority", v as Priority)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(["High", "Medium", "Low"] as Priority[]).map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p} priority
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
+            {goals.length < 2 ? (
+              <Button variant="outline" onClick={addGoal} className="w-full">
+                <Plus className="w-4 h-4 mr-2" />
+                Add another goal
+              </Button>
+            ) : (
+              <div className="border border-dashed rounded-xl p-4 text-center bg-warning/5">
+                <Sparkles className="w-5 h-5 text-warning mx-auto" />
+                <p className="text-sm font-medium mt-1">Unlimited goals with Premium</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Free plan supports 2 goals. Upgrade later from the Advisor tab.
+                </p>
+              </div>
+            )}
           </div>
-          <div>
-            <label className={labelClass}>Number of Dependents</label>
-            <input
-              type="number"
-              value={dependents}
-              onChange={e => setDependents(e.target.value)}
-              placeholder="0"
-              className={inputClass}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Step 1: Expenses */}
-      {step === 1 && (
-        <div className="space-y-3">
-          {expenses.map((exp, i) => (
-            <div key={i} className="bg-card rounded-xl p-4 shadow-card space-y-2">
-              <input
-                value={exp.name}
-                onChange={e => {
-                  const next = [...expenses];
-                  next[i].name = e.target.value;
-                  setExpenses(next);
-                }}
-                placeholder="e.g. Rent, Food, Transport, Utilities"
-                className={inputClass}
-              />
-              <input
-                type="number"
-                value={exp.amount}
-                onChange={e => {
-                  const next = [...expenses];
-                  next[i].amount = e.target.value;
-                  setExpenses(next);
-                }}
-                placeholder="Amount in KES"
-                className={inputClass}
-              />
-              {expenses.length > 1 && (
-                <button
-                  onClick={() => setExpenses(expenses.filter((_, idx) => idx !== i))}
-                  className="text-xs text-destructive font-medium"
-                >
-                  Remove
-                </button>
-              )}
-            </div>
-          ))}
-          <button
-            onClick={() => setExpenses([...expenses, { name: "", amount: "" }])}
-            className="text-sm text-primary font-medium"
-          >
-            + Add expense
-          </button>
-        </div>
-      )}
-
-      {/* Step 2: Debts */}
-      {step === 2 && (
-        <div className="space-y-4">
-          {debts.map((debt, i) => (
-            <div key={i} className="bg-card rounded-xl p-4 shadow-card space-y-3">
-              <input
-                value={debt.name}
-                onChange={e => {
-                  const next = [...debts];
-                  next[i].name = e.target.value;
-                  setDebts(next);
-                }}
-                placeholder="e.g. Personal loan"
-                className={inputClass}
-              />
-              <div className="grid grid-cols-3 gap-2">
-                <input
-                  type="number"
-                  value={debt.amount}
-                  onChange={e => {
-                    const next = [...debts];
-                    next[i].amount = e.target.value;
-                    setDebts(next);
-                  }}
-                  placeholder="Total (KES)"
-                  className={inputClass}
-                />
-                <input
-                  type="number"
-                  value={debt.interestRate}
-                  onChange={e => {
-                    const next = [...debts];
-                    next[i].interestRate = e.target.value;
-                    setDebts(next);
-                  }}
-                  placeholder="Rate %"
-                  className={inputClass}
-                />
-                <input
-                  type="number"
-                  value={debt.monthlyPayment}
-                  onChange={e => {
-                    const next = [...debts];
-                    next[i].monthlyPayment = e.target.value;
-                    setDebts(next);
-                  }}
-                  placeholder="Monthly"
-                  className={inputClass}
-                />
-              </div>
-            </div>
-          ))}
-          <button
-            onClick={() => setDebts([...debts, { name: "", amount: "", interestRate: "", monthlyPayment: "" }])}
-            className="text-sm text-primary font-medium"
-          >
-            + Add debt
-          </button>
-          <p className="text-xs text-muted-foreground">No debts? Just skip to the next step.</p>
-        </div>
-      )}
-
-      {/* Step 3: Protection */}
-      {step === 3 && (
-        <div className="space-y-4">
-          {[
-            { label: "Do you have life insurance?", value: hasLifeInsurance, set: setHasLifeInsurance },
-            { label: "Do you have health insurance / SHA?", value: hasHealthInsurance, set: setHasHealthInsurance },
-            { label: "Do you have an emergency fund?", value: hasEmergencyFund, set: setHasEmergencyFund },
-          ].map(({ label, value, set }) => (
-            <div key={label} className="bg-card rounded-xl p-4 shadow-card">
-              <p className="text-sm font-medium mb-3">{label}</p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => set(true)}
-                  className={`flex-1 py-2.5 rounded-lg text-sm font-semibold border transition-all ${
-                    value
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border bg-muted/50 text-muted-foreground"
-                  }`}
-                >
-                  Yes
-                </button>
-                <button
-                  onClick={() => set(false)}
-                  className={`flex-1 py-2.5 rounded-lg text-sm font-semibold border transition-all ${
-                    !value
-                      ? "border-destructive bg-destructive/10 text-destructive"
-                      : "border-border bg-muted/50 text-muted-foreground"
-                  }`}
-                >
-                  No
-                </button>
-              </div>
-            </div>
-          ))}
-          {hasEmergencyFund && (
-            <div>
-              <label className={labelClass}>Emergency fund amount (KES)</label>
-              <input
-                type="number"
-                value={emergencyFundAmount}
-                onChange={e => setEmergencyFundAmount(e.target.value)}
-                placeholder="e.g. 150,000"
-                className={inputClass}
-              />
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Step 4: Goals */}
-      {step === 4 && (
-        <div className="space-y-4">
-          {goals.map((goal, i) => (
-            <div key={i} className="bg-card rounded-xl p-4 shadow-card space-y-3">
-              <input
-                value={goal.name}
-                onChange={e => {
-                  const next = [...goals];
-                  next[i].name = e.target.value;
-                  setGoals(next);
-                }}
-                placeholder="e.g. Emergency fund, School fees"
-                className={inputClass}
-              />
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="number"
-                  value={goal.targetAmount}
-                  onChange={e => {
-                    const next = [...goals];
-                    next[i].targetAmount = e.target.value;
-                    setGoals(next);
-                  }}
-                  placeholder="Target (KES)"
-                  className={inputClass}
-                />
-                <input
-                  type="date"
-                  value={goal.deadline}
-                  onChange={e => {
-                    const next = [...goals];
-                    next[i].deadline = e.target.value;
-                    setGoals(next);
-                  }}
-                  className={inputClass}
-                />
-              </div>
-            </div>
-          ))}
-          <button
-            onClick={() => setGoals([...goals, { name: "", targetAmount: "", deadline: "" }])}
-            className="text-sm text-primary font-medium"
-          >
-            + Add goal
-          </button>
-        </div>
-      )}
-
-      {/* Navigation */}
-      <div className="flex gap-3 mt-8">
-        {step > 0 && (
-          <button
-            onClick={() => setStep(step - 1)}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border text-sm font-medium"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back
-          </button>
         )}
-        <button
-          onClick={() => {
-            if (step < steps.length - 1) setStep(step + 1);
-            else handleSubmit();
-          }}
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl gradient-gold text-warning-foreground font-semibold text-sm shadow-elevated transition-transform active:scale-[0.98]"
-        >
-          {step === steps.length - 1 ? (
-            <>
-              <Sparkles className="w-4 h-4" /> Generate My Blueprint
-            </>
-          ) : (
-            <>
-              Continue <ArrowRight className="w-4 h-4" />
-            </>
+
+        {step === 5 && (
+          <div className="space-y-5">
+            {RISK_QUIZ.map((q, qi) => (
+              <div key={qi}>
+                <p className="font-medium text-sm mb-2">{qi + 1}. {q.q}</p>
+                <div className="space-y-2">
+                  {q.options.map((opt, oi) => (
+                    <button
+                      key={oi}
+                      type="button"
+                      onClick={() => {
+                        const next = [...answers];
+                        next[qi] = oi;
+                        setAnswers(next);
+                      }}
+                      className={`w-full text-left border rounded-xl p-3 text-sm ${
+                        answers[qi] === oi ? "border-primary bg-primary/5" : "border-border"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <div className="rounded-xl bg-primary/5 border border-primary/20 p-3 text-sm">
+              Your profile: <span className="font-semibold">{riskTolerance}</span>
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-3 mt-8">
+          {step > 1 && (
+            <Button variant="outline" onClick={() => setStep(step - 1)} disabled={saving}>
+              <ArrowLeft className="w-4 h-4 mr-1" /> Back
+            </Button>
           )}
-        </button>
+          {step < 5 ? (
+            <Button
+              onClick={() => setStep(step + 1)}
+              disabled={!canNext()}
+              className="flex-1 h-11 font-display font-semibold"
+            >
+              Continue <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          ) : (
+            <Button
+              onClick={submit}
+              disabled={saving}
+              className="flex-1 h-11 font-display font-semibold"
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Finish setup"}
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
