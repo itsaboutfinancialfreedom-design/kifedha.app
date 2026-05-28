@@ -37,9 +37,6 @@ function DebtContent() {
           <div>
             <p className="text-xs text-muted-foreground">Total Debt</p>
             <p className="font-display text-lg font-bold">
-          <div>
-            <p className="text-xs text-muted-foreground">Total Debt</p>
-            <p className="font-display text-lg font-bold">
               KES {totalDebt.toLocaleString()}
             </p>
           </div>
@@ -64,8 +61,6 @@ function DebtContent() {
         </div>
       </div>
 
-        </div>
-      </div>
 
       {/* Individual debts */}
       <div className="space-y-3">
