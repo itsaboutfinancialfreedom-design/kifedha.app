@@ -68,6 +68,60 @@ export type Database = {
         }
         Relationships: []
       }
+      user_allocations: {
+        Row: {
+          created_at: string
+          has_dependents: boolean | null
+          id: string
+          investments_amount: number
+          investments_percent: number
+          monthly_income: number
+          needs_amount: number
+          needs_percent: number
+          protection_amount: number
+          protection_percent: number
+          risk_tolerance: string | null
+          savings_amount: number
+          savings_percent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          has_dependents?: boolean | null
+          id?: string
+          investments_amount: number
+          investments_percent: number
+          monthly_income: number
+          needs_amount: number
+          needs_percent: number
+          protection_amount: number
+          protection_percent: number
+          risk_tolerance?: string | null
+          savings_amount: number
+          savings_percent: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          has_dependents?: boolean | null
+          id?: string
+          investments_amount?: number
+          investments_percent?: number
+          monthly_income?: number
+          needs_amount?: number
+          needs_percent?: number
+          protection_amount?: number
+          protection_percent?: number
+          risk_tolerance?: string | null
+          savings_amount?: number
+          savings_percent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_debts: {
         Row: {
           amount: number
