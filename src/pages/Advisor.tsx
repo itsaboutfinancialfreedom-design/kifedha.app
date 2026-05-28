@@ -177,6 +177,10 @@ export default function Advisor() {
               />
             </div>
           </button>
+        </div>
+      )}
+
+
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
