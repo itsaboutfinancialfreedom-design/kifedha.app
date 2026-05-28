@@ -227,7 +227,7 @@ export default function Advisor() {
                 Get your personalized Financial Blueprint — exact KES allocations, gap fixes, and a 3-step action plan.
               </p>
               <button
-                onClick={() => { setIsPremium(true); toast.success("Premium unlocked"); }}
+                onClick={() => navigate("/advisor/upgrade")}
                 className="w-full py-3 rounded-xl gradient-premium text-premium-foreground font-semibold text-sm shadow-elevated"
               >
                 Upgrade — KES 499/month
