@@ -14,7 +14,142 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          dependents_ages: Json | null
+          dependents_count: number | null
+          email: string | null
+          full_name: string | null
+          id: string
+          income_frequency: string | null
+          income_stability: string | null
+          monthly_income: number | null
+          onboarding_completed: boolean
+          phone: string | null
+          risk_score: number | null
+          risk_tolerance: string | null
+          supports_elderly: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dependents_ages?: Json | null
+          dependents_count?: number | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          income_frequency?: string | null
+          income_stability?: string | null
+          monthly_income?: number | null
+          onboarding_completed?: boolean
+          phone?: string | null
+          risk_score?: number | null
+          risk_tolerance?: string | null
+          supports_elderly?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dependents_ages?: Json | null
+          dependents_count?: number | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          income_frequency?: string | null
+          income_stability?: string | null
+          monthly_income?: number | null
+          onboarding_completed?: boolean
+          phone?: string | null
+          risk_score?: number | null
+          risk_tolerance?: string | null
+          supports_elderly?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_debts: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          interest_rate: number
+          min_payment: number
+          name: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          interest_rate?: number
+          min_payment?: number
+          name: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          interest_rate?: number
+          min_payment?: number
+          name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_debts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_goals: {
+        Row: {
+          created_at: string
+          current_amount: number
+          goal_type: string
+          id: string
+          is_premium_feature: boolean
+          priority: string | null
+          target_amount: number
+          target_date: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_amount?: number
+          goal_type: string
+          id?: string
+          is_premium_feature?: boolean
+          priority?: string | null
+          target_amount?: number
+          target_date?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_amount?: number
+          goal_type?: string
+          id?: string
+          is_premium_feature?: boolean
+          priority?: string | null
+          target_amount?: number
+          target_date?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_goals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
