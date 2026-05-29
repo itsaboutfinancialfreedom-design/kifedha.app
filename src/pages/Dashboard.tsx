@@ -33,7 +33,6 @@ import { toast } from "sonner";
     pdf.save("kifedha-dashboard.pdf");
   };
 
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (!hasCompletedOnboarding) navigate("/");
