@@ -84,7 +84,9 @@ export default function Dashboard() {
               <h1 className="font-display text-2xl font-bold text-warning-foreground mt-1">
                 Kifedha
               </h1>
+            </div>
             <div className="flex items-center gap-2">
+
               <button
                 onClick={exportPDF}
                 aria-label={isPremium ? "Export dashboard as PDF" : "Upgrade for PDF export"}
