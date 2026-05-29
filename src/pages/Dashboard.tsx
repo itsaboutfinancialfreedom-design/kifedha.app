@@ -9,7 +9,9 @@ import { useEffect, useMemo, useRef } from "react";
 import { generateInsights } from "@/lib/insightsEngine";
 import { toast } from "sonner";
 
+export default function Dashboard() {
   const { financials, blueprint, hasCompletedOnboarding, automation, setAutomation, isPremium } = useApp();
+
   const navigate = useNavigate();
   const captureRef = useRef<HTMLDivElement>(null);
 
