@@ -28,7 +28,8 @@ export default function Auth() {
   useEffect(() => {
     if (loading || !user) return;
     if (profile && !profile.onboarding_completed) navigate("/onboarding", { replace: true });
-    else navigate("/tracker", { replace: true });
+    else navigate("/dashboard", { replace: true });
+
   }, [user, profile, loading, navigate]);
 
   const handleEmail = async (e: React.FormEvent) => {

@@ -1,172 +1,283 @@
-import { useApp } from "@/context/AppContext";
-import { BottomNav } from "@/components/BottomNav";
-import { Switch } from "@/components/ui/switch";
-import { Target, CalendarDays, Zap, ChevronDown, Sparkles } from "lucide-react";
-import { differenceInMonths, parseISO } from "date-fns";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { differenceInMonths, parseISO, format } from "date-fns";
+import { Target, CalendarDays, Plus, Trash2, Sparkles, Lock } from "lucide-react";
 import { toast } from "sonner";
 
+import { BottomNav } from "@/components/BottomNav";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog";
+
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
+import { useApp } from "@/context/AppContext";
+
+const GOAL_TYPES = [
+  "Emergency fund",
+  "School fees",
+  "Retirement",
+  "House deposit",
+  "Business capital",
+  "Vacation",
+];
+
+const FREE_GOAL_LIMIT = 2;
+
+interface GoalRow {
+  id: string;
+  goal_type: string;
+  target_amount: number;
+  current_amount: number;
+  target_date: string | null;
+  priority: string | null;
+}
+
+interface Draft {
+  goal_type: string;
+  target_amount: string;
+  current_amount: string;
+  target_date: string;
+}
+
+const emptyDraft: Draft = {
+  goal_type: GOAL_TYPES[0],
+  target_amount: "",
+  current_amount: "",
+  target_date: "",
+};
+
 export default function Goals() {
-  const { financials, blueprint, automation, autopilots, setAutopilots } = useApp();
-  const [showWhy, setShowWhy] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isPremium } = useApp();
 
-  if (!financials || !blueprint) return null;
+  const [goals, setGoals] = useState<GoalRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [monthlySavings, setMonthlySavings] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<Draft>(emptyDraft);
+  const [saving, setSaving] = useState(false);
 
-  const monthlySavings = blueprint.allocation.savings.amount;
-  const activeAutopilots = autopilots.filter(a => a.enabled).length;
-  // Split savings evenly across enabled autopilots (simple, transparent rule)
-  const perGoalAuto = activeAutopilots > 0 ? Math.floor(monthlySavings / activeAutopilots) : 0;
+  useEffect(() => {
+    if (!user) { setLoading(false); return; }
+    (async () => {
+      const [{ data: g }, { data: a }] = await Promise.all([
+        supabase.from("user_goals").select("*").eq("user_id", user.id).order("created_at", { ascending: true }),
+        supabase.from("user_allocations").select("savings_amount").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(1).maybeSingle(),
+      ]);
+      setGoals((g ?? []) as GoalRow[]);
+      setMonthlySavings(Number(a?.savings_amount ?? 0));
+      setLoading(false);
+    })();
+  }, [user]);
 
-  function getAutopilot(goalName: string) {
-    return autopilots.find(a => a.goalName === goalName);
-  }
+  const perGoalAllocation = useMemo(
+    () => (goals.length > 0 ? Math.floor(monthlySavings / goals.length) : 0),
+    [goals.length, monthlySavings]
+  );
 
-  function toggleAutopilot(goalName: string, enabled: boolean) {
-    if (enabled && !automation.autopilotGoals) {
-      toast.error("Enable Goal Autopilot in Settings first.");
+  const atFreeLimit = !isPremium && goals.length >= FREE_GOAL_LIMIT;
+
+  function openCreate() {
+    if (atFreeLimit) {
+      toast.error(`Free plan allows ${FREE_GOAL_LIMIT} goals. Upgrade for unlimited.`);
       return;
     }
-    const existing = autopilots.find(a => a.goalName === goalName);
-    let next;
-    if (existing) {
-      next = autopilots.map(a =>
-        a.goalName === goalName ? { ...a, enabled, lastRunISO: new Date().toISOString() } : a
-      );
-    } else {
-      next = [
-        ...autopilots,
-        {
-          goalName,
-          enabled,
-          monthlyContribution: perGoalAuto || Math.floor(monthlySavings / Math.max(1, financials!.goals.length)),
-          simulatedBalance: 0,
-          lastRunISO: new Date().toISOString(),
-        },
-      ];
+    setDraft(emptyDraft);
+    setOpen(true);
+  }
+
+  async function saveGoal() {
+    if (!user) { toast.error("Please sign in"); return; }
+    const target = Number(draft.target_amount);
+    const current = Number(draft.current_amount || "0");
+    if (!draft.goal_type || !(target > 0)) {
+      toast.error("Pick a goal type and target amount");
+      return;
     }
-    setAutopilots(next);
-    toast.success(enabled ? `Autopilot ON for ${goalName}` : `Autopilot OFF for ${goalName}`);
+    setSaving(true);
+    const { data, error } = await supabase
+      .from("user_goals")
+      .insert({
+        user_id: user.id,
+        goal_type: draft.goal_type,
+        target_amount: target,
+        current_amount: current,
+        target_date: draft.target_date || null,
+        priority: "Medium",
+        is_premium_feature: false,
+      })
+      .select()
+      .single();
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    setGoals((p) => [...p, data as GoalRow]);
+    setOpen(false);
+    toast.success("Goal added");
+  }
+
+  async function deleteGoal(id: string) {
+    const { error } = await supabase.from("user_goals").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setGoals((p) => p.filter((g) => g.id !== id));
+  }
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
   }
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <div className="max-w-lg mx-auto px-4 pt-8">
-        <h1 className="font-display text-2xl font-bold mb-1">Your Goals</h1>
-        <p className="text-sm text-muted-foreground mb-5">
-          With KES {monthlySavings.toLocaleString()}/mo in savings, here's your progress.
-        </p>
-
-        {/* Autopilot status banner */}
-        {automation.autopilotGoals && activeAutopilots > 0 && (
-          <div className="mb-5 rounded-2xl p-4 bg-card border border-primary/30 shadow-card">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl gradient-green flex items-center justify-center">
-                <Zap className="w-5 h-5 text-secondary-foreground" />
-              </div>
-              <div className="flex-1">
-                <p className="font-display font-semibold text-sm">Self-driving money is ON</p>
-                <p className="text-xs text-muted-foreground">
-                  Auto-allocating ~KES {perGoalAuto.toLocaleString()}/mo to each of {activeAutopilots} goal{activeAutopilots > 1 ? "s" : ""}.
-                </p>
-              </div>
-            </div>
+      <div className="max-w-2xl mx-auto px-4 pt-8">
+        <div className="flex items-start justify-between mb-5">
+          <div>
+            <h1 className="font-display text-2xl font-bold mb-1">Your Goals</h1>
+            <p className="text-sm text-muted-foreground">
+              {monthlySavings > 0
+                ? <>KES {monthlySavings.toLocaleString()}/mo from your blueprint{goals.length > 0 && <> · ~KES {perGoalAllocation.toLocaleString()}/mo per goal</>}</>
+                : <>Set your blueprint to see monthly allocations</>}
+            </p>
           </div>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={openCreate} size="sm">
+                {atFreeLimit ? <Lock className="w-4 h-4 mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
+                New Goal
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create a goal</DialogTitle>
+                <DialogDescription>What are you saving for?</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label>Goal type</Label>
+                  <Select value={draft.goal_type} onValueChange={(v) => setDraft({ ...draft, goal_type: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {GOAL_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Target amount (KES)</Label>
+                  <Input
+                    inputMode="numeric"
+                    placeholder="e.g. 500000"
+                    value={draft.target_amount}
+                    onChange={(e) => setDraft({ ...draft, target_amount: e.target.value.replace(/[^0-9]/g, "") })}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Already saved (KES, optional)</Label>
+                  <Input
+                    inputMode="numeric"
+                    placeholder="0"
+                    value={draft.current_amount}
+                    onChange={(e) => setDraft({ ...draft, current_amount: e.target.value.replace(/[^0-9]/g, "") })}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Target date</Label>
+                  <Input
+                    type="date"
+                    value={draft.target_date}
+                    onChange={(e) => setDraft({ ...draft, target_date: e.target.value })}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+                <Button onClick={saveGoal} disabled={saving}>{saving ? "Saving…" : "Save goal"}</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {atFreeLimit && (
+          <Card className="mb-5 border-premium/40 bg-premium/5">
+            <CardContent className="pt-5 flex items-center gap-3">
+              <Sparkles className="w-5 h-5 text-premium shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold">Free plan limit reached</p>
+                <p className="text-xs text-muted-foreground">Upgrade to track unlimited goals.</p>
+              </div>
+              <Button size="sm" onClick={() => navigate("/advisor/upgrade")}>Upgrade</Button>
+            </CardContent>
+          </Card>
         )}
 
-        {financials.goals.length === 0 ? (
+        {goals.length === 0 ? (
           <div className="text-center py-16">
             <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground text-sm">No goals set yet. Update your blueprint to add goals.</p>
+            <p className="text-muted-foreground text-sm mb-4">No goals yet. Create your first one.</p>
+            <Button onClick={openCreate}><Plus className="w-4 h-4 mr-1" /> Add goal</Button>
           </div>
         ) : (
           <div className="space-y-4">
-            {financials.goals.map((goal, i) => {
-              const targetAmount = Number(goal.targetAmount) || 0;
-              const monthsLeft = goal.deadline
-                ? Math.max(1, differenceInMonths(parseISO(goal.deadline), new Date()))
+            {goals.map((g) => {
+              const target = Number(g.target_amount) || 0;
+              const current = Number(g.current_amount) || 0;
+              const monthsLeft = g.target_date
+                ? Math.max(1, differenceInMonths(parseISO(g.target_date), new Date()))
                 : 12;
-              const monthlyNeeded = Math.ceil(targetAmount / monthsLeft) || 0;
-              const ap = getAutopilot(goal.name);
-              const autoBal = ap?.enabled ? ap.simulatedBalance : 0;
-              const progressPct = targetAmount > 0
-                ? (Math.min(100, Math.round((autoBal / targetAmount) * 100)) ||
-                   Math.min(100, Math.round((monthlySavings / Math.max(1, monthlyNeeded)) * 100)))
-                : 0;
+              const remaining = Math.max(0, target - current);
+              const monthlyNeeded = Math.ceil(remaining / monthsLeft);
+              const progressPct = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
+              const allocation = perGoalAllocation;
+              const shortfall = monthlyNeeded - allocation;
 
               return (
-                <div key={i} className="bg-card rounded-2xl p-5 shadow-card">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl gradient-green flex items-center justify-center">
-                      <Target className="w-5 h-5 text-secondary-foreground" />
+                <Card key={g.id}>
+                  <CardHeader className="pb-2 flex flex-row items-start justify-between space-y-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl gradient-green flex items-center justify-center">
+                        <Target className="w-5 h-5 text-secondary-foreground" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-base">{g.goal_type}</CardTitle>
+                        <CardDescription className="text-xs">
+                          KES {current.toLocaleString()} / {target.toLocaleString()}
+                        </CardDescription>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-display font-semibold text-sm">{goal.name}</h3>
-                      <p className="text-xs text-muted-foreground">
-                        KES {targetAmount.toLocaleString()} target
-                      </p>
+                    <button
+                      onClick={() => deleteGoal(g.id)}
+                      className="text-muted-foreground hover:text-destructive p-1"
+                      aria-label="Delete goal"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Progress value={progressPct} />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <CalendarDays className="w-3 h-3" />
+                        {g.target_date ? format(parseISO(g.target_date), "MMM yyyy") : "No date"} · {monthsLeft} mo
+                      </span>
+                      <span>KES {monthlyNeeded.toLocaleString()}/mo needed</span>
                     </div>
-                  </div>
 
-                  <div className="h-2 bg-muted rounded-full overflow-hidden mb-3">
-                    <div
-                      className="h-full gradient-green rounded-full transition-all duration-500"
-                      style={{ width: `${progressPct}%` }}
-                    />
-                  </div>
-
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <CalendarDays className="w-3 h-3" />
-                      <span>{monthsLeft} months left</span>
-                    </div>
-                    <span>KES {monthlyNeeded.toLocaleString()}/mo needed</span>
-                  </div>
-
-                  {ap?.enabled && (
-                    <div className="mt-3 p-3 bg-success/10 rounded-lg border border-success/20">
-                      <p className="text-xs font-medium text-foreground">
-                        ⚡ Autopilot saved KES {Math.round(ap.simulatedBalance).toLocaleString()} so far
-                      </p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
-                        Contributing KES {ap.monthlyContribution.toLocaleString()}/mo automatically
-                      </p>
-                    </div>
-                  )}
-
-                  {monthlySavings < monthlyNeeded && !ap?.enabled && (
-                    <div className="mt-3 p-2.5 bg-warning/10 rounded-lg">
-                      <p className="text-xs text-foreground">
-                        💡 You need KES {(monthlyNeeded - monthlySavings).toLocaleString()} more/mo. Extend timeline or boost savings.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Autopilot toggle row */}
-                  <div className="mt-4 pt-3 border-t border-border flex items-center gap-3">
-                    <Zap className="w-4 h-4 text-primary" />
-                    <div className="flex-1">
-                      <p className="text-xs font-semibold">Goal Autopilot</p>
-                      <button
-                        onClick={() => setShowWhy(showWhy === goal.name ? null : goal.name)}
-                        className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
-                      >
-                        <Sparkles className="w-3 h-3" /> Why? <ChevronDown className={`w-3 h-3 transition-transform ${showWhy === goal.name ? "rotate-180" : ""}`} />
-                      </button>
-                    </div>
-                    <Switch
-                      checked={!!ap?.enabled}
-                      onCheckedChange={(v) => toggleAutopilot(goal.name, v)}
-                    />
-                  </div>
-
-                  {showWhy === goal.name && (
-                    <div className="mt-2 p-2.5 bg-muted/60 rounded-lg border border-border">
-                      <p className="text-[11px] text-foreground/80 leading-relaxed">
-                        We split your KES {monthlySavings.toLocaleString()}/mo savings allocation evenly across goals with autopilot ON. With this goal active, that's roughly KES {perGoalAuto.toLocaleString()}/mo. The simulated balance grows daily so you can see progress without needing to move money manually.
-                      </p>
-                    </div>
-                  )}
-                </div>
+                    {monthlySavings > 0 && (
+                      <div className={`rounded-lg p-3 text-xs ${shortfall > 0 ? "bg-warning/10" : "bg-success/10"}`}>
+                        {shortfall > 0 ? (
+                          <>💡 Your blueprint allocates KES {allocation.toLocaleString()}/mo per goal. Boost by KES {shortfall.toLocaleString()} or extend the timeline.</>
+                        ) : (
+                          <>✅ Your KES {allocation.toLocaleString()}/mo allocation covers this goal.</>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               );
             })}
           </div>

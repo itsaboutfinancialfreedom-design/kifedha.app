@@ -73,6 +73,9 @@ const App = () => (
                 <Route path="/assessment/risk-profile" element={guarded(<RiskProfile />)} />
                 <Route path="/tools/protection-calculator" element={<ProtectionCalculator />} />
                 <Route path="/tools/debt-planner" element={guarded(<DebtPlanner />)} />
+                <Route path="/debt-planner" element={guarded(<DebtPlanner />)} />
+                <Route path="/protection-gap" element={guarded(<ProtectionCalculator />)} />
+
                 <Route path="/settings/notifications" element={guarded(<NotificationSettings />)} />
                 <Route path="/settings/mpesa" element={guarded(<MpesaSetup />)} />
 
