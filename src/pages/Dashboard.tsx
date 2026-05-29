@@ -9,8 +9,30 @@ import { useEffect, useMemo, useRef } from "react";
 import { generateInsights } from "@/lib/insightsEngine";
 import { toast } from "sonner";
 
-export default function Dashboard() {
-  const { financials, blueprint, hasCompletedOnboarding, automation, setAutomation } = useApp();
+  const { financials, blueprint, hasCompletedOnboarding, automation, setAutomation, isPremium } = useApp();
+  const navigate = useNavigate();
+  const captureRef = useRef<HTMLDivElement>(null);
+
+  const exportPDF = async () => {
+    if (!isPremium) {
+      toast.error("PDF export is a Premium feature");
+      navigate("/advisor/upgrade");
+      return;
+    }
+    if (!captureRef.current) return;
+    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+      import("html2canvas"),
+      import("jspdf"),
+    ]);
+    const canvas = await html2canvas(captureRef.current, { backgroundColor: "#ffffff", scale: 2 });
+    const img = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+    const w = 210;
+    const h = (canvas.height * w) / canvas.width;
+    pdf.addImage(img, "PNG", 0, 0, w, h);
+    pdf.save("kifedha-dashboard.pdf");
+  };
+
   const navigate = useNavigate();
 
   useEffect(() => {
