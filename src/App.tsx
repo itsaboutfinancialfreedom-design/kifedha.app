@@ -29,6 +29,7 @@ import ProtectionCalculator from "./pages/ProtectionCalculator";
 import DebtPlanner from "./pages/DebtPlanner";
 import NotificationSettings from "./pages/NotificationSettings";
 import MpesaSetup from "./pages/MpesaSetup";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 import NotFound from "./pages/NotFound";
 
@@ -45,6 +46,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <PaymentTestModeBanner />
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth" element={<Auth />} />

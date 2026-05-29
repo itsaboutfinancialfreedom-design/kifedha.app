@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Trash2, CheckCircle2, Download, AlertTriangle, Info, Bell } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -143,7 +143,8 @@ function download(filename: string, content: string, type = "text/csv") {
 
 export default function DebtPlanner() {
   const { user } = useAuth();
-  const { isPremium, setIsPremium } = useApp();
+  const { isPremium } = useApp();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [debts, setDebts] = useState<DebtRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -604,7 +605,7 @@ export default function DebtPlanner() {
                 <Bell className="w-4 h-4 mr-2" /> Set payment reminders {!isPremium && "(Premium)"}
               </Button>
               {!isPremium && (
-                <Button variant="secondary" onClick={() => setIsPremium(true)}>Upgrade to Premium</Button>
+                <Button variant="secondary" onClick={() => navigate("/advisor/upgrade")}>Upgrade to Premium</Button>
               )}
             </div>
           </>

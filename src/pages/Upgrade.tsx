@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Check, Sparkles, X, Crown } from "lucide-react";
+import { ArrowLeft, Check, Sparkles, X, Crown, Loader2 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { BottomNav } from "@/components/BottomNav";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { toast } from "sonner";
 
 type Cycle = "monthly" | "yearly";
@@ -17,30 +20,47 @@ const FREE_FEATURES = [
 
 const PREMIUM_FEATURES = [
   "Unlimited savings goals",
-  "Detailed debt simulator (extra payments, snowball/avalanche)",
-  "Insurance & provider comparisons",
+  "Advanced debt simulator (snowball / avalanche)",
+  "Auto-M-Pesa statement import",
   "PDF financial reports",
-  "CSV export of all transactions",
+  "Email reminders & weekly digest",
   "Unlimited AI advisor chat",
-  "Autopilot goals & round-ups",
+  "Priority support",
 ];
 
-const MONTHLY_PRICE = 499;
-const YEARLY_PRICE = 4990; // ~2 months free
+// Pricing displayed to users. Paddle bills in USD; KES is illustrative
+// at ~130 KES / USD. Update both together if the Paddle prices change.
+const PRICES: Record<Cycle, { usd: number; kes: number; priceId: string; cadence: string }> = {
+  monthly: { usd: 8, kes: 1040, priceId: "premium_monthly", cadence: "/month" },
+  yearly:  { usd: 80, kes: 10400, priceId: "premium_yearly", cadence: "/year" },
+};
 
 export default function Upgrade() {
   const navigate = useNavigate();
-  const { isPremium, subscription, startTrial, cancelSubscription, trialDaysLeft, isTrialing } = useApp();
+  const { user } = useAuth();
+  const { isPremium, isTrialing, trialDaysLeft } = useApp();
+  const { openCheckout, loading } = usePaddleCheckout();
   const [cycle, setCycle] = useState<Cycle>("monthly");
 
-  const handleUpgrade = () => {
-    startTrial(cycle);
-    toast.success("7-day free trial started — Premium unlocked");
-    navigate(`/advisor/success?cycle=${cycle}`);
+  const handleUpgrade = async () => {
+    if (!user) { navigate("/auth"); return; }
+    try {
+      await openCheckout({
+        priceId: PRICES[cycle].priceId,
+        userId: user.id,
+        customerEmail: user.email ?? undefined,
+        successUrl: `${window.location.origin}/advisor/success?cycle=${cycle}`,
+      });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not open checkout");
+    }
   };
+
+  const p = PRICES[cycle];
 
   return (
     <div className="min-h-screen bg-background pb-28">
+      <PaymentTestModeBanner />
       <div className="sticky top-0 z-30 bg-card/95 backdrop-blur border-b border-border">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-lg hover:bg-muted">
@@ -63,34 +83,21 @@ export default function Upgrade() {
           </p>
         </div>
 
-        {/* Billing toggle */}
         <div className="flex items-center justify-center">
           <div className="inline-flex bg-muted rounded-full p-1 text-xs font-semibold">
-            <button
-              onClick={() => setCycle("monthly")}
-              className={`px-4 py-1.5 rounded-full transition ${cycle === "monthly" ? "bg-card shadow-card" : "text-muted-foreground"}`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setCycle("yearly")}
-              className={`px-4 py-1.5 rounded-full transition flex items-center gap-1.5 ${cycle === "yearly" ? "bg-card shadow-card" : "text-muted-foreground"}`}
-            >
+            <button onClick={() => setCycle("monthly")} className={`px-4 py-1.5 rounded-full transition ${cycle === "monthly" ? "bg-card shadow-card" : "text-muted-foreground"}`}>Monthly</button>
+            <button onClick={() => setCycle("yearly")} className={`px-4 py-1.5 rounded-full transition flex items-center gap-1.5 ${cycle === "yearly" ? "bg-card shadow-card" : "text-muted-foreground"}`}>
               Yearly
               <span className="px-1.5 py-0.5 rounded-full bg-success/15 text-success text-[10px]">Save 17%</span>
             </button>
           </div>
         </div>
 
-        {/* Pricing cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Free */}
           <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
             <div className="flex items-center justify-between mb-1">
               <h3 className="font-display font-bold text-lg">Free</h3>
-              {!isPremium && (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted">Current</span>
-              )}
+              {!isPremium && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted">Current</span>}
             </div>
             <p className="text-xs text-muted-foreground mb-4">For getting started</p>
             <div className="mb-4">
@@ -99,45 +106,30 @@ export default function Upgrade() {
             </div>
             <ul className="space-y-2 text-sm">
               {FREE_FEATURES.map(f => (
-                <li key={f} className="flex gap-2">
-                  <Check className="w-4 h-4 text-muted-foreground flex-none mt-0.5" />
-                  <span>{f}</span>
-                </li>
+                <li key={f} className="flex gap-2"><Check className="w-4 h-4 text-muted-foreground flex-none mt-0.5" /><span>{f}</span></li>
               ))}
               {PREMIUM_FEATURES.slice(0, 3).map(f => (
-                <li key={f} className="flex gap-2 text-muted-foreground">
-                  <X className="w-4 h-4 flex-none mt-0.5" />
-                  <span className="line-through">{f}</span>
-                </li>
+                <li key={f} className="flex gap-2 text-muted-foreground"><X className="w-4 h-4 flex-none mt-0.5" /><span className="line-through">{f}</span></li>
               ))}
             </ul>
           </div>
 
-          {/* Premium */}
           <div className="relative rounded-2xl border-2 border-warning bg-card p-5 shadow-elevated overflow-hidden">
-            <div className="absolute top-0 right-0 px-3 py-1 rounded-bl-xl gradient-premium text-premium-foreground text-[10px] font-bold tracking-wide">
-              RECOMMENDED
-            </div>
+            <div className="absolute top-0 right-0 px-3 py-1 rounded-bl-xl gradient-premium text-premium-foreground text-[10px] font-bold tracking-wide">RECOMMENDED</div>
             <div className="flex items-center gap-1.5 mb-1">
               <Crown className="w-4 h-4 text-warning" />
               <h3 className="font-display font-bold text-lg">Premium</h3>
             </div>
             <p className="text-xs text-muted-foreground mb-4">For serious wealth builders</p>
             <div className="mb-4">
-              <span className="text-3xl font-display font-bold">
-                KES {cycle === "monthly" ? MONTHLY_PRICE.toLocaleString() : YEARLY_PRICE.toLocaleString()}
-              </span>
-              <span className="text-xs text-muted-foreground"> /{cycle === "monthly" ? "month" : "year"}</span>
-              {cycle === "yearly" && (
-                <p className="text-[11px] text-success mt-0.5">~KES 416/mo · billed yearly</p>
-              )}
+              <span className="text-3xl font-display font-bold">${p.usd}</span>
+              <span className="text-xs text-muted-foreground"> {p.cadence}</span>
+              <p className="text-[11px] text-muted-foreground mt-0.5">≈ KES {p.kes.toLocaleString()} {p.cadence}</p>
+              {cycle === "yearly" && <p className="text-[11px] text-success mt-0.5">2 months free vs monthly</p>}
             </div>
             <ul className="space-y-2 text-sm">
               {PREMIUM_FEATURES.map(f => (
-                <li key={f} className="flex gap-2">
-                  <Check className="w-4 h-4 text-success flex-none mt-0.5" />
-                  <span>{f}</span>
-                </li>
+                <li key={f} className="flex gap-2"><Check className="w-4 h-4 text-success flex-none mt-0.5" /><span>{f}</span></li>
               ))}
             </ul>
 
@@ -146,32 +138,29 @@ export default function Upgrade() {
                 <div className="w-full py-3 rounded-xl bg-success/10 text-success font-semibold text-sm text-center">
                   Premium active{isTrialing ? ` · ${trialDaysLeft}d trial left` : ""}
                 </div>
-                <button
-                  onClick={() => { cancelSubscription(); toast.message("Subscription cancelled"); }}
-                  className="w-full py-2 text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Cancel subscription
-                </button>
+                <p className="text-[11px] text-muted-foreground text-center">
+                  Manage or cancel in Settings.
+                </p>
               </div>
             ) : (
               <button
                 onClick={handleUpgrade}
-                className="mt-5 w-full py-3 rounded-xl gradient-premium text-premium-foreground font-semibold text-sm shadow-elevated transition-transform active:scale-[0.98]"
+                disabled={loading}
+                className="mt-5 w-full py-3 rounded-xl gradient-premium text-premium-foreground font-semibold text-sm shadow-elevated transition-transform active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
               >
-                Upgrade now — Start 7-day free trial
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                {loading ? "Opening checkout…" : "Start 7-day free trial"}
               </button>
             )}
-            <p className="text-[11px] text-muted-foreground text-center mt-2">
-              No card required during trial · Cancel anytime
-            </p>
+            <p className="text-[11px] text-muted-foreground text-center mt-2">Secure checkout · Cancel anytime</p>
           </div>
         </div>
 
         <div className="rounded-xl bg-muted/40 p-4 text-xs text-muted-foreground">
           <p className="font-semibold text-foreground mb-1">How billing works</p>
           <p>
-            Start your 7-day free trial today. You'll keep full Premium access during the trial. After it ends,
-            you'll continue on the {cycle} plan unless you cancel. You can manage or cancel anytime from Settings.
+            Start your 7-day free trial today. After the trial ends, you'll continue on the {cycle} plan
+            unless you cancel. Manage or cancel anytime from Settings. Payments processed securely via Paddle.
           </p>
         </div>
       </div>

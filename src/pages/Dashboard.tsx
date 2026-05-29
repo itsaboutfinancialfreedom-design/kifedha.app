@@ -1,19 +1,23 @@
 import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
 import { ScoreRing } from "@/components/ScoreRing";
 import { InsightCard } from "@/components/InsightCard";
 import { Recommendations } from "@/components/Recommendations";
 import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell, FileDown, Lock } from "lucide-react";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { generateInsights } from "@/lib/insightsEngine";
 import { toast } from "sonner";
+import { generateFinancialReport } from "@/utils/pdfGenerator";
 
 export default function Dashboard() {
   const { financials, blueprint, hasCompletedOnboarding, automation, setAutomation, isPremium } = useApp();
+  const { user, profile } = useAuth();
 
   const navigate = useNavigate();
   const captureRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState(false);
 
   const exportPDF = async () => {
     if (!isPremium) {
@@ -21,19 +25,22 @@ export default function Dashboard() {
       navigate("/advisor/upgrade");
       return;
     }
-    if (!captureRef.current) return;
-    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-      import("html2canvas"),
-      import("jspdf"),
-    ]);
-    const canvas = await html2canvas(captureRef.current, { backgroundColor: "#ffffff", scale: 2 });
-    const img = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const w = 210;
-    const h = (canvas.height * w) / canvas.width;
-    pdf.addImage(img, "PNG", 0, 0, w, h);
-    pdf.save("kifedha-dashboard.pdf");
+    if (!user) return;
+    setExporting(true);
+    try {
+      await generateFinancialReport({
+        userId: user.id,
+        userName: profile?.full_name ?? null,
+        userEmail: user.email ?? null,
+      });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not generate PDF");
+    } finally {
+      setExporting(false);
+    }
   };
+
+
 
 
   useEffect(() => {

@@ -1,4 +1,7 @@
-import { useState, createContext, useContext, ReactNode, useEffect, useMemo } from "react";
+import { useState, createContext, useContext, ReactNode, useEffect, useMemo, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment } from "@/lib/paddle";
+import { useAuth } from "@/context/AuthContext";
 
 export interface UserFinancials {
   monthlyIncome: number;
@@ -170,18 +173,57 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("ywb_onboarded", v.toString());
   };
 
+  // Live subscription from DB (Paddle)
+  const { user } = useAuth();
+  const [dbSub, setDbSub] = useState<{ status: string; current_period_end: string | null; cancel_at_period_end: boolean } | null>(null);
+
+  const fetchDbSub = useCallback(async () => {
+    if (!user) { setDbSub(null); return; }
+    const env = getPaddleEnvironment();
+    const { data } = await supabase
+      .from("subscriptions")
+      .select("status,current_period_end,cancel_at_period_end")
+      .eq("user_id", user.id)
+      .eq("environment", env)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    setDbSub((data as any) ?? null);
+  }, [user]);
+
+  useEffect(() => {
+    fetchDbSub();
+    if (!user) return;
+    const ch = supabase
+      .channel(`app-subs-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "subscriptions", filter: `user_id=eq.${user.id}` }, () => fetchDbSub())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user, fetchDbSub]);
+
   // Trial / premium derived state
   const { isTrialing, trialDaysLeft, isPremium } = useMemo(() => {
     const now = Date.now();
     const ends = subscription.trialEndsAt ? new Date(subscription.trialEndsAt).getTime() : 0;
-    const trialing = ends > now;
-    const daysLeft = trialing ? Math.max(0, Math.ceil((ends - now) / (1000 * 60 * 60 * 24))) : 0;
+    const localTrialing = ends > now;
+    const daysLeft = localTrialing ? Math.max(0, Math.ceil((ends - now) / (1000 * 60 * 60 * 24))) : 0;
+
+    let dbActive = false;
+    let dbTrialing = false;
+    if (dbSub) {
+      const periodEnd = dbSub.current_period_end ? new Date(dbSub.current_period_end).getTime() : Infinity;
+      if (["active", "trialing", "past_due"].includes(dbSub.status)) dbActive = periodEnd > now;
+      else if (dbSub.status === "canceled") dbActive = periodEnd > now;
+      dbTrialing = dbSub.status === "trialing" && periodEnd > now;
+    }
+
     return {
-      isTrialing: trialing,
+      isTrialing: dbTrialing || localTrialing,
       trialDaysLeft: daysLeft,
-      isPremium: subscription.paid || trialing,
+      isPremium: dbActive || subscription.paid || localTrialing,
     };
-  }, [subscription]);
+  }, [subscription, dbSub]);
+
 
   const startTrial = (cycle: BillingCycle) => {
     const now = new Date();
