@@ -143,7 +143,7 @@ function download(filename: string, content: string, type = "text/csv") {
 
 export default function DebtPlanner() {
   const { user } = useAuth();
-  const { isPremium, setIsPremium } = useApp();
+  const { isPremium } = useApp();
   const { toast } = useToast();
   const [debts, setDebts] = useState<DebtRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -604,7 +604,7 @@ export default function DebtPlanner() {
                 <Bell className="w-4 h-4 mr-2" /> Set payment reminders {!isPremium && "(Premium)"}
               </Button>
               {!isPremium && (
-                <Button variant="secondary" onClick={() => setIsPremium(true)}>Upgrade to Premium</Button>
+                <Button variant="secondary" onClick={() => navigate("/advisor/upgrade")}>Upgrade to Premium</Button>
               )}
             </div>
           </>

@@ -1,4 +1,5 @@
 import { Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 
 interface PremiumGateProps {
@@ -7,7 +8,8 @@ interface PremiumGateProps {
 }
 
 export function PremiumGate({ children, featureName }: PremiumGateProps) {
-  const { isPremium, setIsPremium } = useApp();
+  const { isPremium } = useApp();
+  const navigate = useNavigate();
 
   if (isPremium) return <>{children}</>;
 
@@ -23,10 +25,10 @@ export function PremiumGate({ children, featureName }: PremiumGateProps) {
             Get full access to {featureName.toLowerCase()} and take control of your finances.
           </p>
           <button
-            onClick={() => setIsPremium(true)}
+            onClick={() => navigate("/advisor/upgrade")}
             className="w-full py-3 px-6 rounded-xl gradient-premium text-premium-foreground font-semibold text-sm shadow-elevated transition-transform active:scale-[0.98]"
           >
-            Upgrade — KES 499/month
+            Upgrade — $8/month
           </button>
           <p className="text-xs text-muted-foreground mt-3">7-day free trial included</p>
         </div>
@@ -37,3 +39,4 @@ export function PremiumGate({ children, featureName }: PremiumGateProps) {
     </div>
   );
 }
+
