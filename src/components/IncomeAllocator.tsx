@@ -106,6 +106,28 @@ export default function IncomeAllocator({ embedded = false }: Props) {
     }
   }, [profile]);
 
+  // Load latest saved allocation (overrides profile defaults)
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data, error } = await supabase
+        .from("user_allocations")
+        .select("monthly_income, risk_tolerance, has_dependents")
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error || !data) return;
+      const v = Number(data.monthly_income) || 0;
+      if (v > 0) { setIncome(v); setIncomeStr(v.toLocaleString()); }
+      if (data.risk_tolerance === "conservative" || data.risk_tolerance === "moderate" || data.risk_tolerance === "aggressive") {
+        setRisk(data.risk_tolerance as Risk);
+      }
+      if (typeof data.has_dependents === "boolean") setHasDependents(data.has_dependents);
+    })();
+  }, [user]);
+
+
   const a = useMemo(() => calculateAllocations(income, risk, hasDependents), [income, risk, hasDependents]);
 
   const pieData = [

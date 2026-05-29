@@ -4,13 +4,37 @@ import { BottomNav } from "@/components/BottomNav";
 import { ScoreRing } from "@/components/ScoreRing";
 import { InsightCard } from "@/components/InsightCard";
 import { Recommendations } from "@/components/Recommendations";
-import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell, FileDown, Lock } from "lucide-react";
+import { useEffect, useMemo, useRef } from "react";
 import { generateInsights } from "@/lib/insightsEngine";
+import { toast } from "sonner";
 
 export default function Dashboard() {
-  const { financials, blueprint, hasCompletedOnboarding, automation, setAutomation } = useApp();
+  const { financials, blueprint, hasCompletedOnboarding, automation, setAutomation, isPremium } = useApp();
+
   const navigate = useNavigate();
+  const captureRef = useRef<HTMLDivElement>(null);
+
+  const exportPDF = async () => {
+    if (!isPremium) {
+      toast.error("PDF export is a Premium feature");
+      navigate("/advisor/upgrade");
+      return;
+    }
+    if (!captureRef.current) return;
+    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+      import("html2canvas"),
+      import("jspdf"),
+    ]);
+    const canvas = await html2canvas(captureRef.current, { backgroundColor: "#ffffff", scale: 2 });
+    const img = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+    const w = 210;
+    const h = (canvas.height * w) / canvas.width;
+    pdf.addImage(img, "PNG", 0, 0, w, h);
+    pdf.save("kifedha-dashboard.pdf");
+  };
+
 
   useEffect(() => {
     if (!hasCompletedOnboarding) navigate("/");
@@ -61,14 +85,27 @@ export default function Dashboard() {
                 Kifedha
               </h1>
             </div>
-            <button
-              onClick={() => navigate("/settings")}
-              aria-label="Trust & automation settings"
-              className="p-2 rounded-xl bg-warning-foreground/10 hover:bg-warning-foreground/20 transition-colors"
-            >
-              <SettingsIcon className="w-5 h-5 text-warning-foreground" />
-            </button>
+            <div className="flex items-center gap-2">
+
+              <button
+                onClick={exportPDF}
+                aria-label={isPremium ? "Export dashboard as PDF" : "Upgrade for PDF export"}
+                className="p-2 rounded-xl bg-warning-foreground/10 hover:bg-warning-foreground/20 transition-colors"
+              >
+                {isPremium ? <FileDown className="w-5 h-5 text-warning-foreground" /> : <Lock className="w-5 h-5 text-warning-foreground" />}
+              </button>
+              <button
+                onClick={() => navigate("/settings")}
+                aria-label="Trust & automation settings"
+                className="p-2 rounded-xl bg-warning-foreground/10 hover:bg-warning-foreground/20 transition-colors"
+              >
+                <SettingsIcon className="w-5 h-5 text-warning-foreground" />
+              </button>
+            </div>
           </div>
+
+
+
           <div className="mt-6 flex items-center gap-6">
             <div className="relative">
               <ScoreRing score={blueprint.healthScore} size={100} />
