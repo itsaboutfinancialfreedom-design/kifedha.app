@@ -4,9 +4,10 @@ import { BottomNav } from "@/components/BottomNav";
 import { ScoreRing } from "@/components/ScoreRing";
 import { InsightCard } from "@/components/InsightCard";
 import { Recommendations } from "@/components/Recommendations";
-import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell, FileDown, Lock } from "lucide-react";
+import { useEffect, useMemo, useRef } from "react";
 import { generateInsights } from "@/lib/insightsEngine";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const { financials, blueprint, hasCompletedOnboarding, automation, setAutomation } = useApp();
