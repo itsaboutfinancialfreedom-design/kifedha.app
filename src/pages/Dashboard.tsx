@@ -84,15 +84,24 @@ export default function Dashboard() {
               <h1 className="font-display text-2xl font-bold text-warning-foreground mt-1">
                 Kifedha
               </h1>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={exportPDF}
+                aria-label={isPremium ? "Export dashboard as PDF" : "Upgrade for PDF export"}
+                className="p-2 rounded-xl bg-warning-foreground/10 hover:bg-warning-foreground/20 transition-colors"
+              >
+                {isPremium ? <FileDown className="w-5 h-5 text-warning-foreground" /> : <Lock className="w-5 h-5 text-warning-foreground" />}
+              </button>
+              <button
+                onClick={() => navigate("/settings")}
+                aria-label="Trust & automation settings"
+                className="p-2 rounded-xl bg-warning-foreground/10 hover:bg-warning-foreground/20 transition-colors"
+              >
+                <SettingsIcon className="w-5 h-5 text-warning-foreground" />
+              </button>
             </div>
-            <button
-              onClick={() => navigate("/settings")}
-              aria-label="Trust & automation settings"
-              className="p-2 rounded-xl bg-warning-foreground/10 hover:bg-warning-foreground/20 transition-colors"
-            >
-              <SettingsIcon className="w-5 h-5 text-warning-foreground" />
-            </button>
           </div>
+
           <div className="mt-6 flex items-center gap-6">
             <div className="relative">
               <ScoreRing score={blueprint.healthScore} size={100} />
