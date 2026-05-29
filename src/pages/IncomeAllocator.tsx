@@ -1,6 +1,7 @@
 import IncomeAllocator from "@/components/IncomeAllocator";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { ExportPDF } from "@/components/ExportPDF";
 
 export default function IncomeAllocatorPage() {
   return (
@@ -15,14 +16,18 @@ export default function IncomeAllocatorPage() {
         </div>
       </header>
       <main className="max-w-6xl mx-auto px-4 py-6">
-        <div className="mb-6">
-          <h2 className="font-display text-2xl font-bold">Your Financial Blueprint</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Get a personalized income allocation based on your situation. Adjust inputs to see real-time changes.
-          </p>
+        <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h2 className="font-display text-2xl font-bold">Your Financial Blueprint</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Get a personalized income allocation based on your situation. Adjust inputs to see real-time changes.
+            </p>
+          </div>
+          <ExportPDF variant="compact" />
         </div>
         <IncomeAllocator />
       </main>
     </div>
   );
 }
+
