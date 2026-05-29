@@ -99,7 +99,8 @@ export default function Onboarding() {
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth", { replace: true });
-    if (profile?.onboarding_completed) navigate("/tracker", { replace: true });
+    if (profile?.onboarding_completed) navigate("/dashboard", { replace: true });
+
   }, [user, profile, loading, navigate]);
 
   const depCount = Math.max(0, parseInt(dependents || "0", 10));
@@ -197,7 +198,8 @@ export default function Onboarding() {
 
       await refreshProfile();
       toast.success("You're all set!");
-      navigate("/tracker", { replace: true });
+      navigate("/dashboard", { replace: true });
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not save your profile");
     } finally {
