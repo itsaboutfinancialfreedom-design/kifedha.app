@@ -1,4 +1,7 @@
-import { useState, createContext, useContext, ReactNode, useEffect, useMemo } from "react";
+import { useState, createContext, useContext, ReactNode, useEffect, useMemo, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment } from "@/lib/paddle";
+import { useAuth } from "@/context/AuthContext";
 
 export interface UserFinancials {
   monthlyIncome: number;
