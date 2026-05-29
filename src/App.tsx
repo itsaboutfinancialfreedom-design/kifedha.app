@@ -28,6 +28,8 @@ import RiskProfile from "./pages/RiskProfile";
 import ProtectionCalculator from "./pages/ProtectionCalculator";
 import DebtPlanner from "./pages/DebtPlanner";
 import NotificationSettings from "./pages/NotificationSettings";
+import MpesaSetup from "./pages/MpesaSetup";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -71,8 +73,9 @@ const App = () => (
                 <Route path="/assessment/risk-profile" element={guarded(<RiskProfile />)} />
                 <Route path="/tools/protection-calculator" element={<ProtectionCalculator />} />
                 <Route path="/tools/debt-planner" element={guarded(<DebtPlanner />)} />
-                <Route path="/tools/debt-planner" element={guarded(<DebtPlanner />)} />
                 <Route path="/settings/notifications" element={guarded(<NotificationSettings />)} />
+                <Route path="/settings/mpesa" element={guarded(<MpesaSetup />)} />
+
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
