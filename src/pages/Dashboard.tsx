@@ -100,6 +100,8 @@ export default function Dashboard() {
                 <SettingsIcon className="w-5 h-5 text-warning-foreground" />
               </button>
             </div>
+          </div>
+
 
 
           <div className="mt-6 flex items-center gap-6">
