@@ -191,7 +191,18 @@ export default function Settings() {
         {/* Account */}
         <div className="rounded-2xl p-5 bg-card shadow-card border border-border">
           <h2 className="font-display font-semibold text-sm mb-4">Account</h2>
-          <SettingsLogoutButton />
+          <button
+            onClick={async () => {
+              setLoggingOut(true);
+              await signOut();
+              navigate("/auth");
+            }}
+            disabled={loggingOut}
+            className="w-full py-3 rounded-xl border border-border bg-muted hover:bg-muted/80 text-foreground font-semibold text-sm inline-flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {loggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+            Log out
+          </button>
         </div>
       </div>
 
