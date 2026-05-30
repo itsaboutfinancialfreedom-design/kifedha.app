@@ -51,8 +51,10 @@ const TOGGLES: ToggleDef[] = [
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const { automation, setAutomation, isPremium, isTrialing, trialDaysLeft } = useApp();
   const [portalLoading, setPortalLoading] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const update = (key: keyof AutomationSettings, value: boolean) => {
     setAutomation({ ...automation, [key]: value });
