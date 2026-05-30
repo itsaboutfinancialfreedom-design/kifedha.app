@@ -185,6 +185,12 @@ export default function Settings() {
             </a>
           </div>
         </div>
+
+        {/* Account */}
+        <div className="rounded-2xl p-5 bg-card shadow-card border border-border">
+          <h2 className="font-display font-semibold text-sm mb-4">Account</h2>
+          <SettingsLogoutButton />
+        </div>
       </div>
 
       <BottomNav />
