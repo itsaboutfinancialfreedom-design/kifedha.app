@@ -158,6 +158,10 @@ export default function Onboarding() {
     riskTotal <= 4 ? "Conservative" : riskTotal <= 7 ? "Balanced" : "Aggressive";
 
   const canNext = (): boolean => {
+    if (step === 0) {
+      const a = Number(age);
+      return Number.isFinite(a) && a >= 13 && a <= 120 && !!country;
+    }
     if (step === 1) return Number(income) > 0;
     if (step === 2) return depCount >= 0 && ages.every((a, i) => (i < depCount ? a !== "" : true));
     if (step === 3) return debts.every((d) => d.name && Number(d.amount) >= 0);
