@@ -223,6 +223,16 @@ export default function Tracker() {
       </div>
 
       <div className="max-w-lg mx-auto px-4 -mt-4 space-y-4">
+        <Tabs defaultValue="manual" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="manual">Manual</TabsTrigger>
+            <TabsTrigger value="mpesa" className="gap-1.5">
+              M-Pesa Statement
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full gradient-premium text-premium-foreground">PRO</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="manual" className="space-y-4 mt-4">
         {/* Quick add chips */}
         <div className="bg-card rounded-2xl p-4 shadow-card">
           <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
