@@ -115,6 +115,12 @@ export default function Dashboards() {
     <div className="min-h-screen bg-background pb-24">
       <div className="gradient-gold px-4 pt-8 pb-10 rounded-b-3xl">
         <div className="max-w-lg mx-auto">
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-1 text-warning-foreground/80 text-sm mb-2 hover:text-warning-foreground transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
           <p className="text-warning-foreground/70 text-sm font-medium">Kifedha intelligence</p>
           <h1 className="font-display text-2xl font-bold text-warning-foreground mt-1">Strategic Dashboards</h1>
           <p className="text-warning-foreground/75 text-sm mt-2 max-w-md">
