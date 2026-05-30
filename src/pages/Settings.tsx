@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp, AutomationSettings } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { BottomNav } from "@/components/BottomNav";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, MessageCircle, Phone, Shield, Sparkles, Crown, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowLeft, MessageCircle, Phone, Shield, Sparkles, Crown, ExternalLink, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
