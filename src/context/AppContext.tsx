@@ -201,28 +201,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => { supabase.removeChannel(ch); };
   }, [user, fetchDbSub]);
 
-  // Trial / premium derived state
+  // Premium derived state — driven exclusively by the DB subscription row.
+  // Cancellation revokes access immediately (no grace period).
   const { isTrialing, trialDaysLeft, isPremium } = useMemo(() => {
     const now = Date.now();
-    const ends = subscription.trialEndsAt ? new Date(subscription.trialEndsAt).getTime() : 0;
-    const localTrialing = ends > now;
-    const daysLeft = localTrialing ? Math.max(0, Math.ceil((ends - now) / (1000 * 60 * 60 * 24))) : 0;
-
     let dbActive = false;
     let dbTrialing = false;
+    let daysLeft = 0;
     if (dbSub) {
       const periodEnd = dbSub.current_period_end ? new Date(dbSub.current_period_end).getTime() : Infinity;
-      if (["active", "trialing", "past_due"].includes(dbSub.status)) dbActive = periodEnd > now;
-      else if (dbSub.status === "canceled") dbActive = periodEnd > now;
+      // active/trialing/past_due retain access while period is current.
+      // canceled never has access (webhook sets current_period_end = now()).
+      if (["active", "trialing", "past_due"].includes(dbSub.status)) {
+        dbActive = periodEnd === Infinity || periodEnd > now;
+      }
       dbTrialing = dbSub.status === "trialing" && periodEnd > now;
+      if (dbTrialing) daysLeft = Math.max(0, Math.ceil((periodEnd - now) / (1000 * 60 * 60 * 24)));
     }
-
-    return {
-      isTrialing: dbTrialing || localTrialing,
-      trialDaysLeft: daysLeft,
-      isPremium: dbActive || subscription.paid || localTrialing,
-    };
-  }, [subscription, dbSub]);
+    return { isTrialing: dbTrialing, trialDaysLeft: daysLeft, isPremium: dbActive };
+  }, [dbSub]);
 
 
   const startTrial = (cycle: BillingCycle) => {

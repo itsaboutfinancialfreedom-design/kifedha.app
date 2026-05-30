@@ -101,8 +101,9 @@ export default function Upgrade() {
             </div>
             <p className="text-xs text-muted-foreground mb-4">For getting started</p>
             <div className="mb-4">
-              <span className="text-3xl font-display font-bold">KES 0</span>
+              <span className="text-3xl font-display font-bold">$0</span>
               <span className="text-xs text-muted-foreground"> /forever</span>
+              <p className="text-[11px] text-muted-foreground mt-0.5">KES 0</p>
             </div>
             <ul className="space-y-2 text-sm">
               {FREE_FEATURES.map(f => (

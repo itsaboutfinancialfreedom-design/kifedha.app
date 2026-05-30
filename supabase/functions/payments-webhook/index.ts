@@ -12,18 +12,25 @@ function getSupabase() {
   return _supabase;
 }
 
+function extractIds(items: any[]): { priceId?: string; productId?: string } {
+  const item = items?.[0];
+  if (!item) return {};
+  return {
+    priceId: item.price?.importMeta?.externalId,
+    productId: item.product?.importMeta?.externalId,
+  };
+}
+
 async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
   const { id, customerId, items, status, currentBillingPeriod, customData } = data;
   const userId = customData?.userId;
   if (!userId) { console.error('No userId in customData'); return; }
 
-  const item = items[0];
-  const priceId = item.price.importMeta?.externalId;
-  const productId = item.product?.importMeta?.externalId;
+  const { priceId, productId } = extractIds(items);
   if (!priceId || !productId) {
     console.warn('Skipping subscription: missing importMeta.externalId', {
-      rawPriceId: item.price.id,
-      rawProductId: item.product?.id,
+      rawPriceId: items?.[0]?.price?.id,
+      rawProductId: items?.[0]?.product?.id,
     });
     return;
   }
@@ -43,22 +50,35 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
 }
 
 async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
-  const { id, status, currentBillingPeriod, scheduledChange } = data;
+  const { id, status, currentBillingPeriod, scheduledChange, items } = data;
+  const { priceId, productId } = extractIds(items ?? []);
+
+  const update: Record<string, any> = {
+    status,
+    current_period_start: currentBillingPeriod?.startsAt,
+    current_period_end: currentBillingPeriod?.endsAt,
+    cancel_at_period_end: scheduledChange?.action === 'cancel',
+    updated_at: new Date().toISOString(),
+  };
+  // Plan change: capture new price/product if present.
+  if (priceId) update.price_id = priceId;
+  if (productId) update.product_id = productId;
+
   await getSupabase().from('subscriptions')
-    .update({
-      status,
-      current_period_start: currentBillingPeriod?.startsAt,
-      current_period_end: currentBillingPeriod?.endsAt,
-      cancel_at_period_end: scheduledChange?.action === 'cancel',
-      updated_at: new Date().toISOString(),
-    })
+    .update(update)
     .eq('paddle_subscription_id', id)
     .eq('environment', env);
 }
 
 async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
+  // Revoke access immediately: force current_period_end into the past.
   await getSupabase().from('subscriptions')
-    .update({ status: 'canceled', updated_at: new Date().toISOString() })
+    .update({
+      status: 'canceled',
+      current_period_end: new Date().toISOString(),
+      cancel_at_period_end: false,
+      updated_at: new Date().toISOString(),
+    })
     .eq('paddle_subscription_id', data.id)
     .eq('environment', env);
 }
