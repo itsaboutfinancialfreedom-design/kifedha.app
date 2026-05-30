@@ -15,3 +15,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://www.kifedha.app/sitemap.xml
