@@ -29,6 +29,10 @@ import ProtectionCalculator from "./pages/ProtectionCalculator";
 import DebtPlanner from "./pages/DebtPlanner";
 import NotificationSettings from "./pages/NotificationSettings";
 import MpesaSetup from "./pages/MpesaSetup";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import RefundPolicy from "./pages/RefundPolicy";
+import Pricing from "./pages/Pricing";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { PastDueBanner } from "@/components/PastDueBanner";
 
@@ -52,6 +56,10 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/refund" element={<RefundPolicy />} />
                 <Route path="/tools/income-allocator" element={<IncomeAllocatorPage />} />
                 <Route
                   path="/onboarding"
