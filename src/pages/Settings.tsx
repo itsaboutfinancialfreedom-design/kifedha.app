@@ -188,6 +188,28 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Legal */}
+        <div className="rounded-2xl p-5 bg-card shadow-card border border-border">
+          <div className="flex items-center gap-2 mb-3">
+            <FileText className="w-4 h-4 text-muted-foreground" />
+            <h2 className="font-display font-semibold text-sm">Legal</h2>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Link to="/pricing" className="py-2.5 rounded-xl border border-border bg-muted text-center text-xs font-semibold hover:bg-muted/80 transition-colors">
+              Pricing
+            </Link>
+            <Link to="/privacy" className="py-2.5 rounded-xl border border-border bg-muted text-center text-xs font-semibold hover:bg-muted/80 transition-colors">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="py-2.5 rounded-xl border border-border bg-muted text-center text-xs font-semibold hover:bg-muted/80 transition-colors">
+              Terms of Service
+            </Link>
+            <Link to="/refund" className="py-2.5 rounded-xl border border-border bg-muted text-center text-xs font-semibold hover:bg-muted/80 transition-colors">
+              Refund Policy
+            </Link>
+          </div>
+        </div>
+
         {/* Account */}
         <div className="rounded-2xl p-5 bg-card shadow-card border border-border">
           <h2 className="font-display font-semibold text-sm mb-4">Account</h2>
