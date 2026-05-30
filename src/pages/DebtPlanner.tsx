@@ -604,7 +604,7 @@ export default function DebtPlanner() {
             {/* Actions */}
             <div className="flex flex-wrap gap-3">
               <Button onClick={exportSchedule} variant="outline">
-                <Download className="w-4 h-4 mr-2" /> Generate payment schedule (CSV)
+                <Download className="w-4 h-4 mr-2" /> Payment schedule (CSV) {!isPremium && "(Premium)"}
               </Button>
               <Button onClick={setReminders} variant="outline">
                 <Bell className="w-4 h-4 mr-2" /> Set payment reminders {!isPremium && "(Premium)"}
