@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScoreRing } from "@/components/ScoreRing";
 import { useApp } from "@/context/AppContext";
 import { generateInsights } from "@/lib/insightsEngine";
-import { BookOpenCheck, ChevronRight, Shield, Sparkles, Target, TrendingUp } from "lucide-react";
+import { ArrowLeft, BookOpenCheck, ChevronRight, Shield, Sparkles, Target, TrendingUp } from "lucide-react";
 
 function clampScore(value: number) {
   return Math.max(0, Math.min(100, Math.round(value)));
