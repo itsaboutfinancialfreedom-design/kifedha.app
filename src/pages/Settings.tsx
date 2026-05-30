@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp, AutomationSettings } from "@/context/AppContext";
 import { BottomNav } from "@/components/BottomNav";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, MessageCircle, Phone, Shield, Sparkles } from "lucide-react";
+import { ArrowLeft, MessageCircle, Phone, Shield, Sparkles, Crown, ExternalLink, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment } from "@/lib/paddle";
 
 interface ToggleDef {
   key: keyof AutomationSettings;
@@ -47,11 +50,27 @@ const TOGGLES: ToggleDef[] = [
 
 export default function Settings() {
   const navigate = useNavigate();
-  const { automation, setAutomation } = useApp();
+  const { automation, setAutomation, isPremium, isTrialing, trialDaysLeft } = useApp();
+  const [portalLoading, setPortalLoading] = useState(false);
 
   const update = (key: keyof AutomationSettings, value: boolean) => {
     setAutomation({ ...automation, [key]: value });
     toast.success(`${value ? "Enabled" : "Disabled"} ${TOGGLES.find(t => t.key === key)?.title}`);
+  };
+
+  const openPortal = async () => {
+    setPortalLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("customer-portal", {
+        body: { environment: getPaddleEnvironment() },
+      });
+      if (error || !data?.url) throw new Error(error?.message ?? "Could not open billing portal");
+      window.open(data.url, "_blank", "noopener,noreferrer");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not open billing portal");
+    } finally {
+      setPortalLoading(false);
+    }
   };
 
   return (
@@ -79,6 +98,45 @@ export default function Settings() {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Subscription */}
+        <div className="rounded-2xl p-5 bg-card shadow-card border border-border">
+          <div className="flex items-center gap-2 mb-1">
+            <Crown className="w-4 h-4 text-warning" />
+            <h2 className="font-display font-semibold text-sm">Subscription</h2>
+          </div>
+          {isPremium ? (
+            <>
+              <p className="text-xs text-muted-foreground mb-4">
+                Premium active{isTrialing ? ` · ${trialDaysLeft}d trial left` : ""}. Manage billing,
+                switch between monthly and yearly, or cancel anytime.
+              </p>
+              <button
+                onClick={openPortal}
+                disabled={portalLoading}
+                className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm inline-flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {portalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
+                Manage subscription
+              </button>
+              <p className="text-[11px] text-muted-foreground mt-2 text-center">
+                Cancellation takes effect immediately.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-xs text-muted-foreground mb-4">
+                You're on the Free plan. Upgrade to unlock the full Kifedha advantage.
+              </p>
+              <button
+                onClick={() => navigate("/advisor/upgrade")}
+                className="w-full py-3 rounded-xl gradient-premium text-premium-foreground font-semibold text-sm"
+              >
+                Upgrade — $8/month
+              </button>
+            </>
+          )}
         </div>
 
         {/* Toggles */}
