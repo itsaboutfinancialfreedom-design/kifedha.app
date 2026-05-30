@@ -11,18 +11,31 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "@/hooks/use-toast";
 
 const fmt = (n: number) => `KES ${Math.max(0, Math.round(n)).toLocaleString()}`;
 
-const providers = [
-  { name: "Britam", life: 7500, health: null as number | null, income: 3000 },
-  { name: "Jubilee", life: 8000, health: 6500, income: 2500 },
-  { name: "ICEA Lion", life: 7000, health: 7000, income: null },
-  { name: "AAR", life: null, health: 8000, income: null },
-];
+// Indicative monthly premiums (KES) per cover type. Quotes vary by age/health.
+// Sources: provider rate cards & broker quotes — used for side-by-side comparison only.
+const PROVIDER_QUOTES = {
+  life: [
+    { name: "Britam Life", per1M: 1500, highlight: "Cheapest term cover, fast underwriting" },
+    { name: "Jubilee Life", per1M: 1800, highlight: "Strong claims record, bundled critical illness" },
+    { name: "ICEA Lion",   per1M: 1650, highlight: "Includes accelerated terminal illness benefit" },
+  ],
+  health: [
+    { name: "NHIF Supa Cover", flat: 6000, highlight: "Mandatory base; covers most public + accredited hospitals" },
+    { name: "AAR Health",      flat: 8200, highlight: "Outpatient, inpatient, dental, optical bundled" },
+    { name: "Jubilee Health",  flat: 7800, highlight: "Higher inpatient limits, regional cover" },
+  ],
+  income: [
+    { name: "Jubilee Income Protect", per50K: 2000, highlight: "Pays monthly benefit up to 60% of salary" },
+    { name: "Britam Disability",      per50K: 2400, highlight: "Permanent + temporary disability cover" },
+    { name: "Old Mutual Salary Save", per50K: 2200, highlight: "Waiver of premium if disabled" },
+  ],
+};
 
 export default function ProtectionCalculator() {
   const navigate = useNavigate();
@@ -266,43 +279,41 @@ export default function ProtectionCalculator() {
                 <TabsTrigger value="providers">Providers</TabsTrigger>
                 <TabsTrigger value="education">Education</TabsTrigger>
               </TabsList>
-              <TabsContent value="providers">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Provider</TableHead>
-                        <TableHead>Life (5M)</TableHead>
-                        <TableHead>Health (3M)</TableHead>
-                        <TableHead>Income</TableHead>
-                        <TableHead>Monthly Total</TableHead>
-                        <TableHead></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {providers.map((p) => {
-                        const total = (p.life || 0) + (p.health || 0) + (p.income || 0);
-                        return (
-                          <TableRow key={p.name}>
-                            <TableCell className="font-medium">{p.name}</TableCell>
-                            <TableCell>{p.life ? `${p.life.toLocaleString()} KES` : "—"}</TableCell>
-                            <TableCell>{p.health ? `${p.health.toLocaleString()} KES` : "—"}</TableCell>
-                            <TableCell>{p.income ? `${p.income.toLocaleString()} KES` : "—"}</TableCell>
-                            <TableCell className="font-semibold">{total.toLocaleString()} KES</TableCell>
-                            <TableCell>
-                              <Button size="sm" variant="outline" asChild>
-                                <a href={`https://www.google.com/search?q=${encodeURIComponent(p.name + " Kenya insurance quote")}`} target="_blank" rel="noreferrer">
-                                  Get quote <ExternalLink className="w-3 h-3 ml-1" />
-                                </a>
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-                <p className="text-xs text-muted-foreground mt-3">Indicative premiums for comparison only. Actual quotes vary by age, health and underwriting.</p>
+              <TabsContent value="providers" className="space-y-6">
+                <ProviderSection
+                  title="Life cover — premium per KES 1M sum assured / month"
+                  rows={PROVIDER_QUOTES.life.map(p => ({
+                    name: p.name,
+                    quote: calc.lifeGap > 0 ? `KES ${Math.round((calc.lifeGap / 1_000_000) * p.per1M).toLocaleString()}/mo` : "No gap",
+                    sub: `KES ${p.per1M.toLocaleString()}/M cover`,
+                    highlight: p.highlight,
+                    recommended: p.per1M === Math.min(...PROVIDER_QUOTES.life.map(x => x.per1M)),
+                  }))}
+                  query="Kenya life insurance quote"
+                />
+                <ProviderSection
+                  title="Health cover — monthly premium (family of 4, KES 3M limit)"
+                  rows={PROVIDER_QUOTES.health.map(p => ({
+                    name: p.name,
+                    quote: calc.healthGap > 0 ? `KES ${p.flat.toLocaleString()}/mo` : "No gap",
+                    sub: "Indicative family rate",
+                    highlight: p.highlight,
+                    recommended: p.flat === Math.min(...PROVIDER_QUOTES.health.map(x => x.flat)),
+                  }))}
+                  query="Kenya health insurance family cover quote"
+                />
+                <ProviderSection
+                  title="Income protection — premium per KES 50K monthly benefit"
+                  rows={PROVIDER_QUOTES.income.map(p => ({
+                    name: p.name,
+                    quote: calc.incomeGap > 0 ? `KES ${Math.round((calc.incomeGap / 6 / 50_000) * p.per50K).toLocaleString()}/mo` : "No gap",
+                    sub: `KES ${p.per50K.toLocaleString()} per 50K benefit`,
+                    highlight: p.highlight,
+                    recommended: p.per50K === Math.min(...PROVIDER_QUOTES.income.map(x => x.per50K)),
+                  }))}
+                  query="Kenya income protection insurance quote"
+                />
+                <p className="text-xs text-muted-foreground">Indicative premiums for comparison only. Actual quotes vary by age, health, occupation and underwriting. Always request 2–3 written quotes before buying.</p>
               </TabsContent>
               <TabsContent value="education" className="space-y-4 text-sm">
                 <div>
@@ -330,6 +341,47 @@ export default function ProtectionCalculator() {
             <Button variant="outline" onClick={setReminder}><Bell className="w-4 h-4" /> Set annual reminder</Button>
           </CardContent>
         </Card>
+      </div>
+    </div>
+  );
+}
+
+interface ProviderRow {
+  name: string;
+  quote: string;
+  sub: string;
+  highlight: string;
+  recommended?: boolean;
+}
+
+function ProviderSection({ title, rows, query }: { title: string; rows: ProviderRow[]; query: string }) {
+  return (
+    <div>
+      <h4 className="text-sm font-semibold mb-2">{title}</h4>
+      <div className="grid gap-2 sm:grid-cols-3">
+        {rows.map((r) => (
+          <div
+            key={r.name}
+            className={`rounded-xl border p-3 flex flex-col gap-1.5 ${r.recommended ? "border-success bg-success/5" : "border-border"}`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-semibold text-sm">{r.name}</span>
+              {r.recommended && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-success/15 text-success">BEST PRICE</span>
+              )}
+            </div>
+            <div>
+              <div className="font-display text-base font-bold">{r.quote}</div>
+              <div className="text-[11px] text-muted-foreground">{r.sub}</div>
+            </div>
+            <p className="text-[11px] text-muted-foreground line-clamp-2">{r.highlight}</p>
+            <Button size="sm" variant="outline" className="mt-1 h-7 text-xs" asChild>
+              <a href={`https://www.google.com/search?q=${encodeURIComponent(r.name + " " + query)}`} target="_blank" rel="noreferrer">
+                Get quote <ExternalLink className="w-3 h-3 ml-1" />
+              </a>
+            </Button>
+          </div>
+        ))}
       </div>
     </div>
   );

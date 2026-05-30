@@ -1,15 +1,19 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { useTransactions, Transaction } from "@/context/TransactionsContext";
 import { CATEGORIES } from "@/lib/categorize";
 import { useT } from "@/hooks/useT";
-import { ArrowLeft, Download, Printer } from "lucide-react";
+import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+import { ArrowLeft, Download, Printer, Lock, FileText, Wallet, Loader2 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid,
   PieChart, Pie, Cell, Legend,
 } from "recharts";
+import { generateNetWorthSnapshot, generateMonthlyPL } from "@/utils/pdfGenerator";
 
 const PIE_COLORS = ["#f59e0b","#ef4444","#10b981","#3b82f6","#8b5cf6","#ec4899","#14b8a6","#f97316","#84cc16","#6366f1","#06b6d4","#a855f7","#64748b"];
 
@@ -21,6 +25,9 @@ export default function Reports() {
   const navigate = useNavigate();
   const { transactions } = useTransactions();
   const { t } = useT();
+  const { isPremium } = useApp();
+  const { user, profile } = useAuth();
+  const [busy, setBusy] = useState<null | "csv" | "nw" | "pl">(null);
 
   // Last 6 months income vs expense
   const monthly = useMemo(() => {
@@ -77,6 +84,16 @@ export default function Reports() {
       .sort((a, b) => b.suggested - a.suggested);
   }, [transactions]);
 
+  function gateOrRun(kind: "csv" | "nw" | "pl", fn: () => Promise<void> | void) {
+    if (!isPremium) {
+      toast.error("Premium feature", { description: "Upgrade to unlock report exports." });
+      navigate("/advisor/upgrade");
+      return;
+    }
+    setBusy(kind);
+    Promise.resolve(fn()).finally(() => setBusy(null));
+  }
+
   function exportCSV() {
     const rows: string[] = ["Date,Type,Amount,Category,Note,Source"];
     transactions.forEach((tx: Transaction) => {
@@ -96,6 +113,30 @@ export default function Reports() {
     a.download = `kifedha-transactions-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+    toast.success("CSV downloaded");
+  }
+
+  async function downloadNetWorth() {
+    if (!user) return;
+    await generateNetWorthSnapshot({
+      userId: user.id,
+      userName: profile?.full_name ?? null,
+      userEmail: user.email ?? null,
+    });
+    toast.success("Net worth snapshot downloaded");
+  }
+
+  async function downloadMonthlyPL() {
+    if (!user) return;
+    await generateMonthlyPL(
+      {
+        userId: user.id,
+        userName: profile?.full_name ?? null,
+        userEmail: user.email ?? null,
+      },
+      transactions,
+    );
+    toast.success("Monthly P&L downloaded");
   }
 
   return (
@@ -110,13 +151,48 @@ export default function Reports() {
       </div>
 
       <div className="max-w-lg mx-auto px-4 -mt-4 space-y-4">
-        <div className="flex gap-2 print:hidden">
-          <Button variant="outline" size="sm" className="flex-1" onClick={exportCSV}>
-            <Download className="w-4 h-4 mr-1" /> {t("export_csv")}
-          </Button>
-          <Button variant="outline" size="sm" className="flex-1" onClick={() => window.print()}>
-            <Printer className="w-4 h-4 mr-1" /> {t("export_pdf")}
-          </Button>
+        {/* Premium reports */}
+        <div className="bg-card rounded-2xl p-4 shadow-card space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-display text-sm font-semibold">Premium reports</h2>
+              <p className="text-xs text-muted-foreground">Download polished PDFs and your full data.</p>
+            </div>
+            {!isPremium && (
+              <span className="text-[10px] font-bold px-2 py-1 rounded-full gradient-premium text-premium-foreground">PRO</span>
+            )}
+          </div>
+          <div className="grid grid-cols-1 gap-2 print:hidden">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={busy === "nw"}
+              onClick={() => gateOrRun("nw", downloadNetWorth)}
+            >
+              {busy === "nw" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : isPremium ? <Wallet className="w-4 h-4 mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
+              Net worth snapshot (PDF)
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={busy === "pl"}
+              onClick={() => gateOrRun("pl", downloadMonthlyPL)}
+            >
+              {busy === "pl" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : isPremium ? <FileText className="w-4 h-4 mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
+              Monthly P&amp;L statement (PDF)
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => gateOrRun("csv", exportCSV)}
+            >
+              {isPremium ? <Download className="w-4 h-4 mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
+              {t("export_csv")} — all transactions
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              <Printer className="w-4 h-4 mr-2" /> Print this page
+            </Button>
+          </div>
         </div>
 
         <div className="bg-card rounded-2xl p-4 shadow-card">

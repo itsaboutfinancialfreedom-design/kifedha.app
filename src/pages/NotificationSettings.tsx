@@ -24,6 +24,7 @@ const PREFS: Pref[] = [
   { type: "weekly_digest", label: "Weekly digest", description: "Your net worth change and top wins each week.", icon: Calendar, frequency: "weekly" },
   { type: "monthly_review", label: "Monthly review", description: "Reminder to review your budget and goals.", icon: Calendar, frequency: "monthly" },
   { type: "payment_reminders", label: "Payment reminders", description: "Alert 3 days before each debt due date.", icon: CreditCard },
+  { type: "rebalance_reminder", label: "Quarterly rebalance reminder", description: "Nudge every 3 months to review and rebalance your investment allocation.", icon: Calendar, frequency: "quarterly" },
 ];
 
 export default function NotificationSettings() {

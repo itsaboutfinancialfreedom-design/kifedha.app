@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info, Save, FileDown, Target, Lock } from "lucide-react";
+import { Info, Save, FileDown, Target, Lock, Bell, ExternalLink, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -28,6 +28,34 @@ const TOOLTIPS = {
   savings: "Future goals: emergency fund (3-6 months), retirement, education, major purchases. Aim for ≥20%.",
   investments: "Growth assets: stocks, bonds, mutual funds, SACCOs, business capital. Higher risk = higher return.",
   protection: "Insurance: life (10x annual income), health, income protection — shields you from financial loss.",
+};
+
+interface FundPick {
+  name: string;
+  type: "MMF" | "Bond fund" | "Equity fund" | "ETF" | "SACCO";
+  yieldText: string;
+  min: string;
+  why: string;
+  url: string;
+}
+
+// Kenya-focused funds. Yields are illustrative and change weekly — always verify before investing.
+const KENYA_FUNDS: Record<Risk, FundPick[]> = {
+  conservative: [
+    { name: "CIC Money Market Fund", type: "MMF", yieldText: "~14% p.a.", min: "KES 5,000", why: "Top-rated MMF, daily liquidity, ideal for emergency fund", url: "https://www.google.com/search?q=CIC+Money+Market+Fund+Kenya" },
+    { name: "Sanlam Money Market Fund", type: "MMF", yieldText: "~13% p.a.", min: "KES 2,500", why: "Low entry, regulated by CMA, weekly payouts", url: "https://www.google.com/search?q=Sanlam+Money+Market+Fund+Kenya" },
+    { name: "NCBA Fixed Income Fund", type: "Bond fund", yieldText: "~12% p.a.", min: "KES 5,000", why: "Government & corporate bonds, lower volatility than equity", url: "https://www.google.com/search?q=NCBA+Fixed+Income+Fund" },
+  ],
+  moderate: [
+    { name: "Sanlam Balanced Fund", type: "Equity fund", yieldText: "~15% p.a.", min: "KES 2,500", why: "Mix of NSE equities + bonds; smoother ride than pure equity", url: "https://www.google.com/search?q=Sanlam+Balanced+Fund+Kenya" },
+    { name: "Britam Bond Fund", type: "Bond fund", yieldText: "~13% p.a.", min: "KES 1,000", why: "Defensive base — pairs well with one equity fund", url: "https://www.google.com/search?q=Britam+Bond+Fund" },
+    { name: "Stima SACCO", type: "SACCO", yieldText: "~11% dividend", min: "KES 1,000/mo", why: "Patient capital + cheap loan multiplier when you need credit", url: "https://www.google.com/search?q=Stima+SACCO+Kenya" },
+  ],
+  aggressive: [
+    { name: "ABSA NewGold ETF (NSE)", type: "ETF", yieldText: "Tracks gold price (USD)", min: "1 unit (~KES 9,000)", why: "Hedge against KES weakness, traded on NSE", url: "https://www.google.com/search?q=NewGold+ETF+NSE+Kenya" },
+    { name: "Sanlam Equity Fund", type: "Equity fund", yieldText: "~18% p.a. (volatile)", min: "KES 2,500", why: "Diversified NSE blue chips, professionally managed", url: "https://www.google.com/search?q=Sanlam+Equity+Fund+Kenya" },
+    { name: "Vanguard S&P 500 (via ETrade/Interactive Brokers)", type: "ETF", yieldText: "~10% USD historical", min: "~USD 100", why: "Global diversification beyond NSE; USD-denominated", url: "https://www.google.com/search?q=VOO+Vanguard+S%26P+500+ETF" },
+  ],
 };
 
 export function calculateAllocations(
@@ -91,7 +119,36 @@ export default function IncomeAllocator({ embedded = false }: Props) {
   const [risk, setRisk] = useState<Risk>(initialRisk);
   const [hasDependents, setHasDependents] = useState<boolean>(initialDeps);
   const [saving, setSaving] = useState(false);
+  const [rebalanceOn, setRebalanceOn] = useState(false);
   const captureRef = useRef<HTMLDivElement>(null);
+
+  // Load rebalance reminder state
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("user_notifications")
+        .select("enabled")
+        .eq("user_id", user.id)
+        .eq("notification_type", "rebalance_reminder")
+        .maybeSingle();
+      if (data) setRebalanceOn(!!data.enabled);
+    })();
+  }, [user]);
+
+  const toggleRebalance = async (v: boolean) => {
+    if (!user) { toast.error("Log in to set reminders"); return; }
+    setRebalanceOn(v);
+    const { error } = await supabase
+      .from("user_notifications")
+      .upsert(
+        { user_id: user.id, notification_type: "rebalance_reminder", enabled: v, frequency: "quarterly" },
+        { onConflict: "user_id,notification_type" }
+      );
+    if (error) { setRebalanceOn(!v); toast.error("Could not save reminder"); }
+    else toast.success(v ? "Quarterly rebalance reminder on" : "Reminder off");
+  };
+
 
   // Sync when profile loads
   useEffect(() => {
@@ -322,6 +379,58 @@ export default function IncomeAllocator({ embedded = false }: Props) {
           </div>
         </div>
       </div>
+
+      {/* Kenya fund picks by risk profile */}
+      <Card className="mt-6">
+        <CardHeader>
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-warning" />
+                Where to put your investments ({risk})
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                Picks for Kenyan investors. {!isPremium && "Free shows the top pick — upgrade for the full shortlist."}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 rounded-lg border px-3 py-1.5">
+              <Bell className="h-3.5 w-3.5 text-muted-foreground" />
+              <Label htmlFor="rebal" className="text-xs">Quarterly rebalance reminder</Label>
+              <Switch id="rebal" checked={rebalanceOn} onCheckedChange={toggleRebalance} />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {(isPremium ? KENYA_FUNDS[risk] : KENYA_FUNDS[risk].slice(0, 1)).map((f) => (
+              <div key={f.name} className="rounded-xl border p-3 space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-semibold text-sm">{f.name}</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">{f.type}</span>
+                </div>
+                <div className="text-xs"><span className="font-semibold">{f.yieldText}</span> · min {f.min}</div>
+                <p className="text-[11px] text-muted-foreground line-clamp-2">{f.why}</p>
+                <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
+                  <a href={f.url} target="_blank" rel="noreferrer">Learn more <ExternalLink className="h-3 w-3 ml-1" /></a>
+                </Button>
+              </div>
+            ))}
+            {!isPremium && (
+              <button
+                onClick={() => navigate("/advisor/upgrade")}
+                className="rounded-xl border-2 border-dashed border-warning/40 p-3 flex flex-col items-center justify-center text-center hover:bg-warning/5 transition"
+              >
+                <Lock className="h-4 w-4 text-warning mb-1" />
+                <span className="text-xs font-semibold">Unlock {KENYA_FUNDS[risk].length - 1} more picks</span>
+                <span className="text-[10px] text-muted-foreground">Premium</span>
+              </button>
+            )}
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-3">Yields are indicative and change weekly. Past performance is not a guarantee. Verify with the provider before investing.</p>
+        </CardContent>
+      </Card>
+
+
 
       {/* Actions */}
       <div className="grid sm:grid-cols-3 gap-3 mt-6">

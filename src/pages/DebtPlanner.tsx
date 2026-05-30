@@ -301,6 +301,11 @@ export default function DebtPlanner() {
   }
 
   function exportSchedule() {
+    if (!isPremium) {
+      toast({ title: "Premium feature", description: "CSV payment schedules are a Premium export." });
+      navigate("/advisor/upgrade");
+      return;
+    }
     const rows = avalanche.timeline.map((t) => ({ month: t.month, total_balance: Math.round(Number(t.total)) }));
     download(`debt-schedule-${Date.now()}.csv`, toCSV(rows));
   }
@@ -599,7 +604,7 @@ export default function DebtPlanner() {
             {/* Actions */}
             <div className="flex flex-wrap gap-3">
               <Button onClick={exportSchedule} variant="outline">
-                <Download className="w-4 h-4 mr-2" /> Generate payment schedule (CSV)
+                <Download className="w-4 h-4 mr-2" /> Payment schedule (CSV) {!isPremium && "(Premium)"}
               </Button>
               <Button onClick={setReminders} variant="outline">
                 <Bell className="w-4 h-4 mr-2" /> Set payment reminders {!isPremium && "(Premium)"}
