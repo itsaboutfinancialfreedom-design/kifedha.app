@@ -6,6 +6,8 @@ import { ArrowLeft, Send, Sparkles, Lock, Loader2, Crown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import { generateInsights } from "@/lib/insightsEngine";
+import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment } from "@/lib/paddle";
 
 interface Msg { role: "user" | "assistant"; content: string }
 
