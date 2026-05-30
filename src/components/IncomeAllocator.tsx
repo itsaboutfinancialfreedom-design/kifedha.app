@@ -380,6 +380,58 @@ export default function IncomeAllocator({ embedded = false }: Props) {
         </div>
       </div>
 
+      {/* Kenya fund picks by risk profile */}
+      <Card className="mt-6">
+        <CardHeader>
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-warning" />
+                Where to put your investments ({risk})
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                Picks for Kenyan investors. {!isPremium && "Free shows the top pick — upgrade for the full shortlist."}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 rounded-lg border px-3 py-1.5">
+              <Bell className="h-3.5 w-3.5 text-muted-foreground" />
+              <Label htmlFor="rebal" className="text-xs">Quarterly rebalance reminder</Label>
+              <Switch id="rebal" checked={rebalanceOn} onCheckedChange={toggleRebalance} />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {(isPremium ? KENYA_FUNDS[risk] : KENYA_FUNDS[risk].slice(0, 1)).map((f) => (
+              <div key={f.name} className="rounded-xl border p-3 space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-semibold text-sm">{f.name}</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">{f.type}</span>
+                </div>
+                <div className="text-xs"><span className="font-semibold">{f.yieldText}</span> · min {f.min}</div>
+                <p className="text-[11px] text-muted-foreground line-clamp-2">{f.why}</p>
+                <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
+                  <a href={f.url} target="_blank" rel="noreferrer">Learn more <ExternalLink className="h-3 w-3 ml-1" /></a>
+                </Button>
+              </div>
+            ))}
+            {!isPremium && (
+              <button
+                onClick={() => navigate("/advisor/upgrade")}
+                className="rounded-xl border-2 border-dashed border-warning/40 p-3 flex flex-col items-center justify-center text-center hover:bg-warning/5 transition"
+              >
+                <Lock className="h-4 w-4 text-warning mb-1" />
+                <span className="text-xs font-semibold">Unlock {KENYA_FUNDS[risk].length - 1} more picks</span>
+                <span className="text-[10px] text-muted-foreground">Premium</span>
+              </button>
+            )}
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-3">Yields are indicative and change weekly. Past performance is not a guarantee. Verify with the provider before investing.</p>
+        </CardContent>
+      </Card>
+
+
+
       {/* Actions */}
       <div className="grid sm:grid-cols-3 gap-3 mt-6">
         <Button onClick={savePlan} disabled={saving}>
