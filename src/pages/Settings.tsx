@@ -124,7 +124,7 @@ export default function Settings() {
                 Manage subscription
               </button>
               <p className="text-[11px] text-muted-foreground mt-2 text-center">
-                Cancellation takes effect immediately.
+                If you cancel, you'll keep premium access until the end of your current billing period.
               </p>
             </>
           ) : (
