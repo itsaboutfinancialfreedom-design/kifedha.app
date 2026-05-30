@@ -70,11 +70,28 @@ const RISK_QUIZ = [
   },
 ] as const;
 
+const COUNTRIES = [
+  "Kenya",
+  "Uganda",
+  "Tanzania",
+  "Rwanda",
+  "Nigeria",
+  "Ghana",
+  "South Africa",
+  "United Kingdom",
+  "United States",
+  "Other",
+];
+
 export default function Onboarding() {
   const navigate = useNavigate();
   const { user, profile, loading, refreshProfile } = useAuth();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+
+  // Step 0 — demographics
+  const [age, setAge] = useState("");
+  const [country, setCountry] = useState("Kenya");
 
   // Step 1
   const [income, setIncome] = useState("");
