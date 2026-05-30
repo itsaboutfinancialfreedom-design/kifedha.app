@@ -30,6 +30,34 @@ const TOOLTIPS = {
   protection: "Insurance: life (10x annual income), health, income protection — shields you from financial loss.",
 };
 
+interface FundPick {
+  name: string;
+  type: "MMF" | "Bond fund" | "Equity fund" | "ETF" | "SACCO";
+  yieldText: string;
+  min: string;
+  why: string;
+  url: string;
+}
+
+// Kenya-focused funds. Yields are illustrative and change weekly — always verify before investing.
+const KENYA_FUNDS: Record<Risk, FundPick[]> = {
+  conservative: [
+    { name: "CIC Money Market Fund", type: "MMF", yieldText: "~14% p.a.", min: "KES 5,000", why: "Top-rated MMF, daily liquidity, ideal for emergency fund", url: "https://www.google.com/search?q=CIC+Money+Market+Fund+Kenya" },
+    { name: "Sanlam Money Market Fund", type: "MMF", yieldText: "~13% p.a.", min: "KES 2,500", why: "Low entry, regulated by CMA, weekly payouts", url: "https://www.google.com/search?q=Sanlam+Money+Market+Fund+Kenya" },
+    { name: "NCBA Fixed Income Fund", type: "Bond fund", yieldText: "~12% p.a.", min: "KES 5,000", why: "Government & corporate bonds, lower volatility than equity", url: "https://www.google.com/search?q=NCBA+Fixed+Income+Fund" },
+  ],
+  moderate: [
+    { name: "Sanlam Balanced Fund", type: "Equity fund", yieldText: "~15% p.a.", min: "KES 2,500", why: "Mix of NSE equities + bonds; smoother ride than pure equity", url: "https://www.google.com/search?q=Sanlam+Balanced+Fund+Kenya" },
+    { name: "Britam Bond Fund", type: "Bond fund", yieldText: "~13% p.a.", min: "KES 1,000", why: "Defensive base — pairs well with one equity fund", url: "https://www.google.com/search?q=Britam+Bond+Fund" },
+    { name: "Stima SACCO", type: "SACCO", yieldText: "~11% dividend", min: "KES 1,000/mo", why: "Patient capital + cheap loan multiplier when you need credit", url: "https://www.google.com/search?q=Stima+SACCO+Kenya" },
+  ],
+  aggressive: [
+    { name: "ABSA NewGold ETF (NSE)", type: "ETF", yieldText: "Tracks gold price (USD)", min: "1 unit (~KES 9,000)", why: "Hedge against KES weakness, traded on NSE", url: "https://www.google.com/search?q=NewGold+ETF+NSE+Kenya" },
+    { name: "Sanlam Equity Fund", type: "Equity fund", yieldText: "~18% p.a. (volatile)", min: "KES 2,500", why: "Diversified NSE blue chips, professionally managed", url: "https://www.google.com/search?q=Sanlam+Equity+Fund+Kenya" },
+    { name: "Vanguard S&P 500 (via ETrade/Interactive Brokers)", type: "ETF", yieldText: "~10% USD historical", min: "~USD 100", why: "Global diversification beyond NSE; USD-denominated", url: "https://www.google.com/search?q=VOO+Vanguard+S%26P+500+ETF" },
+  ],
+};
+
 export function calculateAllocations(
   income: number,
   risk: Risk,
