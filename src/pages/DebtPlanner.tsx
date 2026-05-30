@@ -301,6 +301,11 @@ export default function DebtPlanner() {
   }
 
   function exportSchedule() {
+    if (!isPremium) {
+      toast({ title: "Premium feature", description: "CSV payment schedules are a Premium export." });
+      navigate("/advisor/upgrade");
+      return;
+    }
     const rows = avalanche.timeline.map((t) => ({ month: t.month, total_balance: Math.round(Number(t.total)) }));
     download(`debt-schedule-${Date.now()}.csv`, toCSV(rows));
   }
