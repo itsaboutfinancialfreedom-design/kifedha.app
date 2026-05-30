@@ -70,11 +70,28 @@ const RISK_QUIZ = [
   },
 ] as const;
 
+const COUNTRIES = [
+  "Kenya",
+  "Uganda",
+  "Tanzania",
+  "Rwanda",
+  "Nigeria",
+  "Ghana",
+  "South Africa",
+  "United Kingdom",
+  "United States",
+  "Other",
+];
+
 export default function Onboarding() {
   const navigate = useNavigate();
   const { user, profile, loading, refreshProfile } = useAuth();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+
+  // Step 0 — demographics
+  const [age, setAge] = useState("");
+  const [country, setCountry] = useState("Kenya");
 
   // Step 1
   const [income, setIncome] = useState("");
@@ -141,6 +158,10 @@ export default function Onboarding() {
     riskTotal <= 4 ? "Conservative" : riskTotal <= 7 ? "Balanced" : "Aggressive";
 
   const canNext = (): boolean => {
+    if (step === 0) {
+      const a = Number(age);
+      return Number.isFinite(a) && a >= 13 && a <= 120 && !!country;
+    }
     if (step === 1) return Number(income) > 0;
     if (step === 2) return depCount >= 0 && ages.every((a, i) => (i < depCount ? a !== "" : true));
     if (step === 3) return debts.every((d) => d.name && Number(d.amount) >= 0);
@@ -156,6 +177,8 @@ export default function Onboarding() {
       const { error: pErr } = await supabase
         .from("profiles")
         .update({
+          age: Number(age) || null,
+          country,
           monthly_income: Number(income),
           income_frequency: frequency,
           income_stability: stability,
@@ -219,19 +242,57 @@ export default function Onboarding() {
     <div className="min-h-screen bg-background flex flex-col">
       <div className="gradient-gold px-6 pt-10 pb-6 rounded-b-[2rem]">
         <div className="max-w-lg mx-auto">
-          <p className="text-warning-foreground/80 text-sm font-medium">Step {step} of 5</p>
+          <p className="text-warning-foreground/80 text-sm font-medium">Step {step + 1} of 6</p>
           <h1 className="font-display text-2xl font-bold text-warning-foreground mt-1">
+            {step === 0 && "A bit about you"}
             {step === 1 && "Tell us about your income"}
             {step === 2 && "Who depends on you?"}
             {step === 3 && "Any existing debts?"}
             {step === 4 && "Your financial goals"}
             {step === 5 && "Your risk comfort"}
           </h1>
-          <Progress value={(step / 5) * 100} className="mt-4 h-2 bg-warning-foreground/20" />
+          <Progress value={((step + 1) / 6) * 100} className="mt-4 h-2 bg-warning-foreground/20" />
         </div>
       </div>
 
       <div className="flex-1 px-6 py-6 max-w-lg mx-auto w-full">
+        {step === 0 && (
+          <div className="space-y-5">
+            <div>
+              <Label htmlFor="age">Your age</Label>
+              <Input
+                id="age"
+                inputMode="numeric"
+                value={age}
+                onChange={(e) => setAge(e.target.value.replace(/[^0-9]/g, "").slice(0, 3))}
+                placeholder="e.g. 32"
+                className="mt-1 text-lg"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                We use this to tailor retirement, protection and risk advice.
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="country">Country</Label>
+              <Select value={country} onValueChange={setCountry}>
+                <SelectTrigger id="country" className="mt-1">
+                  <SelectValue placeholder="Select country" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COUNTRIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Currency, products and tax assumptions default to Kenya.
+              </p>
+            </div>
+          </div>
+        )}
+
         {step === 1 && (
           <div className="space-y-5">
             <div>
@@ -500,7 +561,7 @@ export default function Onboarding() {
         )}
 
         <div className="flex gap-3 mt-8">
-          {step > 1 && (
+          {step > 0 && (
             <Button variant="outline" onClick={() => setStep(step - 1)} disabled={saving}>
               <ArrowLeft className="w-4 h-4 mr-1" /> Back
             </Button>

@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          age: number | null
+          country: string
           created_at: string
           dependents_ages: Json | null
           dependents_count: number | null
@@ -33,6 +35,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          age?: number | null
+          country?: string
           created_at?: string
           dependents_ages?: Json | null
           dependents_count?: number | null
@@ -50,6 +54,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          age?: number | null
+          country?: string
           created_at?: string
           dependents_ages?: Json | null
           dependents_count?: number | null
