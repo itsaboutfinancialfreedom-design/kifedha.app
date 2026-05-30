@@ -345,3 +345,44 @@ export default function ProtectionCalculator() {
     </div>
   );
 }
+
+interface ProviderRow {
+  name: string;
+  quote: string;
+  sub: string;
+  highlight: string;
+  recommended?: boolean;
+}
+
+function ProviderSection({ title, rows, query }: { title: string; rows: ProviderRow[]; query: string }) {
+  return (
+    <div>
+      <h4 className="text-sm font-semibold mb-2">{title}</h4>
+      <div className="grid gap-2 sm:grid-cols-3">
+        {rows.map((r) => (
+          <div
+            key={r.name}
+            className={`rounded-xl border p-3 flex flex-col gap-1.5 ${r.recommended ? "border-success bg-success/5" : "border-border"}`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-semibold text-sm">{r.name}</span>
+              {r.recommended && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-success/15 text-success">BEST PRICE</span>
+              )}
+            </div>
+            <div>
+              <div className="font-display text-base font-bold">{r.quote}</div>
+              <div className="text-[11px] text-muted-foreground">{r.sub}</div>
+            </div>
+            <p className="text-[11px] text-muted-foreground line-clamp-2">{r.highlight}</p>
+            <Button size="sm" variant="outline" className="mt-1 h-7 text-xs" asChild>
+              <a href={`https://www.google.com/search?q=${encodeURIComponent(r.name + " " + query)}`} target="_blank" rel="noreferrer">
+                Get quote <ExternalLink className="w-3 h-3 ml-1" />
+              </a>
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
