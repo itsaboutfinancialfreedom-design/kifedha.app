@@ -17,12 +17,25 @@ import { toast } from "@/hooks/use-toast";
 
 const fmt = (n: number) => `KES ${Math.max(0, Math.round(n)).toLocaleString()}`;
 
-const providers = [
-  { name: "Britam", life: 7500, health: null as number | null, income: 3000 },
-  { name: "Jubilee", life: 8000, health: 6500, income: 2500 },
-  { name: "ICEA Lion", life: 7000, health: 7000, income: null },
-  { name: "AAR", life: null, health: 8000, income: null },
-];
+// Indicative monthly premiums (KES) per cover type. Quotes vary by age/health.
+// Sources: provider rate cards & broker quotes — used for side-by-side comparison only.
+const PROVIDER_QUOTES = {
+  life: [
+    { name: "Britam Life", per1M: 1500, highlight: "Cheapest term cover, fast underwriting" },
+    { name: "Jubilee Life", per1M: 1800, highlight: "Strong claims record, bundled critical illness" },
+    { name: "ICEA Lion",   per1M: 1650, highlight: "Includes accelerated terminal illness benefit" },
+  ],
+  health: [
+    { name: "NHIF Supa Cover", flat: 6000, highlight: "Mandatory base; covers most public + accredited hospitals" },
+    { name: "AAR Health",      flat: 8200, highlight: "Outpatient, inpatient, dental, optical bundled" },
+    { name: "Jubilee Health",  flat: 7800, highlight: "Higher inpatient limits, regional cover" },
+  ],
+  income: [
+    { name: "Jubilee Income Protect", per50K: 2000, highlight: "Pays monthly benefit up to 60% of salary" },
+    { name: "Britam Disability",      per50K: 2400, highlight: "Permanent + temporary disability cover" },
+    { name: "Old Mutual Salary Save", per50K: 2200, highlight: "Waiver of premium if disabled" },
+  ],
+};
 
 export default function ProtectionCalculator() {
   const navigate = useNavigate();
