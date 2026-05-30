@@ -71,11 +71,13 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
 }
 
 async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
-  // Revoke access immediately: force current_period_end into the past.
+  // Honor end-of-period grace: keep current_period_end from Paddle so users
+  // retain access for what they've already paid. has_active_subscription()
+  // covers `canceled` rows whose current_period_end is still in the future.
   await getSupabase().from('subscriptions')
     .update({
       status: 'canceled',
-      current_period_end: new Date().toISOString(),
+      current_period_end: data.currentBillingPeriod?.endsAt ?? data.canceledAt ?? new Date().toISOString(),
       cancel_at_period_end: false,
       updated_at: new Date().toISOString(),
     })
