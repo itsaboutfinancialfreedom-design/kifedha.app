@@ -10,7 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, ArrowDownCircle, ArrowUpCircle, Trash2, Sparkles, Mic, Loader2, MessageSquareText, Languages } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { PremiumGate } from "@/components/PremiumGate";
+import { Plus, ArrowDownCircle, ArrowUpCircle, Trash2, Sparkles, Mic, Loader2, MessageSquareText, Languages, FileText, Upload, CheckCircle2 } from "lucide-react";
 import { CATEGORIES, Category, autoCategorize } from "@/lib/categorize";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -221,6 +223,16 @@ export default function Tracker() {
       </div>
 
       <div className="max-w-lg mx-auto px-4 -mt-4 space-y-4">
+        <Tabs defaultValue="manual" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="manual">Manual</TabsTrigger>
+            <TabsTrigger value="mpesa" className="gap-1.5">
+              M-Pesa Statement
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full gradient-premium text-premium-foreground">PRO</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="manual" className="space-y-4 mt-4">
         {/* Quick add chips */}
         <div className="bg-card rounded-2xl p-4 shadow-card">
           <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
@@ -424,6 +436,58 @@ export default function Tracker() {
         >
           {t("view_wealth")}
         </button>
+          </TabsContent>
+
+          <TabsContent value="mpesa" className="mt-4">
+            <PremiumGate featureName="M-Pesa Statement Import">
+              <div className="space-y-4">
+                <div className="bg-card rounded-2xl p-5 shadow-card">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+                      <FileText className="w-5 h-5 text-success" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-display font-bold text-base">Import M-Pesa Statement</h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Upload your official M-Pesa PDF statement and we'll auto-categorize every transaction.
+                      </p>
+                    </div>
+                  </div>
+
+                  <label className="mt-5 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-xl p-8 cursor-pointer hover:bg-muted/40 transition">
+                    <Upload className="w-6 h-6 text-muted-foreground" />
+                    <p className="text-sm font-medium">Tap to upload PDF statement</p>
+                    <p className="text-[11px] text-muted-foreground">Request yours by dialing *334# → My Account → M-PESA Statement</p>
+                    <input
+                      type="file"
+                      accept="application/pdf"
+                      className="hidden"
+                      onChange={() => toast.info("Statement parser launches soon. Your interest is noted.")}
+                    />
+                  </label>
+                </div>
+
+                <div className="bg-card rounded-2xl p-5 shadow-card">
+                  <h4 className="font-display font-semibold text-sm mb-3">What you'll get</h4>
+                  <ul className="space-y-2.5 text-sm">
+                    {[
+                      "Auto-import every Paybill, Till, Send Money & Withdrawal",
+                      "Smart categorization (Food, Transport, Bills, etc.)",
+                      "Detect recurring subscriptions and standing orders",
+                      "Spot hidden fees and overspending patterns",
+                      "Up to 6 months of history in one tap",
+                    ].map(item => (
+                      <li key={item} className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </PremiumGate>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <BottomNav />
