@@ -1,4 +1,5 @@
 import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.95.0/cors";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const SYSTEM_PROMPT = `You are a confident, time-respecting AI Financial Advisor speaking with a Kenyan client. You follow this proven 7-step consultation script INTERNALLY (do NOT label the steps to the user — make it feel natural and conversational):
 
