@@ -30,6 +30,7 @@ import DebtPlanner from "./pages/DebtPlanner";
 import NotificationSettings from "./pages/NotificationSettings";
 import MpesaSetup from "./pages/MpesaSetup";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { PastDueBanner } from "@/components/PastDueBanner";
 
 import NotFound from "./pages/NotFound";
 
@@ -47,6 +48,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <PaymentTestModeBanner />
+              <PastDueBanner />
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth" element={<Auth />} />

@@ -237,9 +237,9 @@ export default function Advisor() {
                 onClick={() => navigate("/advisor/upgrade")}
                 className="w-full py-3 rounded-xl gradient-premium text-premium-foreground font-semibold text-sm shadow-elevated"
               >
-                Upgrade — KES 499/month
+                Upgrade — $8/month
               </button>
-              <p className="text-xs text-muted-foreground mt-2">7-day free trial included</p>
+              <p className="text-xs text-muted-foreground mt-2">7-day free trial · ≈ KES 1,040/mo</p>
             </div>
           )}
         </div>
