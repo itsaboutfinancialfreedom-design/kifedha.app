@@ -95,6 +95,30 @@ export default function Landing() {
           Free to use. Sign in with email or Google.
         </p>
 
+        {/* Pricing teaser */}
+        <section className="mt-12 rounded-2xl border border-border bg-card p-6 shadow-card">
+          <div className="flex items-center gap-2 mb-3">
+            <Crown className="w-5 h-5 text-warning" />
+            <h2 className="font-display font-bold text-lg">Upgrade to Premium</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            Unlock unlimited goals, advanced debt simulation, AI advisor, PDF reports, and more.
+          </p>
+          <div className="flex items-baseline gap-2 mb-4">
+            <span className="text-2xl font-display font-bold">$8</span>
+            <span className="text-xs text-muted-foreground">/month</span>
+            <span className="text-xs text-muted-foreground">·</span>
+            <span className="text-lg font-display font-bold">$80</span>
+            <span className="text-xs text-muted-foreground">/year</span>
+          </div>
+          <Link
+            to="/pricing"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline underline-offset-4"
+          >
+            See full plan details <ArrowRight className="w-4 h-4" />
+          </Link>
+        </section>
+
         {/* Financial Blueprint — Income Allocation Simulator */}
         <section className="mt-12">
           <div className="text-center mb-6">
@@ -114,6 +138,18 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* Footer / Legal links */}
+        <footer className="mt-12 pt-8 border-t border-border">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+            <Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+            <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+            <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+            <Link to="/refund" className="hover:text-foreground transition-colors">Refunds</Link>
+          </div>
+          <p className="text-center text-[10px] text-muted-foreground/60 mt-4">
+            © {new Date().getFullYear()} Herika rise Ltd. All rights reserved.
+          </p>
+        </footer>
       </div>
     </div>
   );
