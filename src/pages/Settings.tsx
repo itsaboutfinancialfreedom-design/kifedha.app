@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp, AutomationSettings } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { BottomNav } from "@/components/BottomNav";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, MessageCircle, Phone, Shield, Sparkles, Crown, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowLeft, MessageCircle, Phone, Shield, Sparkles, Crown, ExternalLink, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
@@ -50,8 +51,10 @@ const TOGGLES: ToggleDef[] = [
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const { automation, setAutomation, isPremium, isTrialing, trialDaysLeft } = useApp();
   const [portalLoading, setPortalLoading] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const update = (key: keyof AutomationSettings, value: boolean) => {
     setAutomation({ ...automation, [key]: value });
@@ -183,6 +186,23 @@ export default function Settings() {
               <Phone className="w-4 h-4" /> Call
             </a>
           </div>
+        </div>
+
+        {/* Account */}
+        <div className="rounded-2xl p-5 bg-card shadow-card border border-border">
+          <h2 className="font-display font-semibold text-sm mb-4">Account</h2>
+          <button
+            onClick={async () => {
+              setLoggingOut(true);
+              await signOut();
+              navigate("/auth");
+            }}
+            disabled={loggingOut}
+            className="w-full py-3 rounded-xl border border-border bg-muted hover:bg-muted/80 text-foreground font-semibold text-sm inline-flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {loggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+            Log out
+          </button>
         </div>
       </div>
 
