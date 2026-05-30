@@ -19,8 +19,9 @@ function computeActive(row: SubscriptionRow | null): boolean {
   if (!row) return false;
   const now = Date.now();
   const end = row.current_period_end ? new Date(row.current_period_end).getTime() : Infinity;
-  // Cancellation revokes access immediately (no grace period).
   if (["active", "trialing", "past_due"].includes(row.status)) return end === Infinity || end > now;
+  // Canceled: keep access until the end of the paid period (grace).
+  if (row.status === "canceled") return end > now;
   return false;
 }
 
