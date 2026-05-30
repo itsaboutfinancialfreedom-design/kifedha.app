@@ -23,10 +23,40 @@ Rules:
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const supabaseUser = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } },
+    );
+    const { data: userData, error: userErr } = await supabaseUser.auth.getUser();
+    if (userErr || !userData.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { text, audio, mimeType } = await req.json();
     if (!text && !audio) {
       return new Response(JSON.stringify({ error: "Missing text or audio" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    // Size guards to prevent token-cost amplification
+    if (typeof text === "string" && text.length > 2048) {
+      return new Response(JSON.stringify({ error: "Text too long (max 2KB)" }), {
+        status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (typeof audio === "string" && audio.length > 7_000_000) {
+      // ~5MB decoded
+      return new Response(JSON.stringify({ error: "Audio too large (max ~5MB)" }), {
+        status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     const KEY = Deno.env.get("LOVABLE_API_KEY");
