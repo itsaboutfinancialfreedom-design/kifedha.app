@@ -119,7 +119,36 @@ export default function IncomeAllocator({ embedded = false }: Props) {
   const [risk, setRisk] = useState<Risk>(initialRisk);
   const [hasDependents, setHasDependents] = useState<boolean>(initialDeps);
   const [saving, setSaving] = useState(false);
+  const [rebalanceOn, setRebalanceOn] = useState(false);
   const captureRef = useRef<HTMLDivElement>(null);
+
+  // Load rebalance reminder state
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("user_notifications")
+        .select("enabled")
+        .eq("user_id", user.id)
+        .eq("notification_type", "rebalance_reminder")
+        .maybeSingle();
+      if (data) setRebalanceOn(!!data.enabled);
+    })();
+  }, [user]);
+
+  const toggleRebalance = async (v: boolean) => {
+    if (!user) { toast.error("Log in to set reminders"); return; }
+    setRebalanceOn(v);
+    const { error } = await supabase
+      .from("user_notifications")
+      .upsert(
+        { user_id: user.id, notification_type: "rebalance_reminder", enabled: v, frequency: "quarterly" },
+        { onConflict: "user_id,notification_type" }
+      );
+    if (error) { setRebalanceOn(!v); toast.error("Could not save reminder"); }
+    else toast.success(v ? "Quarterly rebalance reminder on" : "Reminder off");
+  };
+
 
   // Sync when profile loads
   useEffect(() => {
