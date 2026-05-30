@@ -279,43 +279,41 @@ export default function ProtectionCalculator() {
                 <TabsTrigger value="providers">Providers</TabsTrigger>
                 <TabsTrigger value="education">Education</TabsTrigger>
               </TabsList>
-              <TabsContent value="providers">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Provider</TableHead>
-                        <TableHead>Life (5M)</TableHead>
-                        <TableHead>Health (3M)</TableHead>
-                        <TableHead>Income</TableHead>
-                        <TableHead>Monthly Total</TableHead>
-                        <TableHead></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {providers.map((p) => {
-                        const total = (p.life || 0) + (p.health || 0) + (p.income || 0);
-                        return (
-                          <TableRow key={p.name}>
-                            <TableCell className="font-medium">{p.name}</TableCell>
-                            <TableCell>{p.life ? `${p.life.toLocaleString()} KES` : "—"}</TableCell>
-                            <TableCell>{p.health ? `${p.health.toLocaleString()} KES` : "—"}</TableCell>
-                            <TableCell>{p.income ? `${p.income.toLocaleString()} KES` : "—"}</TableCell>
-                            <TableCell className="font-semibold">{total.toLocaleString()} KES</TableCell>
-                            <TableCell>
-                              <Button size="sm" variant="outline" asChild>
-                                <a href={`https://www.google.com/search?q=${encodeURIComponent(p.name + " Kenya insurance quote")}`} target="_blank" rel="noreferrer">
-                                  Get quote <ExternalLink className="w-3 h-3 ml-1" />
-                                </a>
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-                <p className="text-xs text-muted-foreground mt-3">Indicative premiums for comparison only. Actual quotes vary by age, health and underwriting.</p>
+              <TabsContent value="providers" className="space-y-6">
+                <ProviderSection
+                  title="Life cover — premium per KES 1M sum assured / month"
+                  rows={PROVIDER_QUOTES.life.map(p => ({
+                    name: p.name,
+                    quote: calc.lifeGap > 0 ? `KES ${Math.round((calc.lifeGap / 1_000_000) * p.per1M).toLocaleString()}/mo` : "No gap",
+                    sub: `KES ${p.per1M.toLocaleString()}/M cover`,
+                    highlight: p.highlight,
+                    recommended: p.per1M === Math.min(...PROVIDER_QUOTES.life.map(x => x.per1M)),
+                  }))}
+                  query="Kenya life insurance quote"
+                />
+                <ProviderSection
+                  title="Health cover — monthly premium (family of 4, KES 3M limit)"
+                  rows={PROVIDER_QUOTES.health.map(p => ({
+                    name: p.name,
+                    quote: calc.healthGap > 0 ? `KES ${p.flat.toLocaleString()}/mo` : "No gap",
+                    sub: "Indicative family rate",
+                    highlight: p.highlight,
+                    recommended: p.flat === Math.min(...PROVIDER_QUOTES.health.map(x => x.flat)),
+                  }))}
+                  query="Kenya health insurance family cover quote"
+                />
+                <ProviderSection
+                  title="Income protection — premium per KES 50K monthly benefit"
+                  rows={PROVIDER_QUOTES.income.map(p => ({
+                    name: p.name,
+                    quote: calc.incomeGap > 0 ? `KES ${Math.round((calc.incomeGap / 6 / 50_000) * p.per50K).toLocaleString()}/mo` : "No gap",
+                    sub: `KES ${p.per50K.toLocaleString()} per 50K benefit`,
+                    highlight: p.highlight,
+                    recommended: p.per50K === Math.min(...PROVIDER_QUOTES.income.map(x => x.per50K)),
+                  }))}
+                  query="Kenya income protection insurance quote"
+                />
+                <p className="text-xs text-muted-foreground">Indicative premiums for comparison only. Actual quotes vary by age, health, occupation and underwriting. Always request 2–3 written quotes before buying.</p>
               </TabsContent>
               <TabsContent value="education" className="space-y-4 text-sm">
                 <div>
