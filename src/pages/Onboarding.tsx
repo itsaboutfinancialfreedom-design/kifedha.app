@@ -177,6 +177,8 @@ export default function Onboarding() {
       const { error: pErr } = await supabase
         .from("profiles")
         .update({
+          age: Number(age) || null,
+          country,
           monthly_income: Number(income),
           income_frequency: frequency,
           income_stability: stability,
