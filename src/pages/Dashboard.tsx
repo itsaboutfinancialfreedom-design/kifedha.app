@@ -190,6 +190,27 @@ export default function Dashboard() {
           </div>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </button>
+
+        {/* M-Pesa SMS card — only for new users */}
+        {transactions.length < 5 && (
+          <div className="bg-card rounded-2xl p-4 shadow-card border-l-4 border-success">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+                <Smartphone className="w-5 h-5 text-success" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-display font-semibold text-sm">Start tracking — paste your M-Pesa SMS</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Paste any M-Pesa confirmation SMS — we'll extract the transaction automatically.
+                </p>
+              </div>
+            </div>
+            <Button className="w-full mt-3" onClick={() => setSmsOpen(true)}>
+              <MessageSquareText className="w-4 h-4 mr-1.5" /> Paste M-Pesa SMS
+            </Button>
+          </div>
+        )}
+
         {/* Personalized recommendations */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
