@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PremiumGate } from "@/components/PremiumGate";
-import { Plus, ArrowDownCircle, ArrowUpCircle, Trash2, Sparkles, Mic, Loader2, MessageSquareText, Languages, FileText, Upload, CheckCircle2 } from "lucide-react";
+import { Plus, ArrowDownCircle, ArrowUpCircle, Trash2, Sparkles, Mic, Loader2, MessageSquareText, Languages, FileText, Upload, CheckCircle2, Smartphone } from "lucide-react";
 import { CATEGORIES, Category, autoCategorize } from "@/lib/categorize";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
