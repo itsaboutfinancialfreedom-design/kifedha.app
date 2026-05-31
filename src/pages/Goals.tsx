@@ -65,6 +65,10 @@ export default function Goals() {
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [saving, setSaving] = useState(false);
 
+  const [contribGoal, setContribGoal] = useState<GoalRow | null>(null);
+  const [contribAmount, setContribAmount] = useState("");
+  const [contribSaving, setContribSaving] = useState(false);
+
   useEffect(() => {
     if (!user) { setLoading(false); return; }
     (async () => {
