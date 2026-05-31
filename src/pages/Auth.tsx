@@ -207,6 +207,10 @@ export default function Auth() {
                 </div>
               </div>
 
+              <p className="text-xs text-muted-foreground text-center">
+                🔒 Your data is encrypted and never shared with third parties.
+              </p>
+
               <Button type="submit" disabled={busy} className="w-full h-11 font-display font-semibold">
                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : mode === "signup" ? "Create account" : "Sign in"}
               </Button>
