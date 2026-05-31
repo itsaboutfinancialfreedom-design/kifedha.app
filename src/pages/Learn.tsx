@@ -143,7 +143,7 @@ interface UsedCtx {
   highCardSpend: boolean;
 }
 
-const GLOSSARY: GlossaryTerm[] = [
+export const GLOSSARY: GlossaryTerm[] = [
   // Budgeting
   { term: "50/30/20 Rule", pillar: "budgeting", def: "Split take-home pay: 50% needs, 30% wants, 20% savings.", example: "KSh 60k income → 30k needs, 18k wants, 12k savings." },
   { term: "Cash Flow", pillar: "budgeting", def: "Money coming in minus money going out over a period.", example: "Income 60k − expenses 45k = +15k positive cash flow." },
