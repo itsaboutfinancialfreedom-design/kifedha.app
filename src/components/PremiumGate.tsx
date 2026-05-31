@@ -1,4 +1,4 @@
-import { Lock } from "lucide-react";
+import { Lock, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 
@@ -8,8 +8,17 @@ interface PremiumGateProps {
 }
 
 export function PremiumGate({ children, featureName }: PremiumGateProps) {
-  const { isPremium } = useApp();
+  const { isPremium, premiumLoading } = useApp();
   const navigate = useNavigate();
+
+  if (premiumLoading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Verifying your subscription…</p>
+      </div>
+    );
+  }
 
   if (isPremium) return <>{children}</>;
 
