@@ -294,8 +294,8 @@ function InsuranceDeepDive() {
 }
 
 // ---------- Progress storage ----------
-const VIEWED_KEY = "ywb_learn_viewed";
-function loadViewed(): { pillars: string[]; terms: string[] } {
+export const VIEWED_KEY = "ywb_learn_viewed";
+export function loadViewed(): { pillars: string[]; terms: string[] } {
   try {
     const s = localStorage.getItem(VIEWED_KEY);
     if (s) return JSON.parse(s);
@@ -305,6 +305,39 @@ function loadViewed(): { pillars: string[]; terms: string[] } {
 function saveViewed(v: { pillars: string[]; terms: string[] }) {
   localStorage.setItem(VIEWED_KEY, JSON.stringify(v));
 }
+
+export interface LearnSuggestion {
+  label: string;
+  reason: string;
+  type: "pillar" | "term";
+  key: string;
+}
+
+export function computeLearnSuggestion(
+  ctx: UsedCtx,
+  viewed: { pillars: string[]; terms: string[] }
+): LearnSuggestion | null {
+  const candidates: LearnSuggestion[] = [];
+  if (ctx.highCardSpend && !viewed.terms.includes("Credit Utilization"))
+    candidates.push({ label: "Credit Utilization", reason: "Your card-style spending is high this month.", type: "term", key: "Credit Utilization" });
+  if (ctx.hasDebt && !viewed.pillars.includes("debt"))
+    candidates.push({ label: "Debt", reason: "You have active debts to plan around.", type: "pillar", key: "debt" });
+  if (!ctx.hasHealth && !viewed.pillars.includes("insurance"))
+    candidates.push({ label: "Insurance (Wealth Protection)", reason: "No health cover detected — biggest wealth risk.", type: "pillar", key: "insurance" });
+  if (!ctx.hasEmergency && !viewed.terms.includes("Emergency Fund"))
+    candidates.push({ label: "Emergency Fund", reason: "No emergency fund logged yet.", type: "term", key: "Emergency Fund" });
+  if (candidates.length === 0) {
+    const p = PILLARS.find(p => !viewed.pillars.includes(p.key));
+    if (p) candidates.push({ label: p.title, reason: "Next pillar to learn.", type: "pillar", key: p.key });
+    else {
+      const t = GLOSSARY.find(t => !viewed.terms.includes(t.term));
+      if (t) candidates.push({ label: t.term, reason: "Next glossary term.", type: "term", key: t.term });
+    }
+  }
+  return candidates[0] ?? null;
+}
+
+export const LEARN_TOTAL_TOPICS = 6 + 30; // 6 pillars + 30 glossary terms = 36
 
 // ---------- Page ----------
 export default function Learn() {
