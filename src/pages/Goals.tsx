@@ -323,6 +323,11 @@ export default function Goals() {
                       <Button size="sm" variant="ghost" onClick={() => openContrib(g)}>
                         Add contribution
                       </Button>
+                      {current > 0 && (
+                        <Button size="sm" variant="outline" onClick={() => shareGoal(g)} aria-label="Share goal">
+                          <Share2 className="w-4 h-4" />
+                        </Button>
+                      )}
                       <button
                         onClick={() => deleteGoal(g.id)}
                         className="text-muted-foreground hover:text-destructive p-1"
