@@ -199,6 +199,26 @@ export default function Dashboard() {
         </button>
 
         <button
+          onClick={() => navigate("/learn")}
+          className="w-full bg-card rounded-2xl p-4 shadow-card flex items-center gap-3 text-left border border-border"
+        >
+          <div className="w-11 h-11 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+            <BookOpen className="w-5 h-5 text-accent" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-display font-bold text-sm">Continue learning</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {learnSuggestion ? learnSuggestion.label : "All topics complete — nice work!"}
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              {learnDone} of {LEARN_TOTAL_TOPICS} topics completed
+            </p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </button>
+
+
+        <button
           onClick={() => navigate("/dashboards")}
           className="w-full bg-card rounded-2xl p-4 shadow-card flex items-center gap-3 text-left border border-border"
         >
