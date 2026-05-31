@@ -5,11 +5,17 @@ import { BottomNav } from "@/components/BottomNav";
 import { ScoreRing } from "@/components/ScoreRing";
 import { InsightCard } from "@/components/InsightCard";
 import { Recommendations } from "@/components/Recommendations";
-import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell, FileDown, Lock } from "lucide-react";
+import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell, FileDown, Lock, Smartphone, MessageSquareText, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { generateInsights } from "@/lib/insightsEngine";
 import { toast } from "sonner";
 import { generateFinancialReport } from "@/utils/pdfGenerator";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { useTransactions } from "@/context/TransactionsContext";
+import { supabase } from "@/integrations/supabase/client";
+import { autoCategorize, Category } from "@/lib/categorize";
 
 export default function Dashboard() {
   const { financials, blueprint, hasCompletedOnboarding, automation, setAutomation, isPremium } = useApp();
