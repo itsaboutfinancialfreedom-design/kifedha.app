@@ -209,37 +209,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (premiumLoading) return;
     localStorage.setItem("ywb_premium_cache", JSON.stringify({ isPremium, isTrialing, at: Date.now() }));
-    localStorage.setItem("ywb_premium", String(isPremium));
   }, [isPremium, isTrialing, premiumLoading]);
-
-
-
-  const startTrial = (cycle: BillingCycle) => {
-    const now = new Date();
-    const trialEnds = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    persistSub({
-      paid: true, // mock: simulate successful subscription
-      cycle,
-      trialEndsAt: trialEnds.toISOString(),
-      startedAt: now.toISOString(),
-    });
-  };
-
-  const cancelSubscription = () => {
-    persistSub({ ...DEFAULT_SUB });
-  };
-
-  const setIsPremium = (v: boolean) => {
-    if (v && !subscription.paid) startTrial("monthly");
-    else if (!v) cancelSubscription();
-  };
 
   return (
     <AppContext.Provider value={{
       financials, setFinancials: handleSetFinancials,
       blueprint, setBlueprint: handleSetBlueprint,
-      isPremium, setIsPremium, premiumLoading,
-      subscription, startTrial, cancelSubscription,
+      isPremium, premiumLoading,
       trialDaysLeft, isTrialing,
       hasCompletedOnboarding, setHasCompletedOnboarding: handleSetOnboarded,
       automation, setAutomation,
@@ -249,6 +225,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     </AppContext.Provider>
   );
 }
+
 
 export function useApp() {
   const ctx = useContext(AppContext);
