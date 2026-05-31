@@ -104,12 +104,14 @@ export default function Landing() {
           <p className="text-sm text-muted-foreground mb-4">
             Unlock unlimited goals, advanced debt simulation, AI advisor, PDF reports, and more.
           </p>
-          <div className="flex items-baseline gap-2 mb-4">
-            <span className="text-2xl font-display font-bold">$8</span>
+          <div className="flex items-baseline gap-2 mb-4 flex-wrap">
+            <span className="text-2xl font-display font-bold">KES 1,040</span>
             <span className="text-xs text-muted-foreground">/month</span>
+            <span className="text-xs text-muted-foreground">(≈ $8)</span>
             <span className="text-xs text-muted-foreground">·</span>
-            <span className="text-lg font-display font-bold">$80</span>
+            <span className="text-lg font-display font-bold">KES 10,400</span>
             <span className="text-xs text-muted-foreground">/year</span>
+            <span className="text-xs text-muted-foreground">(≈ $80)</span>
           </div>
           <Link
             to="/pricing"

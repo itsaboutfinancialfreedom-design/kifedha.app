@@ -123,9 +123,9 @@ export default function Upgrade() {
             </div>
             <p className="text-xs text-muted-foreground mb-4">For serious wealth builders</p>
             <div className="mb-4">
-              <span className="text-3xl font-display font-bold">${p.usd}</span>
+              <span className="text-3xl font-display font-bold text-primary">KES {p.kes.toLocaleString()}</span>
               <span className="text-xs text-muted-foreground"> {p.cadence}</span>
-              <p className="text-[11px] text-muted-foreground mt-0.5">≈ KES {p.kes.toLocaleString()} {p.cadence}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">≈ ${p.usd} USD {p.cadence}</p>
               {cycle === "yearly" && <p className="text-[11px] text-success mt-0.5">2 months free vs monthly</p>}
             </div>
             <ul className="space-y-2 text-sm">

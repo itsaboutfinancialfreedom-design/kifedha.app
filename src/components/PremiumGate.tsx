@@ -37,7 +37,7 @@ export function PremiumGate({ children, featureName }: PremiumGateProps) {
             onClick={() => navigate("/advisor/upgrade")}
             className="w-full py-3 px-6 rounded-xl gradient-premium text-premium-foreground font-semibold text-sm shadow-elevated transition-transform active:scale-[0.98]"
           >
-            Upgrade — $8/month
+            Upgrade — KES 1,040/month
           </button>
           <p className="text-xs text-muted-foreground mt-3">7-day free trial included</p>
         </div>
