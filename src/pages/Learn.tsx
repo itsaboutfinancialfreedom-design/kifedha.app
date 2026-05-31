@@ -52,7 +52,7 @@ interface Pillar {
   extra?: React.ReactNode;
 }
 
-const PILLARS: Pillar[] = [
+export const PILLARS: Pillar[] = [
   {
     key: "budgeting",
     title: "Budgeting",
