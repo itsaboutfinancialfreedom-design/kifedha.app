@@ -275,6 +275,10 @@ export default function Goals() {
               const allocation = perGoalAllocation;
               const shortfall = monthlyNeeded - allocation;
 
+              const barColor =
+                progressPct >= 80 ? "bg-emerald-500" :
+                progressPct >= 40 ? "bg-amber-500" : "bg-primary";
+
               return (
                 <Card key={g.id}>
                   <CardHeader className="pb-2 flex flex-row items-start justify-between space-y-0">
@@ -289,16 +293,39 @@ export default function Goals() {
                         </CardDescription>
                       </div>
                     </div>
-                    <button
-                      onClick={() => deleteGoal(g.id)}
-                      className="text-muted-foreground hover:text-destructive p-1"
-                      aria-label="Delete goal"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <Button size="sm" variant="ghost" onClick={() => openContrib(g)}>
+                        Add contribution
+                      </Button>
+                      <button
+                        onClick={() => deleteGoal(g.id)}
+                        className="text-muted-foreground hover:text-destructive p-1"
+                        aria-label="Delete goal"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <Progress value={progressPct} />
+                    <div className="relative h-4 w-full overflow-hidden rounded-full bg-secondary">
+                      <div
+                        className={`h-full w-full flex-1 ${barColor} transition-all`}
+                        style={{ transform: `translateX(-${100 - progressPct}%)` }}
+                      />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-medium">
+                        {progressPct}% · KES {current.toLocaleString()} saved of KES {target.toLocaleString()} target
+                      </span>
+                    </div>
+
+                    {current >= target && (
+                      <div className="flex items-center gap-2 text-sm font-semibold text-emerald-600">
+                        <Trophy className="w-4 h-4" />
+                        Goal reached! 🎉
+                      </div>
+                    )}
+
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <CalendarDays className="w-3 h-3" />
