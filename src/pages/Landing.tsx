@@ -1,6 +1,6 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { Sparkles, ArrowRight, Shield, Target, Wallet, TrendingDown, TrendingUp, Briefcase, Crown } from "lucide-react";
+import { Sparkles, ArrowRight, Shield, Target, Wallet, TrendingDown, TrendingUp, Briefcase, Crown, Lock, MapPin } from "lucide-react";
 import { useEffect } from "react";
 import IncomeAllocator from "@/components/IncomeAllocator";
 
