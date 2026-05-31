@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useTransactions } from "@/context/TransactionsContext";
+import { computeLearnSuggestion, loadViewed, LEARN_TOTAL_TOPICS } from "@/pages/Learn";
 import { supabase } from "@/integrations/supabase/client";
 import { autoCategorize, Category } from "@/lib/categorize";
 
