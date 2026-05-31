@@ -101,7 +101,11 @@ Deno.serve(async (req) => {
       case EventName.SubscriptionCanceled:
         await handleSubscriptionCanceled(event.data, env); break;
       default:
+        // transaction.completed / transaction.payment_failed are subscribed
+        // for visibility but not acted on — subscription.updated already
+        // carries the resulting `past_due` / `active` status we care about.
         console.log('Unhandled event:', event.eventType);
+
     }
     return new Response(JSON.stringify({ received: true }), {
       status: 200, headers: { 'Content-Type': 'application/json' },
