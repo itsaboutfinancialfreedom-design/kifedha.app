@@ -22,7 +22,11 @@ export type Database = {
           dependents_ages: Json | null
           dependents_count: number | null
           email: string | null
+          emergency_fund_amount: number
           full_name: string | null
+          has_emergency_fund: boolean
+          has_health_insurance: boolean
+          has_life_insurance: boolean
           id: string
           income_frequency: string | null
           income_stability: string | null
@@ -41,7 +45,11 @@ export type Database = {
           dependents_ages?: Json | null
           dependents_count?: number | null
           email?: string | null
+          emergency_fund_amount?: number
           full_name?: string | null
+          has_emergency_fund?: boolean
+          has_health_insurance?: boolean
+          has_life_insurance?: boolean
           id: string
           income_frequency?: string | null
           income_stability?: string | null
@@ -60,7 +68,11 @@ export type Database = {
           dependents_ages?: Json | null
           dependents_count?: number | null
           email?: string | null
+          emergency_fund_amount?: number
           full_name?: string | null
+          has_emergency_fund?: boolean
+          has_health_insurance?: boolean
+          has_life_insurance?: boolean
           id?: string
           income_frequency?: string | null
           income_stability?: string | null
