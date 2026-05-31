@@ -50,8 +50,31 @@ export default function Dashboard() {
     }
   };
 
-
-
+  async function parseSMS() {
+    const text = smsText.trim();
+    if (!text) { toast.error("Paste an M-Pesa SMS first"); return; }
+    setSmsBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("parse-transaction", { body: { text } });
+      if (error) throw error;
+      if (!data || !data.amount) { toast.error("Couldn't extract a transaction from that SMS"); return; }
+      addTransaction({
+        type: data.type,
+        amount: Number(data.amount),
+        note: data.note,
+        category: data.category as Category,
+        date: new Date().toISOString(),
+        source: "mpesa",
+      });
+      toast.success(`Logged: ${data.note} · KES ${Number(data.amount).toLocaleString()}`);
+      setSmsText("");
+      setSmsOpen(false);
+    } catch (e: any) {
+      toast.error(e?.message || "SMS parsing failed");
+    } finally {
+      setSmsBusy(false);
+    }
+  }
 
   useEffect(() => {
     if (!hasCompletedOnboarding) navigate("/");
