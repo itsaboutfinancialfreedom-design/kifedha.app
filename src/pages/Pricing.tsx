@@ -77,15 +77,16 @@ export default function Pricing() {
             <p className="text-xs text-muted-foreground mb-4">For serious wealth builders</p>
             <div className="mb-4">
               <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-display font-bold">$8</span>
+                <span className="text-3xl font-display font-bold text-primary">KES 1,040</span>
                 <span className="text-xs text-muted-foreground">/month</span>
               </div>
-              <p className="text-[11px] text-muted-foreground mt-0.5">≈ KES 1,040/month</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">≈ $8 USD / month</p>
               <div className="flex items-baseline gap-1 mt-2">
-                <span className="text-xl font-display font-bold">$80</span>
+                <span className="text-xl font-display font-bold">KES 10,400</span>
                 <span className="text-xs text-muted-foreground">/year</span>
               </div>
-              <p className="text-[11px] text-success mt-0.5">Save 17% with yearly billing</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">≈ $80 USD / year</p>
+              <p className="text-[11px] text-success mt-0.5">Save 17% · KES 2,080/year with yearly billing</p>
             </div>
             <ul className="space-y-2 text-sm">
               {PREMIUM_FEATURES.map(f => (
