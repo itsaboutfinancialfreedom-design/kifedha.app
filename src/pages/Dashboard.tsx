@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { ScoreRing } from "@/components/ScoreRing";
 import { InsightCard } from "@/components/InsightCard";
 import { Recommendations } from "@/components/Recommendations";
-import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell, FileDown, Lock, Smartphone, MessageSquareText, Loader2 } from "lucide-react";
+import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell, FileDown, Lock, Smartphone, MessageSquareText, Loader2, TrendingDown, Wallet } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { generateInsights } from "@/lib/insightsEngine";
 import { toast } from "sonner";

@@ -1,13 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
-import { Receipt, Target, LayoutDashboard, Shield, TrendingDown, BookOpen } from "lucide-react";
+import { useApp } from "@/context/AppContext";
+import { Receipt, Target, LayoutDashboard, Sparkles, BookOpen } from "lucide-react";
 
 const navItems = [
-  { to: "/tracker", icon: Receipt, label: "Tracker" },
-  { to: "/dashboard", icon: LayoutDashboard, label: "Wealth" },
-  { to: "/goals", icon: Target, label: "Goals" },
-  { to: "/protection", icon: Shield, label: "Protect" },
-  { to: "/debt", icon: TrendingDown, label: "Debt" },
-  { to: "/learn", icon: BookOpen, label: "Learn" },
+  { to: "/tracker",   icon: Receipt,        label: "Tracker"  },
+  { to: "/dashboard", icon: LayoutDashboard, label: "Wealth"   },
+  { to: "/goals",     icon: Target,          label: "Goals"    },
+  { to: "/advisor",   icon: Sparkles,        label: "Advisor"  },
+  { to: "/learn",     icon: BookOpen,        label: "Learn"    },
 ];
 
 export function BottomNav() {
