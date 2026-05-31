@@ -49,15 +49,6 @@ export interface FinancialBlueprint {
   insuranceRecommendations: string[];
 }
 
-export type BillingCycle = "monthly" | "yearly";
-
-export interface Subscription {
-  paid: boolean;            // user has an active paid plan (mock)
-  cycle: BillingCycle | null;
-  trialEndsAt: string | null; // ISO; if in future → treated as premium
-  startedAt: string | null;
-}
-
 const DEFAULT_AUTOMATION: AutomationSettings = {
   autopilotGoals: false,
   roundUps: false,
@@ -66,12 +57,6 @@ const DEFAULT_AUTOMATION: AutomationSettings = {
   autoSweepSurplus: false,
 };
 
-const DEFAULT_SUB: Subscription = {
-  paid: false,
-  cycle: null,
-  trialEndsAt: null,
-  startedAt: null,
-};
 
 interface AppContextType {
   financials: UserFinancials | null;
