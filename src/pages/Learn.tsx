@@ -457,6 +457,9 @@ export default function Learn() {
                 <Button size="sm" onClick={continueLearning}>Continue learning</Button>
               </div>
             )}
+            <Button size="sm" variant="outline" className="w-full" onClick={shareProgress}>
+              Share my progress
+            </Button>
           </CardContent>
         </Card>
 
