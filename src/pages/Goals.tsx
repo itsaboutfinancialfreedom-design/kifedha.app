@@ -133,6 +133,42 @@ export default function Goals() {
     setGoals((p) => p.filter((g) => g.id !== id));
   }
 
+  async function fetchGoals() {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from("user_goals")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: true });
+    if (error) { toast.error(error.message); return; }
+    setGoals((data ?? []) as GoalRow[]);
+  }
+
+  function openContrib(goal: GoalRow) {
+    setContribGoal(goal);
+    setContribAmount("");
+  }
+
+  async function saveContrib() {
+    if (!contribGoal) return;
+    const amount = Number(contribAmount);
+    if (!(amount > 0)) {
+      toast.error("Enter a valid amount");
+      return;
+    }
+    setContribSaving(true);
+    const { error } = await supabase
+      .from("user_goals")
+      .update({ current_amount: contribGoal.current_amount + amount })
+      .eq("id", contribGoal.id);
+    setContribSaving(false);
+    if (error) { toast.error(error.message); return; }
+    await fetchGoals();
+    setContribGoal(null);
+    setContribAmount("");
+    toast.success(`KES ${amount.toLocaleString()} added to ${contribGoal.goal_type}!`);
+  }
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
   }
