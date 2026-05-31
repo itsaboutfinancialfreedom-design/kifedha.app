@@ -55,12 +55,16 @@ Deno.serve(async (req) => {
     );
 
     const subUrl = session.urls?.subscriptions?.[0];
-    const url = subUrl?.cancelSubscription || subUrl?.updateSubscriptionPaymentMethod || session.urls?.general?.overview;
-
-    return new Response(JSON.stringify({ url, urls: session.urls }), {
+    const overview = session.urls?.general?.overview;
+    const updatePayment = subUrl?.updateSubscriptionPaymentMethod || overview;
+    const cancel = subUrl?.cancelSubscription || overview;
+    // Default `url` = overview (safe "manage" landing).
+    // Callers that need a specific action should read `updatePayment` or `cancel`.
+    return new Response(JSON.stringify({ url: overview, updatePayment, cancel, urls: session.urls }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (e: any) {
     console.error('customer-portal error:', e);
     return new Response(JSON.stringify({ error: e?.message ?? 'Internal error' }), {

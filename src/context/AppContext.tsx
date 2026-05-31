@@ -49,15 +49,6 @@ export interface FinancialBlueprint {
   insuranceRecommendations: string[];
 }
 
-export type BillingCycle = "monthly" | "yearly";
-
-export interface Subscription {
-  paid: boolean;            // user has an active paid plan (mock)
-  cycle: BillingCycle | null;
-  trialEndsAt: string | null; // ISO; if in future → treated as premium
-  startedAt: string | null;
-}
-
 const DEFAULT_AUTOMATION: AutomationSettings = {
   autopilotGoals: false,
   roundUps: false,
@@ -66,12 +57,6 @@ const DEFAULT_AUTOMATION: AutomationSettings = {
   autoSweepSurplus: false,
 };
 
-const DEFAULT_SUB: Subscription = {
-  paid: false,
-  cycle: null,
-  trialEndsAt: null,
-  startedAt: null,
-};
 
 interface AppContextType {
   financials: UserFinancials | null;
@@ -80,12 +65,9 @@ interface AppContextType {
   setBlueprint: (b: FinancialBlueprint) => void;
   isPremium: boolean;
   premiumLoading: boolean;
-  setIsPremium: (v: boolean) => void;
-  subscription: Subscription;
-  startTrial: (cycle: BillingCycle) => void;
-  cancelSubscription: () => void;
   trialDaysLeft: number;
   isTrialing: boolean;
+
   hasCompletedOnboarding: boolean;
   setHasCompletedOnboarding: (v: boolean) => void;
   automation: AutomationSettings;
@@ -105,13 +87,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem("ywb_blueprint");
     return saved ? JSON.parse(saved) : null;
   });
-  const [subscription, setSubscriptionState] = useState<Subscription>(() => {
-    const saved = localStorage.getItem("ywb_subscription");
-    if (saved) return { ...DEFAULT_SUB, ...JSON.parse(saved) };
-    // Back-compat: previous flag
-    const legacy = localStorage.getItem("ywb_premium") === "true";
-    return { ...DEFAULT_SUB, paid: legacy };
-  });
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(() => {
     return localStorage.getItem("ywb_onboarded") === "true";
   });
@@ -124,11 +99,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const persistSub = (s: Subscription) => {
-    setSubscriptionState(s);
-    localStorage.setItem("ywb_subscription", JSON.stringify(s));
-    localStorage.setItem("ywb_premium", String(s.paid));
-  };
+  // One-time cleanup of legacy mock-subscription localStorage keys.
+  useEffect(() => {
+    localStorage.removeItem("ywb_subscription");
+    localStorage.removeItem("ywb_premium");
+  }, []);
+
 
   const setAutomation = (a: AutomationSettings) => {
     setAutomationState(a);
@@ -233,37 +209,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (premiumLoading) return;
     localStorage.setItem("ywb_premium_cache", JSON.stringify({ isPremium, isTrialing, at: Date.now() }));
-    localStorage.setItem("ywb_premium", String(isPremium));
   }, [isPremium, isTrialing, premiumLoading]);
-
-
-
-  const startTrial = (cycle: BillingCycle) => {
-    const now = new Date();
-    const trialEnds = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    persistSub({
-      paid: true, // mock: simulate successful subscription
-      cycle,
-      trialEndsAt: trialEnds.toISOString(),
-      startedAt: now.toISOString(),
-    });
-  };
-
-  const cancelSubscription = () => {
-    persistSub({ ...DEFAULT_SUB });
-  };
-
-  const setIsPremium = (v: boolean) => {
-    if (v && !subscription.paid) startTrial("monthly");
-    else if (!v) cancelSubscription();
-  };
 
   return (
     <AppContext.Provider value={{
       financials, setFinancials: handleSetFinancials,
       blueprint, setBlueprint: handleSetBlueprint,
-      isPremium, setIsPremium, premiumLoading,
-      subscription, startTrial, cancelSubscription,
+      isPremium, premiumLoading,
       trialDaysLeft, isTrialing,
       hasCompletedOnboarding, setHasCompletedOnboarding: handleSetOnboarded,
       automation, setAutomation,
@@ -273,6 +225,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     </AppContext.Provider>
   );
 }
+
 
 export function useApp() {
   const ctx = useContext(AppContext);
