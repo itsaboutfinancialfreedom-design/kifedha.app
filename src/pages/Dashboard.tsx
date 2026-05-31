@@ -20,10 +20,14 @@ import { autoCategorize, Category } from "@/lib/categorize";
 export default function Dashboard() {
   const { financials, blueprint, hasCompletedOnboarding, automation, setAutomation, isPremium } = useApp();
   const { user, profile } = useAuth();
+  const { transactions, addTransaction } = useTransactions();
 
   const navigate = useNavigate();
   const captureRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
+  const [smsOpen, setSmsOpen] = useState(false);
+  const [smsText, setSmsText] = useState("");
+  const [smsBusy, setSmsBusy] = useState(false);
 
   const exportPDF = async () => {
     if (!isPremium) {
