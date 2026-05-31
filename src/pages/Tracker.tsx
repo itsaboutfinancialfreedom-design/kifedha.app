@@ -223,6 +223,24 @@ export default function Tracker() {
       </div>
 
       <div className="max-w-lg mx-auto px-4 -mt-4 space-y-4">
+        {/* M-Pesa SMS card */}
+        <div className="bg-card rounded-2xl p-4 shadow-card border-l-4 border-success">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+              <Smartphone className="w-5 h-5 text-success" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-display font-semibold text-sm">Log from M-Pesa SMS</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Paste any M-Pesa confirmation SMS — we'll extract the transaction automatically.
+              </p>
+            </div>
+          </div>
+          <Button className="w-full mt-3" onClick={() => setSmsOpen(true)}>
+            <MessageSquareText className="w-4 h-4 mr-1.5" /> Paste M-Pesa SMS
+          </Button>
+        </div>
+
         <Tabs defaultValue="manual" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="manual">Manual</TabsTrigger>
