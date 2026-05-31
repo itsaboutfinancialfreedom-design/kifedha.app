@@ -106,7 +106,8 @@ export default function Settings() {
     }
   };
 
-  const persistAndRegenerate = async (patch: Record<string, any>, overrides: Partial<UserFinancials>) => {
+  type ProfilePatch = Partial<{ monthly_income: number; has_life_insurance: boolean; has_health_insurance: boolean; has_emergency_fund: boolean; emergency_fund_amount: number; }>;
+  const persistAndRegenerate = async (patch: ProfilePatch, overrides: Partial<UserFinancials>) => {
     if (!user) return;
     setSavingFinances(true);
     const { error } = await supabase.from("profiles").update(patch).eq("id", user.id);
