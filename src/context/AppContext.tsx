@@ -262,7 +262,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider value={{
       financials, setFinancials: handleSetFinancials,
       blueprint, setBlueprint: handleSetBlueprint,
-      isPremium, setIsPremium,
+      isPremium, setIsPremium, premiumLoading,
       subscription, startTrial, cancelSubscription,
       trialDaysLeft, isTrialing,
       hasCompletedOnboarding, setHasCompletedOnboarding: handleSetOnboarded,
