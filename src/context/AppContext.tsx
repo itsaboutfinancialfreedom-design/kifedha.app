@@ -65,12 +65,9 @@ interface AppContextType {
   setBlueprint: (b: FinancialBlueprint) => void;
   isPremium: boolean;
   premiumLoading: boolean;
-  setIsPremium: (v: boolean) => void;
-  subscription: Subscription;
-  startTrial: (cycle: BillingCycle) => void;
-  cancelSubscription: () => void;
   trialDaysLeft: number;
   isTrialing: boolean;
+
   hasCompletedOnboarding: boolean;
   setHasCompletedOnboarding: (v: boolean) => void;
   automation: AutomationSettings;
