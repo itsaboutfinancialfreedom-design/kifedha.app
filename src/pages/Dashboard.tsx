@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { ScoreRing } from "@/components/ScoreRing";
 import { InsightCard } from "@/components/InsightCard";
 import { Recommendations } from "@/components/Recommendations";
-import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell, FileDown, Lock, Smartphone, MessageSquareText, Loader2 } from "lucide-react";
+import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell, FileDown, Lock, Smartphone, MessageSquareText, Loader2, TrendingDown, Wallet } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { generateInsights } from "@/lib/insightsEngine";
 import { toast } from "sonner";
@@ -308,9 +308,12 @@ export default function Dashboard() {
           { label: "Goal Planning", to: "/goals", icon: TrendingUp },
           { label: "Financial Dashboards", to: "/dashboards", icon: BookOpenCheck },
           { label: "Protection Insights", to: "/protection", icon: Shield },
+          { label: "Risk & Protection", to: "/protection", icon: Shield },
+          { label: "Debt Tracker", to: "/debt", icon: TrendingDown },
+          { label: "Budget & Expenses", to: "/budget", icon: Wallet },
         ].map(({ label, to, icon: Icon }) => (
           <button
-            key={to}
+            key={label}
             onClick={() => navigate(to)}
             className="w-full flex items-center gap-3 bg-card rounded-2xl p-4 shadow-card"
           >
