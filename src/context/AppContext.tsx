@@ -79,6 +79,7 @@ interface AppContextType {
   blueprint: FinancialBlueprint | null;
   setBlueprint: (b: FinancialBlueprint) => void;
   isPremium: boolean;
+  premiumLoading: boolean;
   setIsPremium: (v: boolean) => void;
   subscription: Subscription;
   startTrial: (cycle: BillingCycle) => void;
