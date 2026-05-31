@@ -308,9 +308,12 @@ export default function Dashboard() {
           { label: "Goal Planning", to: "/goals", icon: TrendingUp },
           { label: "Financial Dashboards", to: "/dashboards", icon: BookOpenCheck },
           { label: "Protection Insights", to: "/protection", icon: Shield },
+          { label: "Risk & Protection", to: "/protection", icon: Shield },
+          { label: "Debt Tracker", to: "/debt", icon: TrendingDown },
+          { label: "Budget & Expenses", to: "/budget", icon: Wallet },
         ].map(({ label, to, icon: Icon }) => (
           <button
-            key={to}
+            key={label}
             onClick={() => navigate(to)}
             className="w-full flex items-center gap-3 bg-card rounded-2xl p-4 shadow-card"
           >
