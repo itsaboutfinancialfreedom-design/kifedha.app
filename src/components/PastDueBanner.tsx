@@ -42,14 +42,16 @@ export function PastDueBanner() {
       const { data, error } = await supabase.functions.invoke("customer-portal", {
         body: { environment: getPaddleEnvironment() },
       });
-      if (error || !data?.url) throw new Error(error?.message ?? "Could not open billing portal");
-      window.open(data.url, "_blank", "noopener,noreferrer");
+      const target = data?.updatePayment || data?.url;
+      if (error || !target) throw new Error(error?.message ?? "Could not open billing portal");
+      window.open(target, "_blank", "noopener,noreferrer");
     } catch (e: any) {
       toast.error(e?.message ?? "Could not open billing portal");
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="w-full bg-destructive/10 border-b border-destructive/30 px-4 py-2 text-sm text-destructive flex items-center justify-center gap-3 flex-wrap">
