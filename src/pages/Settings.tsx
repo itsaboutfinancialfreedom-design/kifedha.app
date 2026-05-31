@@ -52,10 +52,112 @@ const TOGGLES: ToggleDef[] = [
 
 export default function Settings() {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
-  const { automation, setAutomation, isPremium, isTrialing, trialDaysLeft } = useApp();
+  const { signOut, user } = useAuth();
+  const { automation, setAutomation, isPremium, isTrialing, trialDaysLeft, financials, setFinancials, setBlueprint } = useApp();
   const [portalLoading, setPortalLoading] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+
+  // My Finances state
+  const [income, setIncome] = useState<string>("");
+  const [hasLife, setHasLife] = useState(false);
+  const [hasHealth, setHasHealth] = useState(false);
+  const [hasEmergency, setHasEmergency] = useState(false);
+  const [emergencyAmount, setEmergencyAmount] = useState<string>("");
+  const [savingFinances, setSavingFinances] = useState(false);
+  const [loadingFinances, setLoadingFinances] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("monthly_income, has_life_insurance, has_health_insurance, has_emergency_fund, emergency_fund_amount")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (data) {
+        setIncome(data.monthly_income != null ? String(data.monthly_income) : "");
+        setHasLife(!!(data as any).has_life_insurance);
+        setHasHealth(!!(data as any).has_health_insurance);
+        setHasEmergency(!!(data as any).has_emergency_fund);
+        setEmergencyAmount((data as any).emergency_fund_amount ? String((data as any).emergency_fund_amount) : "");
+      }
+      setLoadingFinances(false);
+    })();
+  }, [user?.id]);
+
+  const regenerateBlueprint = (overrides: Partial<UserFinancials>) => {
+    const base: UserFinancials = financials ?? {
+      monthlyIncome: 0,
+      expenses: [],
+      totalExpenses: 0,
+      debts: [],
+      totalDebt: 0,
+      dependents: 0,
+      goals: [],
+      hasLifeInsurance: false,
+      hasHealthInsurance: false,
+      hasEmergencyFund: false,
+      emergencyFundAmount: 0,
+    };
+    const next: UserFinancials = { ...base, ...overrides };
+    setFinancials(next);
+    if (next.monthlyIncome > 0) {
+      setBlueprint(generateBlueprint(next));
+    }
+  };
+
+  const persistAndRegenerate = async (patch: Record<string, any>, overrides: Partial<UserFinancials>) => {
+    if (!user) return;
+    setSavingFinances(true);
+    const { error } = await supabase.from("profiles").update(patch).eq("id", user.id);
+    setSavingFinances(false);
+    if (error) {
+      toast.error("Could not save changes");
+      return;
+    }
+    regenerateBlueprint(overrides);
+    toast.success("Your financial blueprint has been updated.");
+  };
+
+  const saveIncome = async () => {
+    const n = Number(income);
+    if (!Number.isFinite(n) || n <= 0) {
+      toast.error("Enter a valid monthly income");
+      return;
+    }
+    await persistAndRegenerate({ monthly_income: n }, { monthlyIncome: n });
+  };
+
+  const toggleLife = async (v: boolean) => {
+    setHasLife(v);
+    await persistAndRegenerate({ has_life_insurance: v }, { hasLifeInsurance: v });
+  };
+
+  const toggleHealth = async (v: boolean) => {
+    setHasHealth(v);
+    await persistAndRegenerate({ has_health_insurance: v }, { hasHealthInsurance: v });
+  };
+
+  const toggleEmergency = async (v: boolean) => {
+    setHasEmergency(v);
+    const amt = v ? Number(emergencyAmount) || 0 : 0;
+    await persistAndRegenerate(
+      { has_emergency_fund: v, emergency_fund_amount: amt },
+      { hasEmergencyFund: v, emergencyFundAmount: amt },
+    );
+  };
+
+  const saveEmergencyAmount = async () => {
+    const amt = Number(emergencyAmount);
+    if (!Number.isFinite(amt) || amt < 0) {
+      toast.error("Enter a valid amount");
+      return;
+    }
+    await persistAndRegenerate(
+      { emergency_fund_amount: amt },
+      { emergencyFundAmount: amt },
+    );
+  };
 
   const update = (key: keyof AutomationSettings, value: boolean) => {
     setAutomation({ ...automation, [key]: value });
