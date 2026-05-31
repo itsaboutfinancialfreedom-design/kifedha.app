@@ -246,6 +246,78 @@ export default function Settings() {
           )}
         </div>
 
+        {/* My Finances */}
+        <div className="rounded-2xl p-5 bg-card shadow-card border border-border space-y-5">
+          <div className="flex items-center gap-2">
+            <Wallet className="w-4 h-4 text-primary" />
+            <h2 className="font-display font-semibold text-sm">My Finances</h2>
+            {savingFinances && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground ml-1" />}
+          </div>
+
+          {/* Monthly income */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-foreground">Monthly income (KES)</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={income}
+                onChange={(e) => setIncome(e.target.value.replace(/[^\d.]/g, ""))}
+                placeholder="e.g. 50000"
+                disabled={loadingFinances}
+                className="flex-1 px-3 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+              />
+              <button
+                onClick={saveIncome}
+                disabled={savingFinances || loadingFinances}
+                className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-60"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+
+          {/* Insurance status */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold text-foreground">Insurance status</p>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm">I have life insurance</span>
+              <Switch checked={hasLife} onCheckedChange={toggleLife} disabled={savingFinances || loadingFinances} />
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm">I have health insurance</span>
+              <Switch checked={hasHealth} onCheckedChange={toggleHealth} disabled={savingFinances || loadingFinances} />
+            </div>
+          </div>
+
+          {/* Emergency fund */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm font-semibold">I have an emergency fund</span>
+              <Switch checked={hasEmergency} onCheckedChange={toggleEmergency} disabled={savingFinances || loadingFinances} />
+            </div>
+            {hasEmergency && (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={emergencyAmount}
+                  onChange={(e) => setEmergencyAmount(e.target.value.replace(/[^\d.]/g, ""))}
+                  placeholder="Amount in KES"
+                  className="flex-1 px-3 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                />
+                <button
+                  onClick={saveEmergencyAmount}
+                  disabled={savingFinances}
+                  className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-60"
+                >
+                  Save
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Toggles */}
         <div className="bg-card rounded-2xl shadow-card divide-y divide-border">
           {TOGGLES.map(t => (
