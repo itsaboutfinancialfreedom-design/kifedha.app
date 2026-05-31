@@ -5,19 +5,29 @@ import { BottomNav } from "@/components/BottomNav";
 import { ScoreRing } from "@/components/ScoreRing";
 import { InsightCard } from "@/components/InsightCard";
 import { Recommendations } from "@/components/Recommendations";
-import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell, FileDown, Lock } from "lucide-react";
+import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell, FileDown, Lock, Smartphone, MessageSquareText, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { generateInsights } from "@/lib/insightsEngine";
 import { toast } from "sonner";
 import { generateFinancialReport } from "@/utils/pdfGenerator";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { useTransactions } from "@/context/TransactionsContext";
+import { supabase } from "@/integrations/supabase/client";
+import { autoCategorize, Category } from "@/lib/categorize";
 
 export default function Dashboard() {
   const { financials, blueprint, hasCompletedOnboarding, automation, setAutomation, isPremium } = useApp();
   const { user, profile } = useAuth();
+  const { transactions, addTransaction } = useTransactions();
 
   const navigate = useNavigate();
   const captureRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
+  const [smsOpen, setSmsOpen] = useState(false);
+  const [smsText, setSmsText] = useState("");
+  const [smsBusy, setSmsBusy] = useState(false);
 
   const exportPDF = async () => {
     if (!isPremium) {
@@ -40,8 +50,31 @@ export default function Dashboard() {
     }
   };
 
-
-
+  async function parseSMS() {
+    const text = smsText.trim();
+    if (!text) { toast.error("Paste an M-Pesa SMS first"); return; }
+    setSmsBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("parse-transaction", { body: { text } });
+      if (error) throw error;
+      if (!data || !data.amount) { toast.error("Couldn't extract a transaction from that SMS"); return; }
+      addTransaction({
+        type: data.type,
+        amount: Number(data.amount),
+        note: data.note,
+        category: data.category as Category,
+        date: new Date().toISOString(),
+        source: "mpesa",
+      });
+      toast.success(`Logged: ${data.note} · KES ${Number(data.amount).toLocaleString()}`);
+      setSmsText("");
+      setSmsOpen(false);
+    } catch (e: any) {
+      toast.error(e?.message || "SMS parsing failed");
+    } finally {
+      setSmsBusy(false);
+    }
+  }
 
   useEffect(() => {
     if (!hasCompletedOnboarding) navigate("/");
@@ -157,6 +190,27 @@ export default function Dashboard() {
           </div>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </button>
+
+        {/* M-Pesa SMS card — only for new users */}
+        {transactions.length < 5 && (
+          <div className="bg-card rounded-2xl p-4 shadow-card border-l-4 border-success">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+                <Smartphone className="w-5 h-5 text-success" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-display font-semibold text-sm">Start tracking — paste your M-Pesa SMS</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Paste any M-Pesa confirmation SMS — we'll extract the transaction automatically.
+                </p>
+              </div>
+            </div>
+            <Button className="w-full mt-3" onClick={() => setSmsOpen(true)}>
+              <MessageSquareText className="w-4 h-4 mr-1.5" /> Paste M-Pesa SMS
+            </Button>
+          </div>
+        )}
+
         {/* Personalized recommendations */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
@@ -266,6 +320,26 @@ export default function Dashboard() {
           </button>
         ))}
       </div>
+
+      {/* M-Pesa SMS Dialog */}
+      <Dialog open={smsOpen} onOpenChange={setSmsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Paste M-Pesa SMS</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Textarea
+              rows={5}
+              value={smsText}
+              onChange={e => setSmsText(e.target.value)}
+              placeholder="e.g. QHJ4X8K2 Confirmed. Ksh500.00 sent to NAIVAS SUPERMARKET on 12/5/26 at 1:35PM. New M-PESA balance is Ksh 2,300.00..."
+            />
+            <Button className="w-full" onClick={parseSMS} disabled={smsBusy}>
+              {smsBusy ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Parsing…</> : "Extract & log"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <BottomNav />
     </div>
