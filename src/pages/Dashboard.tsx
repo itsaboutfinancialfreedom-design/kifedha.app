@@ -86,6 +86,26 @@ export default function Dashboard() {
     [financials, blueprint]
   );
 
+  const learnViewed = useMemo(() => loadViewed(), []);
+  const learnDone = learnViewed.pillars.length + learnViewed.terms.length;
+  const learnSuggestion = useMemo(() => {
+    const m = new Date().getMonth();
+    const highCardSpend = transactions
+      .filter(t => t.type === "expense" && new Date(t.date).getMonth() === m)
+      .reduce((s, t) => s + t.amount, 0) > 30000;
+    return computeLearnSuggestion({
+      roundUps: automation.roundUps,
+      autopilot: automation.autopilotGoals,
+      autoSweep: automation.autoSweepSurplus,
+      hasDebt: !!financials && financials.totalDebt > 0,
+      hasGoals: !!financials && financials.goals.length > 0,
+      hasHealth: !!financials?.hasHealthInsurance,
+      hasLife: !!financials?.hasLifeInsurance,
+      hasEmergency: !!financials?.hasEmergencyFund,
+      highCardSpend,
+    }, learnViewed);
+  }, [transactions, automation, financials, learnViewed]);
+
   if (!financials || !blueprint) return null;
 
   const visibleInsights = insights.filter(i => {
