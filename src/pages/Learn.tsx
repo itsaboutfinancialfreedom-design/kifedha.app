@@ -131,7 +131,7 @@ interface GlossaryTerm {
   usedWhen?: (ctx: UsedCtx) => boolean;
 }
 
-interface UsedCtx {
+export interface UsedCtx {
   roundUps: boolean;
   autopilot: boolean;
   autoSweep: boolean;
