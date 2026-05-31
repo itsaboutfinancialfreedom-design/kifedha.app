@@ -173,12 +173,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("ywb_onboarded", v.toString());
   };
 
-  // Live subscription from DB (Paddle)
+  // Server-verified subscription state (source of truth).
+  // localStorage is used ONLY as a fast-read cache, written AFTER the server confirms.
   const { user } = useAuth();
   const [dbSub, setDbSub] = useState<{ status: string; current_period_end: string | null; cancel_at_period_end: boolean } | null>(null);
+  const [premiumLoading, setPremiumLoading] = useState<boolean>(true);
 
   const fetchDbSub = useCallback(async () => {
-    if (!user) { setDbSub(null); return; }
+    if (!user) {
+      setDbSub(null);
+      setPremiumLoading(false);
+      localStorage.removeItem("ywb_premium_cache");
+      return;
+    }
+    setPremiumLoading(true);
     const env = getPaddleEnvironment();
     const { data } = await supabase
       .from("subscriptions")
@@ -189,8 +197,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .limit(1)
       .maybeSingle();
     setDbSub((data as any) ?? null);
+    setPremiumLoading(false);
   }, [user]);
 
+  // Re-verify server-side whenever the authenticated user changes.
   useEffect(() => {
     fetchDbSub();
     if (!user) return;
@@ -199,10 +209,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .on("postgres_changes", { event: "*", schema: "public", table: "subscriptions", filter: `user_id=eq.${user.id}` }, () => fetchDbSub())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [user, fetchDbSub]);
+  }, [user?.id, fetchDbSub]);
 
-  // Premium derived state — driven exclusively by the DB subscription row.
-  // Cancellation revokes access immediately (no grace period).
+  // Premium derived state — driven exclusively by the server-verified subscription row.
   const { isTrialing, trialDaysLeft, isPremium } = useMemo(() => {
     const now = Date.now();
     let dbActive = false;
@@ -210,8 +219,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let daysLeft = 0;
     if (dbSub) {
       const periodEnd = dbSub.current_period_end ? new Date(dbSub.current_period_end).getTime() : Infinity;
-      // active/trialing/past_due retain access while period is current.
-      // canceled never has access (webhook sets current_period_end = now()).
       if (["active", "trialing", "past_due"].includes(dbSub.status)) {
         dbActive = periodEnd === Infinity || periodEnd > now;
       }
@@ -220,6 +227,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     return { isTrialing: dbTrialing, trialDaysLeft: daysLeft, isPremium: dbActive };
   }, [dbSub]);
+
+  // Write to localStorage cache ONLY after the server confirms — never read as source of truth.
+  useEffect(() => {
+    if (premiumLoading) return;
+    localStorage.setItem("ywb_premium_cache", JSON.stringify({ isPremium, isTrialing, at: Date.now() }));
+    localStorage.setItem("ywb_premium", String(isPremium));
+  }, [isPremium, isTrialing, premiumLoading]);
+
 
 
   const startTrial = (cycle: BillingCycle) => {
