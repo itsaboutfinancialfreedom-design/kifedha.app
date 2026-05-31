@@ -321,6 +321,26 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {/* M-Pesa SMS Dialog */}
+      <Dialog open={smsOpen} onOpenChange={setSmsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Paste M-Pesa SMS</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Textarea
+              rows={5}
+              value={smsText}
+              onChange={e => setSmsText(e.target.value)}
+              placeholder="e.g. QHJ4X8K2 Confirmed. Ksh500.00 sent to NAIVAS SUPERMARKET on 12/5/26 at 1:35PM. New M-PESA balance is Ksh 2,300.00..."
+            />
+            <Button className="w-full" onClick={parseSMS} disabled={smsBusy}>
+              {smsBusy ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Parsing…</> : "Extract & log"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <BottomNav />
     </div>
   );
