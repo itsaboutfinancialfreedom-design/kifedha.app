@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useApp, AutomationSettings } from "@/context/AppContext";
+import { useApp, AutomationSettings, UserFinancials } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
 import { BottomNav } from "@/components/BottomNav";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, MessageCircle, Phone, Shield, Sparkles, Crown, ExternalLink, Loader2, LogOut, FileText } from "lucide-react";
+import { ArrowLeft, MessageCircle, Phone, Shield, Sparkles, Crown, ExternalLink, Loader2, LogOut, FileText, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
+import { generateBlueprint } from "@/lib/blueprintEngine";
 
 interface ToggleDef {
   key: keyof AutomationSettings;
