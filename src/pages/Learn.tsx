@@ -424,15 +424,6 @@ export default function Learn() {
     window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
   };
 
-  const continueLearning = () => {
-    if (!suggestion) return;
-    if (suggestion.type === "pillar") togglePillar(suggestion.key as PillarKey);
-    else {
-      toggleTerm(suggestion.key);
-      const el = document.getElementById(`term-${suggestion.key}`);
-      el?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background pb-24">
