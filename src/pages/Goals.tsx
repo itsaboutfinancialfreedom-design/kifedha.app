@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { differenceInMonths, parseISO, format } from "date-fns";
-import { Target, CalendarDays, Plus, Trash2, Sparkles, Lock, Trophy } from "lucide-react";
+import { Target, CalendarDays, Plus, Trash2, Sparkles, Lock, Trophy, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { BottomNav } from "@/components/BottomNav";
@@ -147,6 +147,32 @@ export default function Goals() {
   function openContrib(goal: GoalRow) {
     setContribGoal(goal);
     setContribAmount("");
+  }
+
+  function shareGoal(goal: GoalRow) {
+    const target = Number(goal.target_amount) || 0;
+    const current = Number(goal.current_amount) || 0;
+    const pct = target > 0 ? Math.round((current / target) * 100) : 0;
+
+    let proverb = "Haba na haba hujaza kibaba — little by little fills the measure.";
+    if (goal.goal_type.toLowerCase().includes("house") || goal.goal_type.toLowerCase().includes("land")) {
+      proverb = "Ardhi ni mali — land is wealth.";
+    } else if (goal.goal_type.toLowerCase().includes("school") || goal.goal_type.toLowerCase().includes("education")) {
+      proverb = "Elimu ni ufunguo wa maisha — education is the key to life.";
+    } else if (goal.goal_type.toLowerCase().includes("business")) {
+      proverb = "Biashara ni ujanja — business is cleverness.";
+    }
+
+    const msg = [
+      `🎯 I'm ${pct}% towards my ${goal.goal_type} goal on Kifedha!`,
+      `Saved KES ${current.toLocaleString()} of KES ${target.toLocaleString()}`,
+      "",
+      pct >= 100 ? `🎉 Goal achieved! ${proverb}` : proverb,
+      "",
+      "Track your goals: https://www.kifedha.app",
+    ].join("\n");
+
+    window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
   }
 
   async function saveContrib() {
@@ -297,6 +323,11 @@ export default function Goals() {
                       <Button size="sm" variant="ghost" onClick={() => openContrib(g)}>
                         Add contribution
                       </Button>
+                      {current > 0 && (
+                        <Button size="sm" variant="outline" onClick={() => shareGoal(g)} aria-label="Share goal">
+                          <Share2 className="w-4 h-4" />
+                        </Button>
+                      )}
                       <button
                         onClick={() => deleteGoal(g.id)}
                         className="text-muted-foreground hover:text-destructive p-1"
