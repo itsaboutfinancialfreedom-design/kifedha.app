@@ -350,6 +350,31 @@ export default function Goals() {
           </div>
         )}
       </div>
+
+      <Dialog open={!!contribGoal} onOpenChange={(open) => { if (!open) { setContribGoal(null); setContribAmount(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add to {contribGoal?.goal_type}</DialogTitle>
+            <DialogDescription>Record a contribution toward this goal.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Amount (KES)</Label>
+              <Input
+                inputMode="numeric"
+                placeholder="Amount in KES"
+                value={contribAmount}
+                onChange={(e) => setContribAmount(e.target.value.replace(/[^0-9]/g, ""))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => { setContribGoal(null); setContribAmount(""); }}>Cancel</Button>
+            <Button onClick={saveContrib} disabled={contribSaving}>{contribSaving ? "Saving…" : "Save"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <BottomNav />
     </div>
   );
