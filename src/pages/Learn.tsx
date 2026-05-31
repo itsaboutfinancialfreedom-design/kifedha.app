@@ -52,7 +52,7 @@ interface Pillar {
   extra?: React.ReactNode;
 }
 
-const PILLARS: Pillar[] = [
+export const PILLARS: Pillar[] = [
   {
     key: "budgeting",
     title: "Budgeting",
@@ -131,7 +131,7 @@ interface GlossaryTerm {
   usedWhen?: (ctx: UsedCtx) => boolean;
 }
 
-interface UsedCtx {
+export interface UsedCtx {
   roundUps: boolean;
   autopilot: boolean;
   autoSweep: boolean;
@@ -143,7 +143,7 @@ interface UsedCtx {
   highCardSpend: boolean;
 }
 
-const GLOSSARY: GlossaryTerm[] = [
+export const GLOSSARY: GlossaryTerm[] = [
   // Budgeting
   { term: "50/30/20 Rule", pillar: "budgeting", def: "Split take-home pay: 50% needs, 30% wants, 20% savings.", example: "KSh 60k income → 30k needs, 18k wants, 12k savings." },
   { term: "Cash Flow", pillar: "budgeting", def: "Money coming in minus money going out over a period.", example: "Income 60k − expenses 45k = +15k positive cash flow." },
@@ -294,8 +294,8 @@ function InsuranceDeepDive() {
 }
 
 // ---------- Progress storage ----------
-const VIEWED_KEY = "ywb_learn_viewed";
-function loadViewed(): { pillars: string[]; terms: string[] } {
+export const VIEWED_KEY = "ywb_learn_viewed";
+export function loadViewed(): { pillars: string[]; terms: string[] } {
   try {
     const s = localStorage.getItem(VIEWED_KEY);
     if (s) return JSON.parse(s);
@@ -305,6 +305,39 @@ function loadViewed(): { pillars: string[]; terms: string[] } {
 function saveViewed(v: { pillars: string[]; terms: string[] }) {
   localStorage.setItem(VIEWED_KEY, JSON.stringify(v));
 }
+
+export interface LearnSuggestion {
+  label: string;
+  reason: string;
+  type: "pillar" | "term";
+  key: string;
+}
+
+export function computeLearnSuggestion(
+  ctx: UsedCtx,
+  viewed: { pillars: string[]; terms: string[] }
+): LearnSuggestion | null {
+  const candidates: LearnSuggestion[] = [];
+  if (ctx.highCardSpend && !viewed.terms.includes("Credit Utilization"))
+    candidates.push({ label: "Credit Utilization", reason: "Your card-style spending is high this month.", type: "term", key: "Credit Utilization" });
+  if (ctx.hasDebt && !viewed.pillars.includes("debt"))
+    candidates.push({ label: "Debt", reason: "You have active debts to plan around.", type: "pillar", key: "debt" });
+  if (!ctx.hasHealth && !viewed.pillars.includes("insurance"))
+    candidates.push({ label: "Insurance (Wealth Protection)", reason: "No health cover detected — biggest wealth risk.", type: "pillar", key: "insurance" });
+  if (!ctx.hasEmergency && !viewed.terms.includes("Emergency Fund"))
+    candidates.push({ label: "Emergency Fund", reason: "No emergency fund logged yet.", type: "term", key: "Emergency Fund" });
+  if (candidates.length === 0) {
+    const p = PILLARS.find(p => !viewed.pillars.includes(p.key));
+    if (p) candidates.push({ label: p.title, reason: "Next pillar to learn.", type: "pillar", key: p.key });
+    else {
+      const t = GLOSSARY.find(t => !viewed.terms.includes(t.term));
+      if (t) candidates.push({ label: t.term, reason: "Next glossary term.", type: "term", key: t.term });
+    }
+  }
+  return candidates[0] ?? null;
+}
+
+export const LEARN_TOTAL_TOPICS = 6 + 30; // 6 pillars + 30 glossary terms = 36
 
 // ---------- Page ----------
 export default function Learn() {
@@ -371,27 +404,10 @@ export default function Learn() {
   const pct = Math.round((doneItems / totalItems) * 100);
 
   // Suggest next: prioritize pillar with strongest signal
-  const suggestion = useMemo(() => {
-    const candidates: { label: string; reason: string; type: "pillar" | "term"; key: string }[] = [];
-    if (highCardSpend && !viewed.terms.includes("Credit Utilization"))
-      candidates.push({ label: "Credit Utilization", reason: "Your card-style spending is high this month.", type: "term", key: "Credit Utilization" });
-    if (usedCtx.hasDebt && !viewed.pillars.includes("debt"))
-      candidates.push({ label: "Debt", reason: "You have active debts to plan around.", type: "pillar", key: "debt" });
-    if (!usedCtx.hasHealth && !viewed.pillars.includes("insurance"))
-      candidates.push({ label: "Insurance (Wealth Protection)", reason: "No health cover detected — biggest wealth risk.", type: "pillar", key: "insurance" });
-    if (!usedCtx.hasEmergency && !viewed.terms.includes("Emergency Fund"))
-      candidates.push({ label: "Emergency Fund", reason: "No emergency fund logged yet.", type: "term", key: "Emergency Fund" });
-    // Fallback: first unread
-    if (candidates.length === 0) {
-      const p = PILLARS.find(p => !viewed.pillars.includes(p.key));
-      if (p) candidates.push({ label: p.title, reason: "Next pillar to learn.", type: "pillar", key: p.key });
-      else {
-        const t = GLOSSARY.find(t => !viewed.terms.includes(t.term));
-        if (t) candidates.push({ label: t.term, reason: "Next glossary term.", type: "term", key: t.term });
-      }
-    }
-    return candidates[0] ?? null;
-  }, [highCardSpend, usedCtx, viewed]);
+  const suggestion = useMemo(
+    () => computeLearnSuggestion(usedCtx, viewed),
+    [usedCtx, viewed]
+  );
 
   const continueLearning = () => {
     if (!suggestion) return;
@@ -402,6 +418,12 @@ export default function Learn() {
       el?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
+
+  const shareProgress = () => {
+    const text = `I've completed ${doneItems}/${totalItems} financial topics on Kifedha! 📚\n\nHaba na haba hujaza kibaba — little by little fills the measure.\n\nJoin me: https://www.kifedha.app`;
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  };
+
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -435,6 +457,9 @@ export default function Learn() {
                 <Button size="sm" onClick={continueLearning}>Continue learning</Button>
               </div>
             )}
+            <Button size="sm" variant="outline" className="w-full" onClick={shareProgress}>
+              Share my progress
+            </Button>
           </CardContent>
         </Card>
 

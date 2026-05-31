@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { ScoreRing } from "@/components/ScoreRing";
 import { InsightCard } from "@/components/InsightCard";
 import { Recommendations } from "@/components/Recommendations";
-import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell, FileDown, Lock, Smartphone, MessageSquareText, Loader2, TrendingDown, Wallet } from "lucide-react";
+import { TrendingUp, Shield, AlertTriangle, ChevronRight, Sparkles, Settings as SettingsIcon, BookOpenCheck, Bell, FileDown, Lock, Smartphone, MessageSquareText, Loader2, TrendingDown, Wallet, BookOpen } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { generateInsights } from "@/lib/insightsEngine";
 import { toast } from "sonner";
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useTransactions } from "@/context/TransactionsContext";
+import { computeLearnSuggestion, loadViewed, LEARN_TOTAL_TOPICS } from "@/pages/Learn";
 import { supabase } from "@/integrations/supabase/client";
 import { autoCategorize, Category } from "@/lib/categorize";
 
@@ -84,6 +85,26 @@ export default function Dashboard() {
     () => (financials && blueprint ? generateInsights(financials, blueprint) : []),
     [financials, blueprint]
   );
+
+  const learnViewed = useMemo(() => loadViewed(), []);
+  const learnDone = learnViewed.pillars.length + learnViewed.terms.length;
+  const learnSuggestion = useMemo(() => {
+    const m = new Date().getMonth();
+    const highCardSpend = transactions
+      .filter(t => t.type === "expense" && new Date(t.date).getMonth() === m)
+      .reduce((s, t) => s + t.amount, 0) > 30000;
+    return computeLearnSuggestion({
+      roundUps: automation.roundUps,
+      autopilot: automation.autopilotGoals,
+      autoSweep: automation.autoSweepSurplus,
+      hasDebt: !!financials && financials.totalDebt > 0,
+      hasGoals: !!financials && financials.goals.length > 0,
+      hasHealth: !!financials?.hasHealthInsurance,
+      hasLife: !!financials?.hasLifeInsurance,
+      hasEmergency: !!financials?.hasEmergencyFund,
+      highCardSpend,
+    }, learnViewed);
+  }, [transactions, automation, financials, learnViewed]);
 
   if (!financials || !blueprint) return null;
 
@@ -176,6 +197,26 @@ export default function Dashboard() {
           </div>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </button>
+
+        <button
+          onClick={() => navigate("/learn")}
+          className="w-full bg-card rounded-2xl p-4 shadow-card flex items-center gap-3 text-left border border-border"
+        >
+          <div className="w-11 h-11 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+            <BookOpen className="w-5 h-5 text-accent" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-display font-bold text-sm">Continue learning</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {learnSuggestion ? learnSuggestion.label : "All topics complete — nice work!"}
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              {learnDone} of {LEARN_TOTAL_TOPICS} topics completed
+            </p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </button>
+
 
         <button
           onClick={() => navigate("/dashboards")}
