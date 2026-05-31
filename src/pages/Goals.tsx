@@ -149,6 +149,32 @@ export default function Goals() {
     setContribAmount("");
   }
 
+  function shareGoal(goal: GoalRow) {
+    const target = Number(goal.target_amount) || 0;
+    const current = Number(goal.current_amount) || 0;
+    const pct = target > 0 ? Math.round((current / target) * 100) : 0;
+
+    let proverb = "Haba na haba hujaza kibaba — little by little fills the measure.";
+    if (goal.goal_type.toLowerCase().includes("house") || goal.goal_type.toLowerCase().includes("land")) {
+      proverb = "Ardhi ni mali — land is wealth.";
+    } else if (goal.goal_type.toLowerCase().includes("school") || goal.goal_type.toLowerCase().includes("education")) {
+      proverb = "Elimu ni ufunguo wa maisha — education is the key to life.";
+    } else if (goal.goal_type.toLowerCase().includes("business")) {
+      proverb = "Biashara ni ujanja — business is cleverness.";
+    }
+
+    const msg = [
+      `🎯 I'm ${pct}% towards my ${goal.goal_type} goal on Kifedha!`,
+      `Saved KES ${current.toLocaleString()} of KES ${target.toLocaleString()}`,
+      "",
+      pct >= 100 ? `🎉 Goal achieved! ${proverb}` : proverb,
+      "",
+      "Track your goals: https://www.kifedha.app",
+    ].join("\n");
+
+    window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
+  }
+
   async function saveContrib() {
     if (!contribGoal) return;
     const amount = Number(contribAmount);
