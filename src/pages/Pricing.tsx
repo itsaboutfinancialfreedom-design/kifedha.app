@@ -12,7 +12,7 @@ const FREE_FEATURES = [
 const PREMIUM_FEATURES = [
   "Unlimited savings goals",
   "Advanced debt simulator (snowball / avalanche)",
-  "Auto-M-Pesa statement import",
+  "M-Pesa SMS auto-logging (paste any SMS to log instantly)",
   "PDF financial reports",
   "Email reminders & weekly digest",
   "Unlimited AI advisor chat",

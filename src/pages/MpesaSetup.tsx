@@ -61,23 +61,22 @@ export default function MpesaSetup() {
 
             <Button
               className="w-full"
-              disabled={!isValid}
               onClick={() => {
-                toast.info("M-Pesa sync launches in Phase 2. We've noted your interest.");
+                navigate('/tracker?sms=open');
               }}
             >
-              Connect M-Pesa
+              Paste M-Pesa SMS
             </Button>
 
             <div className="rounded-xl bg-muted/50 p-4 text-xs text-muted-foreground space-y-2">
-              <p className="font-semibold text-foreground">What you'll get when this launches:</p>
+              <p className="font-semibold text-foreground">M-Pesa SMS logging (available now)</p>
               <ul className="space-y-1 list-disc pl-4">
-                <li>Auto-import M-Pesa statements daily</li>
-                <li>Categorize Paybill, Till, and Send Money transactions</li>
-                <li>Detect recurring subscriptions and bills</li>
-                <li>Real-time balance and spending alerts</li>
+                <li>Paste any M-Pesa confirmation SMS to log a transaction instantly</li>
+                <li>We automatically extract amount, payee, and category</li>
+                <li>No manual typing needed — works for Send Money, Paybill, and Till numbers</li>
               </ul>
             </div>
+            <p className="text-[11px] text-muted-foreground">Auto-import coming in Phase 2</p>
           </CardContent>
         </Card>
       </main>

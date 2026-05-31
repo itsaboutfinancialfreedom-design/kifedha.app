@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { useTransactions } from "@/context/TransactionsContext";
 import { BottomNav } from "@/components/BottomNav";
@@ -21,6 +21,7 @@ const QUICK_EXPENSE_CATS: Category[] = ["Food", "Transport", "Bills", "Airtime &
 
 export default function Tracker() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { t, lang, toggle } = useT();
   const { financials } = useApp();
   const { transactions, addTransaction, deleteTransaction } = useTransactions();
@@ -37,6 +38,13 @@ export default function Tracker() {
   const [processing, setProcessing] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+
+  useEffect(() => {
+    if (searchParams.get("sms") === "open") {
+      setSmsOpen(true);
+      navigate("/tracker", { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   async function parseSMS() {
     const text = smsText.trim();
