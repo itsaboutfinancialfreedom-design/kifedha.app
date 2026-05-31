@@ -87,13 +87,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem("ywb_blueprint");
     return saved ? JSON.parse(saved) : null;
   });
-  const [subscription, setSubscriptionState] = useState<Subscription>(() => {
-    const saved = localStorage.getItem("ywb_subscription");
-    if (saved) return { ...DEFAULT_SUB, ...JSON.parse(saved) };
-    // Back-compat: previous flag
-    const legacy = localStorage.getItem("ywb_premium") === "true";
-    return { ...DEFAULT_SUB, paid: legacy };
-  });
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(() => {
     return localStorage.getItem("ywb_onboarded") === "true";
   });
@@ -106,11 +99,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const persistSub = (s: Subscription) => {
-    setSubscriptionState(s);
-    localStorage.setItem("ywb_subscription", JSON.stringify(s));
-    localStorage.setItem("ywb_premium", String(s.paid));
-  };
+  // One-time cleanup of legacy mock-subscription localStorage keys.
+  useEffect(() => {
+    localStorage.removeItem("ywb_subscription");
+    localStorage.removeItem("ywb_premium");
+  }, []);
+
 
   const setAutomation = (a: AutomationSettings) => {
     setAutomationState(a);
