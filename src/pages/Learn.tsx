@@ -404,27 +404,25 @@ export default function Learn() {
   const pct = Math.round((doneItems / totalItems) * 100);
 
   // Suggest next: prioritize pillar with strongest signal
-  const suggestion = useMemo(() => {
-    const candidates: { label: string; reason: string; type: "pillar" | "term"; key: string }[] = [];
-    if (highCardSpend && !viewed.terms.includes("Credit Utilization"))
-      candidates.push({ label: "Credit Utilization", reason: "Your card-style spending is high this month.", type: "term", key: "Credit Utilization" });
-    if (usedCtx.hasDebt && !viewed.pillars.includes("debt"))
-      candidates.push({ label: "Debt", reason: "You have active debts to plan around.", type: "pillar", key: "debt" });
-    if (!usedCtx.hasHealth && !viewed.pillars.includes("insurance"))
-      candidates.push({ label: "Insurance (Wealth Protection)", reason: "No health cover detected — biggest wealth risk.", type: "pillar", key: "insurance" });
-    if (!usedCtx.hasEmergency && !viewed.terms.includes("Emergency Fund"))
-      candidates.push({ label: "Emergency Fund", reason: "No emergency fund logged yet.", type: "term", key: "Emergency Fund" });
-    // Fallback: first unread
-    if (candidates.length === 0) {
-      const p = PILLARS.find(p => !viewed.pillars.includes(p.key));
-      if (p) candidates.push({ label: p.title, reason: "Next pillar to learn.", type: "pillar", key: p.key });
-      else {
-        const t = GLOSSARY.find(t => !viewed.terms.includes(t.term));
-        if (t) candidates.push({ label: t.term, reason: "Next glossary term.", type: "term", key: t.term });
-      }
+  const suggestion = useMemo(
+    () => computeLearnSuggestion(usedCtx, viewed),
+    [usedCtx, viewed]
+  );
+
+  const continueLearning = () => {
+    if (!suggestion) return;
+    if (suggestion.type === "pillar") togglePillar(suggestion.key as PillarKey);
+    else {
+      toggleTerm(suggestion.key);
+      const el = document.getElementById(`term-${suggestion.key}`);
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-    return candidates[0] ?? null;
-  }, [highCardSpend, usedCtx, viewed]);
+  };
+
+  const shareProgress = () => {
+    const text = `I've completed ${doneItems}/${totalItems} financial topics on Kifedha! 📚\n\nHaba na haba hujaza kibaba — little by little fills the measure.\n\nJoin me: https://www.kifedha.app`;
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  };
 
   const continueLearning = () => {
     if (!suggestion) return;
