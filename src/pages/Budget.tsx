@@ -1,7 +1,8 @@
+import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { BottomNav } from "@/components/BottomNav";
 
-import { Wallet, PiggyBank, TrendingUp, Shield, GraduationCap, Landmark, Sunset } from "lucide-react";
+import { Wallet, PiggyBank, TrendingUp, Shield, GraduationCap, Landmark, Sunset, ArrowLeft } from "lucide-react";
 
 function BudgetContent() {
   const { financials, blueprint } = useApp();
