@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,6 +14,7 @@ function clampScore(value: number) {
 export default function Dashboards() {
   const { financials, blueprint, hasCompletedOnboarding, automation, autopilots } = useApp();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('literacy');
 
   useEffect(() => {
     if (!hasCompletedOnboarding) navigate("/");
@@ -94,6 +95,7 @@ export default function Dashboards() {
       tone: "text-primary",
       icon: BookOpenCheck,
       subtitle: `${dangerInsights} critical risk${dangerInsights === 1 ? "" : "s"} need attention`,
+      tabKey: "literacy",
     },
     {
       title: "Wealth Planning",
@@ -101,6 +103,7 @@ export default function Dashboards() {
       tone: "text-success",
       icon: TrendingUp,
       subtitle: `${financials.goals.length} goal${financials.goals.length === 1 ? "" : "s"} linked to your plan`,
+      tabKey: "wealth",
     },
     {
       title: "Insurance Penetration",
@@ -108,6 +111,7 @@ export default function Dashboards() {
       tone: "text-premium",
       icon: Shield,
       subtitle: `${protectionCoverage}/3 core protections currently covered`,
+      tabKey: "insurance",
     },
   ];
 
@@ -131,8 +135,16 @@ export default function Dashboards() {
 
       <div className="max-w-lg mx-auto px-4 -mt-4 space-y-4">
         <div className="grid grid-cols-1 gap-3">
-          {statCards.map(({ title, score, subtitle, icon: Icon, tone }) => (
-            <div key={title} className="bg-card rounded-2xl p-5 shadow-card border border-border flex items-center gap-4">
+          {statCards.map(({ title, score, subtitle, icon: Icon, tone, tabKey }) => (
+            <button
+              key={title}
+              onClick={() => {
+                setActiveTab(tabKey);
+                setTimeout(() => document.getElementById('dashboard-tabs')
+                  ?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+              }}
+              className="w-full bg-card rounded-2xl p-5 shadow-card border border-border flex items-center gap-4 text-left hover:border-primary/40 transition-colors"
+            >
               <ScoreRing score={score} size={78} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
@@ -141,15 +153,16 @@ export default function Dashboards() {
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
               </div>
-            </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
+            </button>
           ))}
         </div>
 
-        <Tabs defaultValue="literacy" className="space-y-4">
+        <Tabs id="dashboard-tabs" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="w-full grid grid-cols-3 h-auto gap-1 bg-muted p-1 rounded-xl">
-            <TabsTrigger value="literacy" className="text-[11px] px-2 py-2">Literacy</TabsTrigger>
-            <TabsTrigger value="wealth" className="text-[11px] px-2 py-2">Wealth</TabsTrigger>
-            <TabsTrigger value="insurance" className="text-[11px] px-2 py-2">Insurance</TabsTrigger>
+            <TabsTrigger value="literacy" className="text-xs px-2 py-2">Literacy</TabsTrigger>
+            <TabsTrigger value="wealth" className="text-xs px-2 py-2">Wealth</TabsTrigger>
+            <TabsTrigger value="insurance" className="text-xs px-2 py-2">Insurance</TabsTrigger>
           </TabsList>
 
           <TabsContent value="literacy" className="space-y-4 mt-0">
