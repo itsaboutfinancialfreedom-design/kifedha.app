@@ -55,6 +55,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
   const { automation, setAutomation, isPremium, isTrialing, trialDaysLeft, financials, setFinancials, setBlueprint } = useApp();
+  const { lang, toggle } = useT();
   const [portalLoading, setPortalLoading] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
