@@ -158,11 +158,11 @@ export default function Dashboards() {
           ))}
         </div>
 
-        <Tabs defaultValue="literacy" className="space-y-4">
+        <Tabs id="dashboard-tabs" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="w-full grid grid-cols-3 h-auto gap-1 bg-muted p-1 rounded-xl">
-            <TabsTrigger value="literacy" className="text-[11px] px-2 py-2">Literacy</TabsTrigger>
-            <TabsTrigger value="wealth" className="text-[11px] px-2 py-2">Wealth</TabsTrigger>
-            <TabsTrigger value="insurance" className="text-[11px] px-2 py-2">Insurance</TabsTrigger>
+            <TabsTrigger value="literacy" className="text-xs px-2 py-2">Literacy</TabsTrigger>
+            <TabsTrigger value="wealth" className="text-xs px-2 py-2">Wealth</TabsTrigger>
+            <TabsTrigger value="insurance" className="text-xs px-2 py-2">Insurance</TabsTrigger>
           </TabsList>
 
           <TabsContent value="literacy" className="space-y-4 mt-0">
