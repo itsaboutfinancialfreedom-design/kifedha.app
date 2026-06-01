@@ -404,6 +404,35 @@ export default function Goals() {
         </DialogContent>
       </Dialog>
 
+      <Dialog
+        open={!!confirmDeleteId}
+        onOpenChange={(open) => { if (!open) setConfirmDeleteId(null); }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete this goal?</DialogTitle>
+            <DialogDescription>
+              This will permanently delete the goal and all saved progress.
+              This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConfirmDeleteId(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (confirmDeleteId) deleteGoal(confirmDeleteId);
+                setConfirmDeleteId(null);
+              }}
+            >
+              Delete goal
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <BottomNav />
     </div>
   );
