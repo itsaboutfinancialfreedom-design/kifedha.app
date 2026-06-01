@@ -64,6 +64,7 @@ export default function Goals() {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [saving, setSaving] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const [contribGoal, setContribGoal] = useState<GoalRow | null>(null);
   const [contribAmount, setContribAmount] = useState("");
@@ -326,7 +327,7 @@ export default function Goals() {
                         </Button>
                       )}
                       <button
-                        onClick={() => deleteGoal(g.id)}
+                        onClick={() => setConfirmDeleteId(g.id)}
                         className="text-muted-foreground hover:text-destructive p-1"
                         aria-label="Delete goal"
                       >
@@ -399,6 +400,35 @@ export default function Goals() {
           <DialogFooter>
             <Button variant="ghost" onClick={() => { setContribGoal(null); setContribAmount(""); }}>Cancel</Button>
             <Button onClick={saveContrib} disabled={contribSaving}>{contribSaving ? "Saving…" : "Save"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!confirmDeleteId}
+        onOpenChange={(open) => { if (!open) setConfirmDeleteId(null); }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete this goal?</DialogTitle>
+            <DialogDescription>
+              This will permanently delete the goal and all saved progress.
+              This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConfirmDeleteId(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (confirmDeleteId) deleteGoal(confirmDeleteId);
+                setConfirmDeleteId(null);
+              }}
+            >
+              Delete goal
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
