@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { differenceInMonths, parseISO, format } from "date-fns";
-import { Target, CalendarDays, Plus, Trash2, Sparkles, Lock, Trophy, Share2 } from "lucide-react";
+import { Target, CalendarDays, Plus, Trash2, Sparkles, Lock, Trophy, Share2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 import { BottomNav } from "@/components/BottomNav";
@@ -201,72 +201,69 @@ export default function Goals() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <div className="max-w-2xl mx-auto px-4 pt-8">
-        <div className="flex items-start justify-between mb-5">
-          <div>
-            <h1 className="font-display text-2xl font-bold mb-1">Your Goals</h1>
-            <p className="text-sm text-muted-foreground">
-              {monthlySavings > 0
-                ? <>KES {monthlySavings.toLocaleString()}/mo from your blueprint{goals.length > 0 && <> · ~KES {perGoalAllocation.toLocaleString()}/mo per goal</>}</>
-                : <>Set your blueprint to see monthly allocations</>}
-            </p>
-          </div>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={openCreate} size="sm">
-                {atFreeLimit ? <Lock className="w-4 h-4 mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
-                New Goal
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create a goal</DialogTitle>
-                <DialogDescription>What are you saving for?</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label>Goal type</Label>
-                  <Select value={draft.goal_type} onValueChange={(v) => setDraft({ ...draft, goal_type: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {GOAL_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Target amount (KES)</Label>
-                  <Input
-                    inputMode="numeric"
-                    placeholder="e.g. 500000"
-                    value={draft.target_amount}
-                    onChange={(e) => setDraft({ ...draft, target_amount: e.target.value.replace(/[^0-9]/g, "") })}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Already saved (KES, optional)</Label>
-                  <Input
-                    inputMode="numeric"
-                    placeholder="0"
-                    value={draft.current_amount}
-                    onChange={(e) => setDraft({ ...draft, current_amount: e.target.value.replace(/[^0-9]/g, "") })}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Target date</Label>
-                  <Input
-                    type="date"
-                    value={draft.target_date}
-                    onChange={(e) => setDraft({ ...draft, target_date: e.target.value })}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button onClick={saveGoal} disabled={saving}>{saving ? "Saving…" : "Save goal"}</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
+          <button onClick={() => navigate(-1)}
+            className="p-1.5 -ml-1.5 rounded-lg hover:bg-muted transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="font-display font-bold text-base flex-1">Your Goals</h1>
+          <Button onClick={openCreate} size="sm">
+            {atFreeLimit ? <Lock className="w-4 h-4 mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
+            New Goal
+          </Button>
         </div>
+      </div>
+      <div className="max-w-2xl mx-auto px-4 pt-8">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create a goal</DialogTitle>
+              <DialogDescription>What are you saving for?</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label>Goal type</Label>
+                <Select value={draft.goal_type} onValueChange={(v) => setDraft({ ...draft, goal_type: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {GOAL_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Target amount (KES)</Label>
+                <Input
+                  inputMode="numeric"
+                  placeholder="e.g. 500000"
+                  value={draft.target_amount}
+                  onChange={(e) => setDraft({ ...draft, target_amount: e.target.value.replace(/[^0-9]/g, "") })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Already saved (KES, optional)</Label>
+                <Input
+                  inputMode="numeric"
+                  placeholder="0"
+                  value={draft.current_amount}
+                  onChange={(e) => setDraft({ ...draft, current_amount: e.target.value.replace(/[^0-9]/g, "") })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Target date</Label>
+                <Input
+                  type="date"
+                  value={draft.target_date}
+                  onChange={(e) => setDraft({ ...draft, target_date: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button onClick={saveGoal} disabled={saving}>{saving ? "Saving…" : "Save goal"}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {atFreeLimit && (
           <Card className="mb-5 border-premium/40 bg-premium/5">

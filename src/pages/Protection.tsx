@@ -1,10 +1,12 @@
+import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { BottomNav } from "@/components/BottomNav";
 import { ScoreRing } from "@/components/ScoreRing";
-import { Shield, Heart, Briefcase, AlertTriangle, CheckCircle2, Calendar } from "lucide-react";
+import { Shield, Heart, Briefcase, AlertTriangle, CheckCircle2, Calendar, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Protection() {
+  const navigate = useNavigate();
   const { financials, blueprint } = useApp();
   if (!financials || !blueprint) return null;
 
@@ -37,11 +39,17 @@ export default function Protection() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
+        <div className="max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
+          <button onClick={() => navigate(-1)}
+            className="p-1.5 -ml-1.5 rounded-lg hover:bg-muted transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="font-display font-bold text-base">Risk & Protection</h1>
+        </div>
+      </div>
+
       <div className="max-w-lg mx-auto px-4 pt-8">
-        <h1 className="font-display text-2xl font-bold mb-1">Risk & Protection</h1>
-        <p className="text-sm text-muted-foreground mb-6">
-          Protect what you've built. Here's where you stand.
-        </p>
 
         {/* Risk Score */}
         <div className="bg-card rounded-2xl p-6 shadow-card mb-4 flex items-center gap-6">
