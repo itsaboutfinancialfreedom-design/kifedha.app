@@ -95,6 +95,7 @@ export default function Dashboards() {
       tone: "text-primary",
       icon: BookOpenCheck,
       subtitle: `${dangerInsights} critical risk${dangerInsights === 1 ? "" : "s"} need attention`,
+      tabKey: "literacy",
     },
     {
       title: "Wealth Planning",
@@ -102,6 +103,7 @@ export default function Dashboards() {
       tone: "text-success",
       icon: TrendingUp,
       subtitle: `${financials.goals.length} goal${financials.goals.length === 1 ? "" : "s"} linked to your plan`,
+      tabKey: "wealth",
     },
     {
       title: "Insurance Penetration",
@@ -109,6 +111,7 @@ export default function Dashboards() {
       tone: "text-premium",
       icon: Shield,
       subtitle: `${protectionCoverage}/3 core protections currently covered`,
+      tabKey: "insurance",
     },
   ];
 
