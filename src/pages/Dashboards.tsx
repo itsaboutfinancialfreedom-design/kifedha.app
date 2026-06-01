@@ -220,6 +220,26 @@ export default function Dashboards() {
                   </div>
                 ))}
               </div>
+              {!autopilots.some(a => a.enabled) && (
+                <div className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/20">
+                  <p className="text-sm font-semibold mb-1 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    What is Goal Autopilot?
+                  </p>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Goal Autopilot automatically moves part of your monthly savings
+                    into each of your goals — no manual transfers needed. Enable it
+                    in Settings to start building wealth on autopilot.
+                  </p>
+                  <button
+                    onClick={() => navigate('/settings')}
+                    className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground
+                      text-sm font-semibold hover:bg-primary/90 transition-colors"
+                  >
+                    Enable Goal Autopilot in Settings
+                  </button>
+                </div>
+              )}
             </div>
           </TabsContent>
 
