@@ -320,6 +320,24 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Language */}
+        <div className="rounded-2xl p-5 bg-card shadow-card border border-border">
+          <h2 className="font-display font-semibold text-sm mb-3">Language</h2>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">
+                {lang === "sw" ? "Kiswahili" : "English"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {lang === "sw"
+                  ? "Badilisha lugha kwenda Kiingereza"
+                  : "Switch interface to Kiswahili"}
+              </p>
+            </div>
+            <Switch checked={lang === "sw"} onCheckedChange={toggle} />
+          </div>
+        </div>
+
         {/* Toggles */}
         <div className="bg-card rounded-2xl shadow-card divide-y divide-border">
           {TOGGLES.map(t => (
