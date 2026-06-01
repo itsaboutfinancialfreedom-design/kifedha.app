@@ -21,11 +21,15 @@ import { useApp } from "@/context/AppContext";
 
 const GOAL_TYPES = [
   "Emergency fund",
-  "School fees",
-  "Retirement",
-  "House deposit",
+  "Buy land or property",
+  "School fees (primary / secondary)",
+  "University / college fees",
   "Business capital",
-  "Vacation",
+  "Buy a car",
+  "Medical fund",
+  "Chama contributions",
+  "Retirement",
+  "Travel / holiday",
 ];
 
 const FREE_GOAL_LIMIT = 2;
@@ -156,12 +160,17 @@ export default function Goals() {
     const pct = target > 0 ? Math.round((current / target) * 100) : 0;
 
     let proverb = "Haba na haba hujaza kibaba — little by little fills the measure.";
-    if (goal.goal_type.toLowerCase().includes("house") || goal.goal_type.toLowerCase().includes("land")) {
+    const type = goal.goal_type.toLowerCase();
+    if (type.includes("land") || type.includes("property")) {
       proverb = "Ardhi ni mali — land is wealth.";
-    } else if (goal.goal_type.toLowerCase().includes("school") || goal.goal_type.toLowerCase().includes("education")) {
+    } else if (type.includes("school") || type.includes("university") || type.includes("college")) {
       proverb = "Elimu ni ufunguo wa maisha — education is the key to life.";
-    } else if (goal.goal_type.toLowerCase().includes("business")) {
+    } else if (type.includes("business")) {
       proverb = "Biashara ni ujanja — business is cleverness.";
+    } else if (type.includes("chama")) {
+      proverb = "Umoja ni nguvu — unity is strength.";
+    } else if (type.includes("medical")) {
+      proverb = "Afya ni mali — health is wealth.";
     }
 
     const msg = [
