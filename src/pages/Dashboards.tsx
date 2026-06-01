@@ -135,8 +135,16 @@ export default function Dashboards() {
 
       <div className="max-w-lg mx-auto px-4 -mt-4 space-y-4">
         <div className="grid grid-cols-1 gap-3">
-          {statCards.map(({ title, score, subtitle, icon: Icon, tone }) => (
-            <div key={title} className="bg-card rounded-2xl p-5 shadow-card border border-border flex items-center gap-4">
+          {statCards.map(({ title, score, subtitle, icon: Icon, tone, tabKey }) => (
+            <button
+              key={title}
+              onClick={() => {
+                setActiveTab(tabKey);
+                setTimeout(() => document.getElementById('dashboard-tabs')
+                  ?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+              }}
+              className="w-full bg-card rounded-2xl p-5 shadow-card border border-border flex items-center gap-4 text-left hover:border-primary/40 transition-colors"
+            >
               <ScoreRing score={score} size={78} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
@@ -145,7 +153,8 @@ export default function Dashboards() {
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
               </div>
-            </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
+            </button>
           ))}
         </div>
 
