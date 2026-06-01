@@ -142,7 +142,7 @@ export default function Landing() {
 
         {/* Footer / Legal links */}
         <footer className="mt-12 pt-8 border-t border-border">
-          <div className="flex flex-wrap items-center justify-center gap-4 mb-4">
+          <div className="flex flex-wrap items-center justify-center gap-4 mb-3">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Lock className="w-3 h-3" /> 256-bit encrypted
             </div>
@@ -162,7 +162,7 @@ export default function Landing() {
           <p className="text-center text-[10px] text-muted-foreground/60 mt-4">
             © {new Date().getFullYear()} Herika rise Ltd. All rights reserved.
           </p>
-          <p className="text-center text-[10px] text-muted-foreground/50 mt-2 max-w-xs mx-auto">
+          <p className="text-center text-[11px] text-muted-foreground/60 mt-2 max-w-sm mx-auto leading-relaxed">
             Kifedha is a financial planning tool, not a licensed bank or investment advisor.
             For regulated investment advice, consult a CMA-licensed professional.
           </p>
