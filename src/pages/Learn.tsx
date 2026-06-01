@@ -429,13 +429,15 @@ export default function Learn() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur border-b">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-primary" />
-          <h1 className="text-lg font-semibold">Learn</h1>
-          <Badge variant="secondary" className="ml-auto">{doneItems}/{totalItems}</Badge>
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
+        <div className="max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
+          <button onClick={() => navigate(-1)}
+            className="p-1.5 -ml-1.5 rounded-lg hover:bg-muted transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="font-display font-bold text-base">Financial Education</h1>
         </div>
-      </header>
+      </div>
 
       <main className="max-w-lg mx-auto px-4 py-4 space-y-6">
         {/* Progress */}
