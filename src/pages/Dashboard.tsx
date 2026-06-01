@@ -348,7 +348,6 @@ export default function Dashboard() {
         {[
           { label: "Goal Planning", to: "/goals", icon: TrendingUp },
           { label: "Financial Dashboards", to: "/dashboards", icon: BookOpenCheck },
-          { label: "Protection Insights", to: "/protection", icon: Shield },
           { label: "Risk & Protection", to: "/protection", icon: Shield },
           { label: "Debt Tracker", to: "/debt", icon: TrendingDown },
           { label: "Budget & Expenses", to: "/budget", icon: Wallet },
