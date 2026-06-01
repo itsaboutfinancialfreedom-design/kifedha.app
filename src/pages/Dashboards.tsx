@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScoreRing } from "@/components/ScoreRing";
 import { useApp } from "@/context/AppContext";
 import { generateInsights } from "@/lib/insightsEngine";
-import { ArrowLeft, BookOpenCheck, ChevronRight, Shield, Sparkles, Target, TrendingUp } from "lucide-react";
+import { ArrowLeft, BookOpenCheck, ChevronRight, Heart, PiggyBank, Shield, Sparkles, Target, TrendingUp } from "lucide-react";
 
 function clampScore(value: number) {
   return Math.max(0, Math.min(100, Math.round(value)));
@@ -248,6 +248,44 @@ export default function Dashboards() {
                     <p className="text-sm">{item}</p>
                   </div>
                 ))}
+              </div>
+              <div className="space-y-2 mt-4">
+                {!financials.hasHealthInsurance && (
+                  <button
+                    onClick={() => navigate('/protection')}
+                    className="w-full flex items-center gap-3 rounded-xl bg-danger/5 border border-danger/20 px-4 py-3 text-left hover:bg-danger/10 transition-colors"
+                  >
+                    <Shield className="w-4 h-4 text-danger shrink-0" />
+                    <span className="text-sm font-medium flex-1">
+                      Get health cover — start with SHA (KES 500/mo)
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                )}
+                {!financials.hasLifeInsurance && (
+                  <button
+                    onClick={() => navigate('/protection')}
+                    className="w-full flex items-center gap-3 rounded-xl bg-warning/5 border border-warning/20 px-4 py-3 text-left hover:bg-warning/10 transition-colors"
+                  >
+                    <Heart className="w-4 h-4 text-warning shrink-0" />
+                    <span className="text-sm font-medium flex-1">
+                      Add life cover to protect your dependents
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                )}
+                {!financials.hasEmergencyFund && (
+                  <button
+                    onClick={() => navigate('/goals')}
+                    className="w-full flex items-center gap-3 rounded-xl bg-primary/5 border border-primary/20 px-4 py-3 text-left hover:bg-primary/10 transition-colors"
+                  >
+                    <PiggyBank className="w-4 h-4 text-primary shrink-0" />
+                    <span className="text-sm font-medium flex-1">
+                      Start an emergency fund goal
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                )}
               </div>
             </div>
           </TabsContent>
