@@ -14,6 +14,7 @@ function clampScore(value: number) {
 export default function Dashboards() {
   const { financials, blueprint, hasCompletedOnboarding, automation, autopilots } = useApp();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('literacy');
 
   useEffect(() => {
     if (!hasCompletedOnboarding) navigate("/");
