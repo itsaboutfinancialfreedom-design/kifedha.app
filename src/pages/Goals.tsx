@@ -317,22 +317,32 @@ export default function Goals() {
                         </CardDescription>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Button size="sm" variant="ghost" onClick={() => openContrib(g)}>
-                        Add contribution
-                      </Button>
-                      {current > 0 && (
-                        <Button size="sm" variant="outline" onClick={() => shareGoal(g)} aria-label="Share goal">
-                          <Share2 className="w-4 h-4" />
+                    <div className="flex flex-col items-end gap-0.5">
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => openContrib(g)}
+                          aria-label="Add contribution"
+                          title="Add contribution"
+                          className="w-8 h-8"
+                        >
+                          <PlusCircle className="w-4 h-4 text-success" />
                         </Button>
-                      )}
-                      <button
-                        onClick={() => setConfirmDeleteId(g.id)}
-                        className="text-muted-foreground hover:text-destructive p-1"
-                        aria-label="Delete goal"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                        {current > 0 && (
+                          <Button size="sm" variant="outline" onClick={() => shareGoal(g)} aria-label="Share goal">
+                            <Share2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                        <button
+                          onClick={() => setConfirmDeleteId(g.id)}
+                          className="text-muted-foreground hover:text-destructive p-1"
+                          aria-label="Delete goal"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">Add · Share · Delete</span>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
