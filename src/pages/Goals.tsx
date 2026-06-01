@@ -64,6 +64,7 @@ export default function Goals() {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [saving, setSaving] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const [contribGoal, setContribGoal] = useState<GoalRow | null>(null);
   const [contribAmount, setContribAmount] = useState("");
