@@ -206,6 +206,94 @@ function DebtContent() {
           </div>
         </div>
       </div>
+
+      {/* Add debt dialog */}
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add a debt</DialogTitle>
+            <DialogDescription>Track a loan or credit balance</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="debt-name">Debt name</Label>
+              <Input
+                id="debt-name"
+                value={newDebt.name}
+                onChange={(e) => setNewDebt({ ...newDebt, name: e.target.value })}
+                placeholder="e.g. Tala loan"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Lender type</Label>
+              <Select
+                value={newDebt.type}
+                onValueChange={(v) => setNewDebt({ ...newDebt, type: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    "Mobile loan (Tala/Branch)",
+                    "Fuliza",
+                    "SACCO loan",
+                    "Bank loan",
+                    "Credit card",
+                    "Family & friends",
+                    "Other",
+                  ].map((t) => (
+                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="debt-amount">Total balance (KES)</Label>
+              <Input
+                id="debt-amount"
+                inputMode="numeric"
+                value={newDebt.amount}
+                onChange={(e) => setNewDebt({
+                  ...newDebt,
+                  amount: e.target.value.replace(/[^0-9]/g, ""),
+                })}
+                placeholder="0"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="debt-monthly">Monthly payment (KES)</Label>
+              <Input
+                id="debt-monthly"
+                inputMode="numeric"
+                value={newDebt.monthlyPayment}
+                onChange={(e) => setNewDebt({
+                  ...newDebt,
+                  monthlyPayment: e.target.value.replace(/[^0-9]/g, ""),
+                })}
+                placeholder="0"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="debt-rate">Interest rate % per year</Label>
+              <Input
+                id="debt-rate"
+                inputMode="decimal"
+                value={newDebt.interestRate}
+                onChange={(e) => setNewDebt({ ...newDebt, interestRate: e.target.value })}
+                placeholder="e.g. 15"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                If your lender quotes monthly rate, multiply by 12.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button>
+            <Button onClick={saveDebt}>Save debt</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
