@@ -342,6 +342,7 @@ export const LEARN_TOTAL_TOPICS = 6 + 30; // 6 pillars + 30 glossary terms = 36
 
 // ---------- Page ----------
 export default function Learn() {
+  const navigate = useNavigate();
   const { financials, automation } = useApp();
   const { transactions } = useTransactions();
   const [openPillar, setOpenPillar] = useState<PillarKey | null>(null);
