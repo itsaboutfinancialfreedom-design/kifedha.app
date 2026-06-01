@@ -1,7 +1,8 @@
+import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { BottomNav } from "@/components/BottomNav";
 import { ScoreRing } from "@/components/ScoreRing";
-import { Shield, Heart, Briefcase, AlertTriangle, CheckCircle2, Calendar } from "lucide-react";
+import { Shield, Heart, Briefcase, AlertTriangle, CheckCircle2, Calendar, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Protection() {

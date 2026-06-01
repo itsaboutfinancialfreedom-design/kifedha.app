@@ -1,7 +1,8 @@
+import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import { BottomNav } from "@/components/BottomNav";
 
-import { TrendingDown, AlertTriangle, CheckCircle2, Zap } from "lucide-react";
+import { TrendingDown, AlertTriangle, CheckCircle2, Zap, ArrowLeft } from "lucide-react";
 
 function DebtContent() {
   const { financials, blueprint } = useApp();

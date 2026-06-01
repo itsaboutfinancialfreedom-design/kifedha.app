@@ -187,7 +187,7 @@ export default function Settings() {
           <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-lg hover:bg-muted">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="font-display font-bold text-base">Trust & Automation</h1>
+          <h1 className="font-display font-bold text-base">Settings</h1>
         </div>
       </div>
 
