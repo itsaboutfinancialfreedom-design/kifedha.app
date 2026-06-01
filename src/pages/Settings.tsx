@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useApp, AutomationSettings, UserFinancials } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
+import { useT } from "@/hooks/useT";
 import { BottomNav } from "@/components/BottomNav";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, MessageCircle, Phone, Shield, Sparkles, Crown, ExternalLink, Loader2, LogOut, FileText, Wallet } from "lucide-react";
@@ -54,6 +55,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
   const { automation, setAutomation, isPremium, isTrialing, trialDaysLeft, financials, setFinancials, setBlueprint } = useApp();
+  const { lang, toggle } = useT();
   const [portalLoading, setPortalLoading] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -315,6 +317,24 @@ export default function Settings() {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Language */}
+        <div className="rounded-2xl p-5 bg-card shadow-card border border-border">
+          <h2 className="font-display font-semibold text-sm mb-3">Language</h2>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">
+                {lang === "sw" ? "Kiswahili" : "English"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {lang === "sw"
+                  ? "Badilisha lugha kwenda Kiingereza"
+                  : "Switch interface to Kiswahili"}
+              </p>
+            </div>
+            <Switch checked={lang === "sw"} onCheckedChange={toggle} />
           </div>
         </div>
 
