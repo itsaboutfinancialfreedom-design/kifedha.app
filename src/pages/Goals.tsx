@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { differenceInMonths, parseISO, format } from "date-fns";
 import { Target, CalendarDays, Plus, PlusCircle, Trash2, Sparkles, Lock, Trophy, Share2, ArrowLeft } from "lucide-react";
+import { ScoreRing } from "@/components/ScoreRing";
 import { toast } from "sonner";
 
 import { BottomNav } from "@/components/BottomNav";
@@ -91,6 +92,18 @@ export default function Goals() {
     () => (goals.length > 0 ? Math.floor(monthlySavings / goals.length) : 0),
     [goals.length, monthlySavings]
   );
+
+  const totalSaved = useMemo(
+    () => goals.reduce((s, g) => s + Number(g.current_amount || 0), 0),
+    [goals]
+  );
+  const totalTarget = useMemo(
+    () => goals.reduce((s, g) => s + Number(g.target_amount || 0), 0),
+    [goals]
+  );
+  const overallPct = totalTarget > 0
+    ? Math.min(100, Math.round((totalSaved / totalTarget) * 100))
+    : 0;
 
   const atFreeLimit = !isPremium && goals.length >= FREE_GOAL_LIMIT;
 
@@ -284,6 +297,23 @@ export default function Goals() {
                 <p className="text-xs text-muted-foreground">Upgrade to track unlimited goals.</p>
               </div>
               <Button size="sm" onClick={() => navigate("/advisor/upgrade")}>Upgrade</Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {goals.length > 0 && (
+          <Card className="mb-5">
+            <CardContent className="pt-5 flex items-center gap-4">
+              <div className="shrink-0 relative">
+                <ScoreRing score={overallPct} size={72} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Total saved across all goals</p>
+                <p className="text-lg font-semibold">KES {totalSaved.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">
+                  of KES {totalTarget.toLocaleString()} target · {overallPct}% overall
+                </p>
+              </div>
             </CardContent>
           </Card>
         )}
