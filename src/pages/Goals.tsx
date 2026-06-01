@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { differenceInMonths, parseISO, format } from "date-fns";
-import { Target, CalendarDays, Plus, Trash2, Sparkles, Lock, Trophy, Share2 } from "lucide-react";
+import { Target, CalendarDays, Plus, Trash2, Sparkles, Lock, Trophy, Share2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 import { BottomNav } from "@/components/BottomNav";

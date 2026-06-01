@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ import {
   ChevronDown,
   Search,
   Sparkles,
-  BookOpen,
+  ArrowLeft,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { useTransactions } from "@/context/TransactionsContext";
