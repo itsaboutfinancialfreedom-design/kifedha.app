@@ -73,7 +73,7 @@ export default function Upgrade() {
       <div className="max-w-lg mx-auto px-4 py-5 space-y-5">
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning/10 text-warning text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" /> 7-day free trial · Cancel anytime
+            <Sparkles className="w-3.5 h-3.5" /> 14-day free trial · Cancel anytime
           </div>
           <h2 className="font-display text-2xl font-bold leading-tight">
             Get the full Kifedha advantage
@@ -150,7 +150,7 @@ export default function Upgrade() {
                 className="mt-5 w-full py-3 rounded-xl gradient-premium text-premium-foreground font-semibold text-sm shadow-elevated transition-transform active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                {loading ? "Opening checkout…" : "Start 7-day free trial"}
+                {loading ? "Opening checkout…" : "Start 14-day free trial"}
               </button>
             )}
             <p className="text-[11px] text-muted-foreground text-center mt-2">Secure checkout · Cancel anytime</p>
@@ -160,8 +160,8 @@ export default function Upgrade() {
         <div className="rounded-xl bg-muted/40 p-4 text-xs text-muted-foreground">
           <p className="font-semibold text-foreground mb-1">How billing works</p>
           <p>
-            Start your 7-day free trial today. After the trial ends, you'll continue on the {cycle} plan
-            unless you cancel. Manage or cancel anytime from Settings. Payments processed securely via Paddle.
+            Start your 14-day free trial today. After the trial ends, you'll continue on the {cycle} plan
+            unless you cancel. No charge during the trial — cancel anytime. Manage or cancel anytime from Settings. Payments processed securely via Paddle.
           </p>
         </div>
       </div>
