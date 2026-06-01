@@ -162,7 +162,7 @@ export default function Landing() {
           <p className="text-center text-[10px] text-muted-foreground/60 mt-4">
             © {new Date().getFullYear()} Herika rise Ltd. All rights reserved.
           </p>
-          <p className="text-center text-[10px] text-muted-foreground/50 mt-2 max-w-xs mx-auto">
+          <p className="text-center text-[11px] text-muted-foreground/60 mt-2 max-w-sm mx-auto leading-relaxed">
             Kifedha is a financial planning tool, not a licensed bank or investment advisor.
             For regulated investment advice, consult a CMA-licensed professional.
           </p>
