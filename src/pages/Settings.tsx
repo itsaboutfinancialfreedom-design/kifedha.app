@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useApp, AutomationSettings, UserFinancials } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
+import { useT } from "@/hooks/useT";
 import { BottomNav } from "@/components/BottomNav";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, MessageCircle, Phone, Shield, Sparkles, Crown, ExternalLink, Loader2, LogOut, FileText, Wallet } from "lucide-react";
