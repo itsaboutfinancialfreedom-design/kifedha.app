@@ -1,12 +1,70 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { BottomNav } from "@/components/BottomNav";
+import { generateBlueprint } from "@/lib/blueprintEngine";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+  DialogFooter, DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 
-import { TrendingDown, AlertTriangle, CheckCircle2, Zap, ArrowLeft } from "lucide-react";
+import { TrendingDown, AlertTriangle, CheckCircle2, Zap, ArrowLeft, Plus } from "lucide-react";
 
 function DebtContent() {
-  const { financials, blueprint } = useApp();
+  const { financials, blueprint, setFinancials, setBlueprint } = useApp();
+  const { user } = useAuth();
+  const [addOpen, setAddOpen] = useState(false);
+  const [newDebt, setNewDebt] = useState({
+    name: "", type: "Mobile loan (Tala/Branch)", amount: "", interestRate: "", monthlyPayment: "",
+  });
   if (!financials || !blueprint) return null;
+
+  const resetForm = () => setNewDebt({
+    name: "", type: "Mobile loan (Tala/Branch)", amount: "", interestRate: "", monthlyPayment: "",
+  });
+
+  const saveDebt = async () => {
+    if (!newDebt.name || !newDebt.amount || !newDebt.monthlyPayment) {
+      toast.error("Fill in name, balance, and monthly payment");
+      return;
+    }
+    const debt = {
+      name: newDebt.name,
+      amount: Number(newDebt.amount),
+      interestRate: Number(newDebt.interestRate) || 0,
+      monthlyPayment: Number(newDebt.monthlyPayment),
+    };
+    const updatedDebts = [...(financials?.debts ?? []), debt];
+    const updatedFinancials = {
+      ...financials!,
+      debts: updatedDebts,
+      totalDebt: updatedDebts.reduce((s, d) => s + d.amount, 0),
+    };
+    setFinancials(updatedFinancials);
+    setBlueprint(generateBlueprint(updatedFinancials));
+    if (user) {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ debts: updatedDebts as never } as never)
+        .eq("id", user.id);
+      if (error) {
+        console.error("Failed to sync debt", error);
+        toast.error("Saved locally, but couldn't sync to your account.");
+      }
+    }
+    toast.success("Debt added");
+    setAddOpen(false);
+    resetForm();
+  };
 
   const income = financials.monthlyIncome ?? 0;
   const debts = financials.debts ?? [];
@@ -26,6 +84,15 @@ function DebtContent() {
 
   return (
     <div className="space-y-4">
+      {/* Header actions */}
+      <div className="flex items-center justify-between">
+        <div /> {/* spacer */}
+        <Button size="sm" onClick={() => setAddOpen(true)} className="gap-1">
+          <Plus className="w-4 h-4" />
+          Add debt
+        </Button>
+      </div>
+
       {/* Summary */}
       <div className="bg-card rounded-2xl p-5 shadow-card">
         <div className="flex items-center justify-between mb-4">
@@ -139,6 +206,94 @@ function DebtContent() {
           </div>
         </div>
       </div>
+
+      {/* Add debt dialog */}
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add a debt</DialogTitle>
+            <DialogDescription>Track a loan or credit balance</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="debt-name">Debt name</Label>
+              <Input
+                id="debt-name"
+                value={newDebt.name}
+                onChange={(e) => setNewDebt({ ...newDebt, name: e.target.value })}
+                placeholder="e.g. Tala loan"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Lender type</Label>
+              <Select
+                value={newDebt.type}
+                onValueChange={(v) => setNewDebt({ ...newDebt, type: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    "Mobile loan (Tala/Branch)",
+                    "Fuliza",
+                    "SACCO loan",
+                    "Bank loan",
+                    "Credit card",
+                    "Family & friends",
+                    "Other",
+                  ].map((t) => (
+                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="debt-amount">Total balance (KES)</Label>
+              <Input
+                id="debt-amount"
+                inputMode="numeric"
+                value={newDebt.amount}
+                onChange={(e) => setNewDebt({
+                  ...newDebt,
+                  amount: e.target.value.replace(/[^0-9]/g, ""),
+                })}
+                placeholder="0"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="debt-monthly">Monthly payment (KES)</Label>
+              <Input
+                id="debt-monthly"
+                inputMode="numeric"
+                value={newDebt.monthlyPayment}
+                onChange={(e) => setNewDebt({
+                  ...newDebt,
+                  monthlyPayment: e.target.value.replace(/[^0-9]/g, ""),
+                })}
+                placeholder="0"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="debt-rate">Interest rate % per year</Label>
+              <Input
+                id="debt-rate"
+                inputMode="decimal"
+                value={newDebt.interestRate}
+                onChange={(e) => setNewDebt({ ...newDebt, interestRate: e.target.value })}
+                placeholder="e.g. 15"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                If your lender quotes monthly rate, multiply by 12.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button>
+            <Button onClick={saveDebt}>Save debt</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
