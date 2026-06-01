@@ -296,6 +296,10 @@ export default function Auth() {
           </TabsContent>
         </Tabs>
 
+        <p className="text-center text-xs text-muted-foreground mt-3">
+          Your data is encrypted and never shared with third parties.
+        </p>
+
         <p className="text-center text-sm text-muted-foreground mt-6">
           {mode === "signup" ? "Already have an account?" : "New to Kifedha?"}{" "}
           <button
