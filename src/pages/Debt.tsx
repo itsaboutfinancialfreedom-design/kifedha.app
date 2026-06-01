@@ -84,6 +84,15 @@ function DebtContent() {
 
   return (
     <div className="space-y-4">
+      {/* Header actions */}
+      <div className="flex items-center justify-between">
+        <div /> {/* spacer */}
+        <Button size="sm" onClick={() => setAddOpen(true)} className="gap-1">
+          <Plus className="w-4 h-4" />
+          Add debt
+        </Button>
+      </div>
+
       {/* Summary */}
       <div className="bg-card rounded-2xl p-5 shadow-card">
         <div className="flex items-center justify-between mb-4">
