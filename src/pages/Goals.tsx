@@ -214,7 +214,7 @@ export default function Goals() {
           </Button>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto px-4 pt-8">
+      <div className="max-w-2xl mx-auto px-4 py-4">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent>
             <DialogHeader>

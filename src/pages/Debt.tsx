@@ -156,7 +156,7 @@ export default function Debt() {
           <h1 className="font-display font-bold text-base">Debt Tracker</h1>
         </div>
       </div>
-      <div className="max-w-lg mx-auto px-4 pt-8">
+      <div className="max-w-lg mx-auto px-4 py-4">
         <DebtContent />
       </div>
       <BottomNav />

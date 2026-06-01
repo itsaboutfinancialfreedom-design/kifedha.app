@@ -49,7 +49,7 @@ export default function Protection() {
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 pt-8">
+      <div className="max-w-lg mx-auto px-4 py-4">
 
         {/* Risk Score */}
         <div className="bg-card rounded-2xl p-6 shadow-card mb-4 flex items-center gap-6">
