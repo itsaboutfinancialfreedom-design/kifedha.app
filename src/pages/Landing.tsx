@@ -142,7 +142,7 @@ export default function Landing() {
 
         {/* Footer / Legal links */}
         <footer className="mt-12 pt-8 border-t border-border">
-          <div className="flex flex-wrap items-center justify-center gap-4 mb-4">
+          <div className="flex flex-wrap items-center justify-center gap-4 mb-3">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Lock className="w-3 h-3" /> 256-bit encrypted
             </div>
