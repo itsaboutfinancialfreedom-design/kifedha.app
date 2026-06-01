@@ -327,7 +327,7 @@ export default function Goals() {
                         </Button>
                       )}
                       <button
-                        onClick={() => deleteGoal(g.id)}
+                        onClick={() => setConfirmDeleteId(g.id)}
                         className="text-muted-foreground hover:text-destructive p-1"
                         aria-label="Delete goal"
                       >
