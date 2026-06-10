@@ -63,8 +63,26 @@ Deno.serve(async (req) => {
       check_env: env,
     });
     const isPremium = isPremiumData === true;
+
+    // Size guards to prevent free-tier bypass and token-cost amplification
+    const MAX_MESSAGES = isPremium ? 100 : 8;
+    if (!Array.isArray(messages) || messages.length > MAX_MESSAGES) {
+      return new Response(JSON.stringify({ error: "Too many messages" }), {
+        status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const totalChars = messages.reduce(
+      (n: number, m: any) => n + String(m?.content ?? "").length, 0,
+    );
+    if (totalChars > 40_000) {
+      return new Response(JSON.stringify({ error: "Conversation too long" }), {
+        status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+
 
     const sevRank: Record<string, number> = { danger: 3, warning: 2, info: 1, success: 0 };
     const rankedInsights = Array.isArray(insights)
