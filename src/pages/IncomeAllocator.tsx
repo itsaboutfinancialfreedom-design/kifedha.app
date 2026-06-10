@@ -26,6 +26,26 @@ export default function IncomeAllocatorPage() {
           <ExportPDF variant="compact" />
         </div>
         <IncomeAllocator />
+
+        <div className="mt-10 text-center border-t pt-10">
+          <h3 className="font-display font-bold text-xl mb-2">
+            Save this plan and track your wealth
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
+            Create a free Kifedha account to track your income,
+            goals, and financial health score — with a 14-day
+            free trial on Premium.
+          </p>
+          <Link
+            to="/auth"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            Start free — takes 2 minutes
+          </Link>
+          <p className="text-xs text-muted-foreground mt-3">
+            No credit card needed
+          </p>
+        </div>
       </main>
     </div>
   );
