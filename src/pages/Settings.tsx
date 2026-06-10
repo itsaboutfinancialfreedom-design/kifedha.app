@@ -320,6 +320,23 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Notifications */}
+        <button
+          onClick={() => navigate("/settings/notifications")}
+          className="w-full flex items-center justify-between px-5 py-4 rounded-2xl bg-card shadow-card border border-border hover:bg-muted/40 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Bell className="w-4 h-4 text-primary" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-semibold">Notifications</p>
+              <p className="text-xs text-muted-foreground">Email, SMS, weekly digest and reminders</p>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </button>
+
         {/* Language */}
         <div className="rounded-2xl p-5 bg-card shadow-card border border-border">
           <h2 className="font-display font-semibold text-sm mb-3">Language</h2>
