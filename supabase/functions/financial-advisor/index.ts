@@ -161,8 +161,9 @@ CLIENT TIER: ${isPremium ? "PREMIUM (give full diagnosis with numbers + action p
     });
   } catch (e) {
     console.error("advisor error", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+
 });
