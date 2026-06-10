@@ -351,6 +351,7 @@ export default function Dashboard() {
           { label: "Risk & Protection", to: "/protection", icon: Shield },
           { label: "Debt Tracker", to: "/debt", icon: TrendingDown },
           { label: "Budget & Expenses", to: "/budget", icon: Wallet },
+          { label: "My Reports", to: "/reports", icon: FileDown },
         ].map(({ label, to, icon: Icon }) => (
           <button
             key={label}
