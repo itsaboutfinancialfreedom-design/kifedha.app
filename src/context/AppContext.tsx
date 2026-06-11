@@ -110,20 +110,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Load financials & blueprint from Supabase when user changes
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("profiles")
+    (supabase.from("profiles") as any)
       .select("financials, blueprint, onboarding_completed")
       .eq("id", user.id)
       .maybeSingle()
-      .then(({ data }) => {
+      .then(({ data }: { data: any }) => {
         if (!data) return;
         if (data.financials) {
-          const f = data.financials as unknown as UserFinancials;
+          const f = data.financials as UserFinancials;
           setFinancials(f);
           localStorage.setItem("ywb_financials", JSON.stringify(f));
         }
         if (data.blueprint) {
-          const b = data.blueprint as unknown as FinancialBlueprint;
+          const b = data.blueprint as FinancialBlueprint;
           setBlueprint(b);
           localStorage.setItem("ywb_blueprint", JSON.stringify(b));
         }
@@ -170,11 +169,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setFinancials(f);
     localStorage.setItem("ywb_financials", JSON.stringify(f));
     if (user) {
-      supabase
-        .from("profiles")
-        .update({ financials: f as unknown as never })
+      (supabase.from("profiles") as any)
+        .update({ financials: f })
         .eq("id", user.id)
-        .then(({ error }) => {
+        .then(({ error }: { error: any }) => {
           if (error) console.error("Failed to sync financials:", error);
         });
     }
@@ -183,11 +181,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setBlueprint(b);
     localStorage.setItem("ywb_blueprint", JSON.stringify(b));
     if (user) {
-      supabase
-        .from("profiles")
-        .update({ blueprint: b as unknown as never })
+      (supabase.from("profiles") as any)
+        .update({ blueprint: b })
         .eq("id", user.id)
-        .then(({ error }) => {
+        .then(({ error }: { error: any }) => {
           if (error) console.error("Failed to sync blueprint:", error);
         });
     }
