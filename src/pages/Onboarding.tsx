@@ -36,11 +36,15 @@ interface GoalRow {
 
 const GOAL_TYPES = [
   "Emergency fund",
-  "School fees",
-  "Retirement",
-  "House deposit",
+  "Buy land or property",
+  "School fees (primary / secondary)",
+  "University / college fees",
   "Business capital",
-  "Vacation",
+  "Buy a car",
+  "Medical fund",
+  "Chama contributions",
+  "Retirement",
+  "Travel / holiday",
 ];
 
 const RISK_QUIZ = [
@@ -143,7 +147,7 @@ export default function Onboarding() {
     }
     setGoals((g) => [
       ...g,
-      { goal_type: "School fees", target_amount: "", target_date: "", priority: "Medium" },
+      { goal_type: "Emergency fund", target_amount: "", target_date: "", priority: "Medium" },
     ]);
   };
   const removeGoal = (i: number) => setGoals((g) => g.filter((_, idx) => idx !== i));
