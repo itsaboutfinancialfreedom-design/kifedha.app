@@ -17,6 +17,66 @@ export const CATEGORIES = [
 export type Category = (typeof CATEGORIES)[number];
 
 const RULES: { keywords: string[]; category: Category }[] = [
+  // ── NEW: Kenyan loan apps and mobile credit ─────────────────
+  {
+    keywords: [
+      "tala", "branch", "fuliza", "m-shwari", "mshwari",
+      "kcb mpesa", "kcb m-pesa", "timiza", "zenka", "okolea",
+      "loan", "repayment", "repay", "credit",
+    ],
+    category: "Bills",
+  },
+
+  // ── NEW: Kenyan banks ────────────────────────────────────────
+  {
+    keywords: [
+      "equity bank", "equity agent", "kcb", "co-op", "coop bank",
+      "cooperative bank", "ncba", "stanbic", "barclays", "absa",
+      "i&m", "dtb", "diamond trust", "family bank", "bank",
+      "atm", "withdrawal", "deposit",
+    ],
+    category: "Savings",
+  },
+
+  // ── NEW: M-Pesa person-to-person transfers ───────────────────
+  {
+    keywords: [
+      "you have sent", "you sent", "received from", "paid to",
+      "transferred to", "send money", "m-pesa", "mpesa",
+      "lipa na", "paybill", "buy goods", "till",
+    ],
+    category: "Bills",
+  },
+
+  // ── NEW: Kenyan supermarkets and food ──────────────────────
+  {
+    keywords: [
+      "chandarana", "cleanshelf", "ukwala", "tuskys",
+      "java", "kfc", "chicken inn", "pizza inn", "galitos",
+      "artcaffe", "dormans",
+    ],
+    category: "Food",
+  },
+
+  // ── NEW: Government and tax ─────────────────────────────────
+  {
+    keywords: [
+      "kra", "ntsa", "nssf", "nhif", "sha", "county", "huduma",
+      "ecitizen", "government", "tax",
+    ],
+    category: "Bills",
+  },
+
+  // ── NEW: Kenyan ride and delivery ───────────────────────────
+  {
+    keywords: [
+      "little cab", "littlecab", "indriver", "faras",
+      "glovo", "jumia food", "sendy",
+    ],
+    category: "Transport",
+  },
+
+  // ── EXISTING rules unchanged below ─────────────────────────
   { keywords: ["uber", "bolt", "matatu", "fare", "fuel", "petrol", "boda", "transport", "sgr"], category: "Transport" },
   { keywords: ["naivas", "carrefour", "quickmart", "food", "lunch", "dinner", "breakfast", "groceries", "supermarket", "mama mboga"], category: "Food" },
   { keywords: ["kplc", "water", "electricity", "wifi", "internet", "zuku", "faiba", "dstv", "gotv", "bill"], category: "Bills" },
