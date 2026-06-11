@@ -99,6 +99,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const { user } = useAuth();
+
   // One-time cleanup of legacy mock-subscription localStorage keys.
   useEffect(() => {
     localStorage.removeItem("ywb_subscription");
