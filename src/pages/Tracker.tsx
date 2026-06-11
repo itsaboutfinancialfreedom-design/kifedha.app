@@ -417,7 +417,109 @@ export default function Tracker() {
         <div className="bg-card rounded-2xl p-4 shadow-card">
           <h2 className="font-display text-sm font-semibold mb-3">{t("recent_tx")}</h2>
           {recent.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">{t("no_tx")}</p>
+            <div className="py-2 space-y-3">
+              {/* Step 1 — paste SMS */}
+              <button
+                onClick={() => setSmsOpen(true)}
+                className="w-full flex items-center gap-3 rounded-xl
+                  bg-success/5 border border-success/20 p-3.5
+                  hover:bg-success/10 transition-colors text-left"
+              >
+                <div className="w-9 h-9 rounded-xl bg-success/15
+                  flex items-center justify-center shrink-0">
+                  <Smartphone className="w-4 h-4 text-success" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold">
+                    Paste your first M-Pesa SMS
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Any Safaricom confirmation message works
+                  </p>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5
+                  rounded-full bg-success/15 text-success shrink-0">
+                  FASTEST
+                </span>
+              </button>
+              {/* Step 2 — log salary */}
+              <button
+                onClick={() => {
+                  setType("income");
+                  setNote("Salary");
+                  setCategory("Income");
+                  setAutoCat(false);
+                  setAmount("");
+                  setOpen(true);
+                }}
+                className="w-full flex items-center gap-3 rounded-xl
+                  bg-primary/5 border border-primary/20 p-3.5
+                  hover:bg-primary/10 transition-colors text-left"
+              >
+                <div className="w-9 h-9 rounded-xl bg-primary/15
+                  flex items-center justify-center shrink-0">
+                  <ArrowUpCircle className="w-4 h-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold">
+                    Log your salary
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Start with your monthly income
+                  </p>
+                </div>
+              </button>
+              {/* Step 3 — log an expense */}
+              <button
+                onClick={() => {
+                  setType("expense");
+                  setNote("");
+                  setCategory("Other");
+                  setAutoCat(true);
+                  setAmount("");
+                  setOpen(true);
+                }}
+                className="w-full flex items-center gap-3 rounded-xl
+                  bg-muted/60 border border-border p-3.5
+                  hover:bg-muted transition-colors text-left"
+              >
+                <div className="w-9 h-9 rounded-xl bg-muted
+                  flex items-center justify-center shrink-0">
+                  <ArrowDownCircle className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold">
+                    Log an expense manually
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    e.g. Lunch at Naivas, matatu fare
+                  </p>
+                </div>
+              </button>
+              {/* How it works — 3 steps */}
+              <div className="mt-1 rounded-xl border border-border
+                bg-card p-4 space-y-2.5">
+                <p className="text-xs font-semibold text-muted-foreground
+                  uppercase tracking-wide">
+                  How Kifedha tracks your money
+                </p>
+                {[
+                  { step: "1", text: "Log income & expenses — manually, by SMS, or by voice" },
+                  { step: "2", text: "Kifedha auto-categorises every transaction" },
+                  { step: "3", text: "See your spending patterns, reports, and wealth score" },
+                ].map(({ step, text }) => (
+                  <div key={step} className="flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-primary/15
+                      text-primary text-[10px] font-bold flex items-center
+                      justify-center shrink-0 mt-0.5">
+                      {step}
+                    </span>
+                    <p className="text-xs text-muted-foreground
+                      leading-relaxed">{text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : (
             <div className="space-y-2">
               {recent.map(tx => (
