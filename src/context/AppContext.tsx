@@ -196,7 +196,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Server-verified subscription state (source of truth).
   // localStorage is used ONLY as a fast-read cache, written AFTER the server confirms.
-  const { user } = useAuth();
   const [dbSub, setDbSub] = useState<{ status: string; current_period_end: string | null; cancel_at_period_end: boolean } | null>(null);
   const [premiumLoading, setPremiumLoading] = useState<boolean>(true);
 
