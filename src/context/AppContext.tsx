@@ -99,11 +99,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const { user } = useAuth();
+
   // One-time cleanup of legacy mock-subscription localStorage keys.
   useEffect(() => {
     localStorage.removeItem("ywb_subscription");
     localStorage.removeItem("ywb_premium");
   }, []);
+
+  // Load financials & blueprint from Supabase when user changes
+  useEffect(() => {
+    if (!user) return;
+    (supabase.from("profiles") as any)
+      .select("financials, blueprint, onboarding_completed")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }: { data: any }) => {
+        if (!data) return;
+        if (data.financials) {
+          const f = data.financials as UserFinancials;
+          setFinancials(f);
+          localStorage.setItem("ywb_financials", JSON.stringify(f));
+        }
+        if (data.blueprint) {
+          const b = data.blueprint as FinancialBlueprint;
+          setBlueprint(b);
+          localStorage.setItem("ywb_blueprint", JSON.stringify(b));
+        }
+        if (data.onboarding_completed) {
+          setHasCompletedOnboarding(true);
+          localStorage.setItem("ywb_onboarded", "true");
+        }
+      });
+  }, [user?.id]);
 
 
   const setAutomation = (a: AutomationSettings) => {
@@ -140,10 +168,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const handleSetFinancials = (f: UserFinancials) => {
     setFinancials(f);
     localStorage.setItem("ywb_financials", JSON.stringify(f));
+    if (user) {
+      (supabase.from("profiles") as any)
+        .update({ financials: f })
+        .eq("id", user.id)
+        .then(({ error }: { error: any }) => {
+          if (error) console.error("Failed to sync financials:", error);
+        });
+    }
   };
   const handleSetBlueprint = (b: FinancialBlueprint) => {
     setBlueprint(b);
     localStorage.setItem("ywb_blueprint", JSON.stringify(b));
+    if (user) {
+      (supabase.from("profiles") as any)
+        .update({ blueprint: b })
+        .eq("id", user.id)
+        .then(({ error }: { error: any }) => {
+          if (error) console.error("Failed to sync blueprint:", error);
+        });
+    }
   };
   const handleSetOnboarded = (v: boolean) => {
     setHasCompletedOnboarding(v);
@@ -152,7 +196,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Server-verified subscription state (source of truth).
   // localStorage is used ONLY as a fast-read cache, written AFTER the server confirms.
-  const { user } = useAuth();
   const [dbSub, setDbSub] = useState<{ status: string; current_period_end: string | null; cancel_at_period_end: boolean } | null>(null);
   const [premiumLoading, setPremiumLoading] = useState<boolean>(true);
 

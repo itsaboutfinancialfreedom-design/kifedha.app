@@ -17,12 +17,14 @@ export type Database = {
       profiles: {
         Row: {
           age: number | null
+          blueprint: Json | null
           country: string
           created_at: string
           dependents_ages: Json | null
           dependents_count: number | null
           email: string | null
           emergency_fund_amount: number
+          financials: Json | null
           full_name: string | null
           has_emergency_fund: boolean
           has_health_insurance: boolean
@@ -40,12 +42,14 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          blueprint?: Json | null
           country?: string
           created_at?: string
           dependents_ages?: Json | null
           dependents_count?: number | null
           email?: string | null
           emergency_fund_amount?: number
+          financials?: Json | null
           full_name?: string | null
           has_emergency_fund?: boolean
           has_health_insurance?: boolean
@@ -63,12 +67,14 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          blueprint?: Json | null
           country?: string
           created_at?: string
           dependents_ages?: Json | null
           dependents_count?: number | null
           email?: string | null
           emergency_fund_amount?: number
+          financials?: Json | null
           full_name?: string | null
           has_emergency_fund?: boolean
           has_health_insurance?: boolean
