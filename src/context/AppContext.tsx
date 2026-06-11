@@ -105,6 +105,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("ywb_premium");
   }, []);
 
+  // Load financials & blueprint from Supabase when user changes
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("financials, blueprint, onboarding_completed")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        if (data.financials) {
+          const f = data.financials as unknown as UserFinancials;
+          setFinancials(f);
+          localStorage.setItem("ywb_financials", JSON.stringify(f));
+        }
+        if (data.blueprint) {
+          const b = data.blueprint as unknown as FinancialBlueprint;
+          setBlueprint(b);
+          localStorage.setItem("ywb_blueprint", JSON.stringify(b));
+        }
+        if (data.onboarding_completed) {
+          setHasCompletedOnboarding(true);
+          localStorage.setItem("ywb_onboarded", "true");
+        }
+      });
+  }, [user?.id]);
+
 
   const setAutomation = (a: AutomationSettings) => {
     setAutomationState(a);
@@ -140,10 +167,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const handleSetFinancials = (f: UserFinancials) => {
     setFinancials(f);
     localStorage.setItem("ywb_financials", JSON.stringify(f));
+    if (user) {
+      supabase
+        .from("profiles")
+        .update({ financials: f as unknown as never })
+        .eq("id", user.id)
+        .then(({ error }) => {
+          if (error) console.error("Failed to sync financials:", error);
+        });
+    }
   };
   const handleSetBlueprint = (b: FinancialBlueprint) => {
     setBlueprint(b);
     localStorage.setItem("ywb_blueprint", JSON.stringify(b));
+    if (user) {
+      supabase
+        .from("profiles")
+        .update({ blueprint: b as unknown as never })
+        .eq("id", user.id)
+        .then(({ error }) => {
+          if (error) console.error("Failed to sync blueprint:", error);
+        });
+    }
   };
   const handleSetOnboarded = (v: boolean) => {
     setHasCompletedOnboarding(v);
