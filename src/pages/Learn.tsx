@@ -349,7 +349,7 @@ export function computeLearnSuggestion(
   return candidates[0] ?? null;
 }
 
-export const LEARN_TOTAL_TOPICS = 6 + 30; // 6 pillars + 30 glossary terms = 36
+export const LEARN_TOTAL_TOPICS = 6 + 38; // 6 pillars + 38 glossary terms = 44
 
 // ---------- Page ----------
 export default function Learn() {
