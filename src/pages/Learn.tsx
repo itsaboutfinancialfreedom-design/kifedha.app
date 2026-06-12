@@ -114,11 +114,11 @@ export const PILLARS: Pillar[] = [
     title: "Insurance (Wealth Protection)",
     icon: ShieldCheck,
     nutshell:
-      "Insurance doesn't grow your wealth — it protects your wealth from being destroyed. Think of it as a seatbelt for your finances.",
+      "Insurance protects what you've built — and certain policies also grow your wealth through disciplined, structured saving. A seatbelt and a pension, in one.",
     inKifedha:
       "We help you track your insurance policies, remind you of premium due dates, and show coverage gaps. Our AI compares your insurance spending against benchmarks.",
     example:
-      "A KSh 300,000 hospital bill wipes 5 years of savings. A KSh 1,500/month health cover absorbs it instead.",
+      "A KSh 300,000 hospital bill wipes 5 years of savings. A KSh 1,500/month health cover absorbs it instead. Meanwhile, KSh 5,000/month in an endowment policy for 15 years → a guaranteed KSh 1.2M+ lump sum.",
     extra: <InsuranceDeepDive />,
   },
 ];
