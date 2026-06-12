@@ -114,11 +114,11 @@ export const PILLARS: Pillar[] = [
     title: "Insurance (Wealth Protection)",
     icon: ShieldCheck,
     nutshell:
-      "Insurance doesn't grow your wealth — it protects your wealth from being destroyed. Think of it as a seatbelt for your finances.",
+      "Insurance protects what you've built — and certain policies also grow your wealth through disciplined, structured saving. A seatbelt and a pension, in one.",
     inKifedha:
       "We help you track your insurance policies, remind you of premium due dates, and show coverage gaps. Our AI compares your insurance spending against benchmarks.",
     example:
-      "A KSh 300,000 hospital bill wipes 5 years of savings. A KSh 1,500/month health cover absorbs it instead.",
+      "A KSh 300,000 hospital bill wipes 5 years of savings. A KSh 1,500/month health cover absorbs it instead. Meanwhile, KSh 5,000/month in an endowment policy for 15 years → a guaranteed KSh 1.2M+ lump sum.",
     extra: <InsuranceDeepDive />,
   },
 ];
@@ -142,6 +142,9 @@ export interface UsedCtx {
   hasLife: boolean;
   hasEmergency: boolean;
   highCardSpend: boolean;
+  hasLongTermGoal: boolean;
+  hasSchoolFeesGoal: boolean;
+  hasRetirementGoal: boolean;
 }
 
 export const GLOSSARY: GlossaryTerm[] = [
@@ -191,6 +194,14 @@ export const GLOSSARY: GlossaryTerm[] = [
   { term: "Rider", pillar: "insurance", def: "Add-on that extends a base policy.", example: "Critical-illness rider on life cover." },
   { term: "Underinsured", pillar: "insurance", def: "Cover too small to absorb a real-world loss.", example: "200k life cover with 3 dependents = underinsured." },
   { term: "Cash Value", pillar: "insurance", def: "Savings portion inside a whole-life policy (often low return).", example: "Whole life builds slow cash value vs MMF growth." },
+  { term: "Endowment Policy", pillar: "insurance", def: "A savings-type insurance policy that pays a guaranteed lump sum at the end of a fixed term (5–20 years), plus accumulated bonuses.", example: "KSh 5,000/month for 15 years → KSh 1.2M–1.8M guaranteed payout at maturity.", usedWhen: c => c.hasLongTermGoal },
+  { term: "Education Policy", pillar: "insurance", def: "An insurance savings plan designed to mature exactly when a child enters Form 1 or university. Includes a premium waiver — policy pays out in full even if the parent dies.", example: "KSh 3,500/month from a child's age 5 → KSh 800,000 at age 18, regardless of what happens to the parent.", usedWhen: c => c.hasSchoolFeesGoal },
+  { term: "Retirement Annuity", pillar: "insurance", def: "An insurance contract that converts accumulated premiums into a guaranteed monthly income stream from retirement age. Complements NSSF.", example: "30-year policy → monthly pension of KSh 15,000–40,000 depending on premiums paid.", usedWhen: c => c.hasRetirementGoal },
+  { term: "Whole-of-Life Policy", pillar: "insurance", def: "A policy that provides life cover for your entire life AND builds a cash surrender value (savings component) over time.", example: "KSh 2,000/month from age 30 → life cover throughout your life plus a growing cash value you can borrow against." },
+  { term: "Investment-Linked Policy (ILP)", pillar: "insurance", def: "Combines life insurance with investment in unit trusts. Part of the premium buys cover; the rest is invested in a fund of your choice.", example: "KSh 5,000/month split: KSh 800 life cover + KSh 4,200 invested in a balanced unit trust.", usedWhen: c => c.hasLongTermGoal },
+  { term: "Premium Waiver", pillar: "insurance", def: "A policy feature that waives (stops) premium payments if the policyholder dies or is permanently disabled — but the policy continues paying out as planned.", example: "Education policy: parent dies when child is 10. Premium waiver kicks in — no more payments needed. Policy still pays out at age 18.", usedWhen: c => c.hasLife },
+  { term: "Maturity Benefit", pillar: "insurance", def: "The guaranteed lump sum paid to the policyholder when a savings-type insurance policy reaches the end of its term.", example: "15-year endowment policy matures → KSh 1.5M paid to the policyholder (not on death — on completion)." },
+  { term: "Surrender Value", pillar: "insurance", def: "The amount paid if you cancel a savings-type insurance policy before it matures. Always less than the maturity benefit — often significantly less in early years.", example: "Cancel a 15-year endowment in year 3 → receive only 20–40% of premiums paid. Best to hold to maturity." },
 ];
 
 // ---------- Insurance deep dive ----------
@@ -290,6 +301,61 @@ function InsuranceDeepDive() {
           ))}
         </div>
       </section>
+
+      <section>
+        <h4 className="font-semibold mb-3 flex items-center gap-2">
+          <span className="text-primary">💰</span> Insurance as a Savings Vehicle
+        </h4>
+        <p className="text-muted-foreground mb-3">
+          Beyond protection, certain insurance products act as powerful, structured savings tools — especially for Kenyans who struggle to maintain savings discipline. The penalty for stopping a policy creates the discipline a savings account cannot.
+        </p>
+        <div className="space-y-3">
+          {[
+            {
+              name: "Endowment Policy",
+              best: "Medium & long-term goals (10–20 yrs)",
+              how: "Fixed monthly premium for a set term. At maturity, receive a guaranteed lump sum plus accumulated bonuses. Cannot be easily withdrawn — that constraint is the feature.",
+              example: "KSh 5,000/month for 15 years → approximately KSh 1.2M–1.8M maturity payout.",
+              flag: "🏘️ Ideal for: land purchase, business capital, retirement top-up",
+            },
+            {
+              name: "Education Policy",
+              best: "School fees planning (start early)",
+              how: "Designed to mature on a child's Form 1 or university entry date. Includes a premium waiver — if the parent dies, premiums stop but the policy pays out in full on the target date.",
+              example: "KSh 3,500/month from age 5 → approximately KSh 800,000 at age 18.",
+              flag: "🎓 Ideal for: parents of children under 10",
+            },
+            {
+              name: "Whole-of-Life / Retirement Annuity",
+              best: "Long-term retirement (20+ yrs)",
+              how: "Provides life cover for your entire life AND builds a cash surrender value over time. At retirement age, can be converted to a monthly pension income. Complements NSSF.",
+              example: "KSh 2,000/month from age 30 → meaningful pension supplement by age 60.",
+              flag: "🌿 Ideal for: self-employed, gig workers, anyone without a workplace pension",
+            },
+            {
+              name: "Investment-Linked Policy (ILP)",
+              best: "Long-term wealth growth (15+ yrs)",
+              how: "Combines life cover with investment in unit trusts. A portion covers life risk; the rest is invested in a fund you choose. Returns are not guaranteed but can outperform endowments over 15+ years.",
+              example: "KSh 5,000/month at 8% fund return for 20 years → approximately KSh 2.9M.",
+              flag: "📈 Ideal for: moderate–aggressive risk profiles, 25–45 age range",
+            },
+          ].map(({ name, best, how, example, flag }) => (
+            <div key={name} className="rounded-lg border bg-card p-3 space-y-1.5">
+              <div className="font-semibold text-sm">{name}</div>
+              <div className="text-xs text-primary font-medium">Best for: {best}</div>
+              <p className="text-xs text-muted-foreground">{how}</p>
+              <p className="text-xs font-medium">📊 {example}</p>
+              <p className="text-xs text-muted-foreground italic">{flag}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 rounded-lg border bg-warning/5 border-warning/20 p-3">
+          <p className="text-xs font-semibold mb-1">⚠️ Important: compare before you commit</p>
+          <p className="text-xs text-muted-foreground">
+            Endowment returns (4–7% p.a.) are lower than MMFs (9–11% p.a.) or T-bills (15–16% p.a.) but the discipline benefit compensates for many savers. A licensed advisor can model the right combination for your income and goals. Ask Kifedha's AI advisor or book a session through the Protection tab.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }
@@ -338,7 +404,7 @@ export function computeLearnSuggestion(
   return candidates[0] ?? null;
 }
 
-export const LEARN_TOTAL_TOPICS = 6 + 30; // 6 pillars + 30 glossary terms = 36
+export const LEARN_TOTAL_TOPICS = 6 + 38; // 6 pillars + 38 glossary terms = 44
 
 // ---------- Page ----------
 export default function Learn() {
@@ -370,6 +436,17 @@ export default function Learn() {
     hasLife: !!financials?.hasLifeInsurance,
     hasEmergency: !!financials?.hasEmergencyFund,
     highCardSpend,
+    hasLongTermGoal: !!financials?.goals.some(g => {
+      if (!g.deadline) return false;
+      const yrs = (new Date(g.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 365);
+      return yrs >= 5;
+    }),
+    hasSchoolFeesGoal: !!financials?.goals.some(g =>
+      g.name?.toLowerCase().includes("school") || g.name?.toLowerCase().includes("university")
+    ),
+    hasRetirementGoal: !!financials?.goals.some(g =>
+      g.name?.toLowerCase().includes("retirement")
+    ),
   };
 
   const togglePillar = (k: PillarKey) => {
