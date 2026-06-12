@@ -373,6 +373,17 @@ export default function Learn() {
     hasLife: !!financials?.hasLifeInsurance,
     hasEmergency: !!financials?.hasEmergencyFund,
     highCardSpend,
+    hasLongTermGoal: !!financials?.goals.some(g => {
+      if (!g.deadline) return false;
+      const yrs = (new Date(g.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 365);
+      return yrs >= 5;
+    }),
+    hasSchoolFeesGoal: !!financials?.goals.some(g =>
+      g.name?.toLowerCase().includes("school") || g.name?.toLowerCase().includes("university")
+    ),
+    hasRetirementGoal: !!financials?.goals.some(g =>
+      g.name?.toLowerCase().includes("retirement")
+    ),
   };
 
   const togglePillar = (k: PillarKey) => {
