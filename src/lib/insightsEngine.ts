@@ -150,5 +150,73 @@ export function generateInsights(
     }
   }
 
+  // ---- NEW: Insurance-as-savings opportunity ----
+
+  // Trigger when: surplus > 10% income AND user has a
+  // long-term goal (5+ years) AND no life insurance
+  const hasLongTermGoal = f.goals.some(g => {
+    if (!g.target_date) return false;
+    const yearsToGoal = (new Date(g.target_date).getTime()
+      - Date.now()) / (1000 * 60 * 60 * 24 * 365);
+    return yearsToGoal >= 5;
+  });
+
+  const hasRetirementGoal = f.goals.some(g =>
+    g.goal_type?.toLowerCase().includes("retirement")
+  );
+
+  const hasSchoolFeesGoal = f.goals.some(g =>
+    g.goal_type?.toLowerCase().includes("school") ||
+    g.goal_type?.toLowerCase().includes("university")
+  );
+
+  if (surplus > income * 0.1 && !f.hasLifeInsurance
+    && (hasLongTermGoal || hasRetirementGoal
+      || hasSchoolFeesGoal)) {
+    insights.push({
+      id: "insurance-savings-opportunity",
+      severity: "info",
+      title: "Insurance could fund your long-term goals",
+      body: `You have KES ${Math.round(surplus).toLocaleString()} surplus monthly and a ${
+        hasSchoolFeesGoal ? "school fees" :
+        hasRetirementGoal ? "retirement" :
+        "long-term"
+      } goal. An endowment or education policy turns monthly premiums into a guaranteed lump sum — with built-in life cover. Ask your advisor.`,
+      reason: `Monthly surplus of KES ${Math.round(surplus).toLocaleString()} exceeds 10% of income. A long-term goal exists. No life insurance is active. Insurance-linked savings products may be more disciplined than a standalone savings account for this timeline.`,
+      category: "savings",
+      actionLabel: "Ask the AI advisor",
+    });
+  }
+
+  // School fees education policy — specific trigger
+  if (hasSchoolFeesGoal && f.dependents > 0
+    && surplus > income * 0.05) {
+    insights.push({
+      id: "education-policy-opportunity",
+      severity: "info",
+      title: "Protect your child's education",
+      body: `With ${f.dependents} dependent${f.dependents > 1 ? "s" : ""} and a school fees goal, an education policy guarantees the payout even if something happens to you — premiums are waived on death. Your KES ${Math.round(surplus).toLocaleString()} monthly surplus could start a policy now.`,
+      reason: `School fees goal detected. ${f.dependents} dependant(s). Monthly surplus of KES ${Math.round(surplus).toLocaleString()} is sufficient for a starter education policy premium.`,
+      category: "savings",
+      actionLabel: "Learn more",
+    });
+  }
+
+  // Retirement — insurance annuity trigger
+  if ((hasRetirementGoal || f.goals.length === 0)
+    && income > 40000
+    && surplus > income * 0.08) {
+    insights.push({
+      id: "retirement-annuity-opportunity",
+      severity: "info",
+      title: "Structured retirement savings available",
+      body: `NSSF alone won't fund your retirement. A retirement annuity policy or whole-of-life plan, started today at your income level, could provide meaningful pension income. Your KES ${Math.round(surplus).toLocaleString()} surplus creates the room.`,
+      reason: `Income above KES 40,000. Surplus above 8% of income. Retirement or no goals detected. NSSF contributions at KES 2,160/mo are insufficient for most income levels.`,
+      category: "savings",
+      actionLabel: "Plan my retirement",
+    });
+  }
+
+  // --- existing return line (keep unchanged) ---
   return insights;
 }
