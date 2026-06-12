@@ -155,19 +155,19 @@ export function generateInsights(
   // Trigger when: surplus > 10% income AND user has a
   // long-term goal (5+ years) AND no life insurance
   const hasLongTermGoal = f.goals.some(g => {
-    if (!g.target_date) return false;
-    const yearsToGoal = (new Date(g.target_date).getTime()
+    if (!g.deadline) return false;
+    const yearsToGoal = (new Date(g.deadline).getTime()
       - Date.now()) / (1000 * 60 * 60 * 24 * 365);
     return yearsToGoal >= 5;
   });
 
   const hasRetirementGoal = f.goals.some(g =>
-    g.goal_type?.toLowerCase().includes("retirement")
+    g.name.toLowerCase().includes("retirement")
   );
 
   const hasSchoolFeesGoal = f.goals.some(g =>
-    g.goal_type?.toLowerCase().includes("school") ||
-    g.goal_type?.toLowerCase().includes("university")
+    g.name.toLowerCase().includes("school") ||
+    g.name.toLowerCase().includes("university")
   );
 
   if (surplus > income * 0.1 && !f.hasLifeInsurance
