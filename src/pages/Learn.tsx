@@ -142,6 +142,9 @@ export interface UsedCtx {
   hasLife: boolean;
   hasEmergency: boolean;
   highCardSpend: boolean;
+  hasLongTermGoal: boolean;
+  hasSchoolFeesGoal: boolean;
+  hasRetirementGoal: boolean;
 }
 
 export const GLOSSARY: GlossaryTerm[] = [
