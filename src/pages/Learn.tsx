@@ -301,6 +301,61 @@ function InsuranceDeepDive() {
           ))}
         </div>
       </section>
+
+      <section>
+        <h4 className="font-semibold mb-3 flex items-center gap-2">
+          <span className="text-primary">💰</span> Insurance as a Savings Vehicle
+        </h4>
+        <p className="text-muted-foreground mb-3">
+          Beyond protection, certain insurance products act as powerful, structured savings tools — especially for Kenyans who struggle to maintain savings discipline. The penalty for stopping a policy creates the discipline a savings account cannot.
+        </p>
+        <div className="space-y-3">
+          {[
+            {
+              name: "Endowment Policy",
+              best: "Medium & long-term goals (10–20 yrs)",
+              how: "Fixed monthly premium for a set term. At maturity, receive a guaranteed lump sum plus accumulated bonuses. Cannot be easily withdrawn — that constraint is the feature.",
+              example: "KSh 5,000/month for 15 years → approximately KSh 1.2M–1.8M maturity payout.",
+              flag: "🏘️ Ideal for: land purchase, business capital, retirement top-up",
+            },
+            {
+              name: "Education Policy",
+              best: "School fees planning (start early)",
+              how: "Designed to mature on a child's Form 1 or university entry date. Includes a premium waiver — if the parent dies, premiums stop but the policy pays out in full on the target date.",
+              example: "KSh 3,500/month from age 5 → approximately KSh 800,000 at age 18.",
+              flag: "🎓 Ideal for: parents of children under 10",
+            },
+            {
+              name: "Whole-of-Life / Retirement Annuity",
+              best: "Long-term retirement (20+ yrs)",
+              how: "Provides life cover for your entire life AND builds a cash surrender value over time. At retirement age, can be converted to a monthly pension income. Complements NSSF.",
+              example: "KSh 2,000/month from age 30 → meaningful pension supplement by age 60.",
+              flag: "🌿 Ideal for: self-employed, gig workers, anyone without a workplace pension",
+            },
+            {
+              name: "Investment-Linked Policy (ILP)",
+              best: "Long-term wealth growth (15+ yrs)",
+              how: "Combines life cover with investment in unit trusts. A portion covers life risk; the rest is invested in a fund you choose. Returns are not guaranteed but can outperform endowments over 15+ years.",
+              example: "KSh 5,000/month at 8% fund return for 20 years → approximately KSh 2.9M.",
+              flag: "📈 Ideal for: moderate–aggressive risk profiles, 25–45 age range",
+            },
+          ].map(({ name, best, how, example, flag }) => (
+            <div key={name} className="rounded-lg border bg-card p-3 space-y-1.5">
+              <div className="font-semibold text-sm">{name}</div>
+              <div className="text-xs text-primary font-medium">Best for: {best}</div>
+              <p className="text-xs text-muted-foreground">{how}</p>
+              <p className="text-xs font-medium">📊 {example}</p>
+              <p className="text-xs text-muted-foreground italic">{flag}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 rounded-lg border bg-warning/5 border-warning/20 p-3">
+          <p className="text-xs font-semibold mb-1">⚠️ Important: compare before you commit</p>
+          <p className="text-xs text-muted-foreground">
+            Endowment returns (4–7% p.a.) are lower than MMFs (9–11% p.a.) or T-bills (15–16% p.a.) but the discipline benefit compensates for many savers. A licensed advisor can model the right combination for your income and goals. Ask Kifedha's AI advisor or book a session through the Protection tab.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }
